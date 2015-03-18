@@ -1,5 +1,6 @@
 package ingvar.android.processor.source;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -8,6 +9,10 @@ import java.util.Map;
 public class SourceManager implements ISourceManager {
 
     private Map<Object, Source> sources;
+
+    public SourceManager() {
+        sources = new HashMap<>();
+    }
 
     @Override
     public Source get(Object key) {

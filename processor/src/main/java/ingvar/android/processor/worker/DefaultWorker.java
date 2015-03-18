@@ -9,7 +9,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import ingvar.android.processor.exception.ProcessorException;
 import ingvar.android.processor.exception.RequestCancelledException;
-import ingvar.android.processor.observation.IProcessObserverManager;
+import ingvar.android.processor.observation.IObserver;
+import ingvar.android.processor.observation.IObserverManager;
 import ingvar.android.processor.persistence.ICacheManager;
 import ingvar.android.processor.persistence.Time;
 import ingvar.android.processor.request.AggregatedRequest;
@@ -29,10 +30,10 @@ public class DefaultWorker implements IWorker {
     protected final ExecutorService executorService;
     protected final ICacheManager cacheManager;
     protected final SourceManager sourceManager;
-    protected final IProcessObserverManager observerManager;
+    protected final IObserverManager observerManager;
 
-    public DefaultWorker(ExecutorService executorService, ICacheManager cacheManager, SourceManager sourceManager, IProcessObserverManager observerManager) {
-        this.executorService = executorService;
+    public DefaultWorker(ICacheManager cacheManager, SourceManager sourceManager, IObserverManager observerManager) {
+        this.executorService = null; //TODO: executorService;
         this.cacheManager = cacheManager;
         this.sourceManager = sourceManager;
         this.observerManager = observerManager;
@@ -53,8 +54,8 @@ public class DefaultWorker implements IWorker {
         request.setStatus(RequestStatus.PROCESSING);
         checkCancellation(request);
 
-        R result = null;
         try {
+            R result;
             if (request instanceof AggregatedRequest) {
                 result = processAggregatedRequest((AggregatedRequest) request);
             } else {
@@ -70,7 +71,7 @@ public class DefaultWorker implements IWorker {
             return null;
 
         } catch (RuntimeException e) {
-            notifyFailed(request);
+            notifyFailed(request, e);
             throw e;
         }
     }
@@ -91,7 +92,7 @@ public class DefaultWorker implements IWorker {
                     Object innerResult = process(inner);
 
                     int current = completed.incrementAndGet();
-                    float progress = current * 100f / requests.size();
+                    float progress = current * IObserver.MAX_PROGRESS / requests.size();
                     synchronized (request) {
                         checkCancellation(request);
                         notifyProgress(request, progress);
@@ -151,21 +152,25 @@ public class DefaultWorker implements IWorker {
     }
 
     protected void notifyProgress(IRequest request, float progress) {
-        //TODO:
+        //adjust progress
+        progress = Math.max(IObserver.MIN_PROGRESS, progress);
+        progress = Math.min(IObserver.MAX_PROGRESS, progress);
+        observerManager.notifyProgress(request, progress);
     }
 
     protected <R> void notifyCompleted(IRequest request, R result) {
         request.setStatus(RequestStatus.COMPLETED);
-        //TODO:
+        observerManager.notifyCompleted(request, result);
     }
 
     protected void notifyCancelled(IRequest request) {
-        //TODO:
+        request.setStatus(RequestStatus.COMPLETED);
+        observerManager.notifyCancelled(request);
     }
 
-    protected void notifyFailed(IRequest request) {
+    protected void notifyFailed(IRequest request, Exception e) {
         request.setStatus(RequestStatus.FAILED);
-        //TODO:
+        observerManager.notifyFailed(request, e);
     }
 
     protected void checkCancellation(IRequest request) {
