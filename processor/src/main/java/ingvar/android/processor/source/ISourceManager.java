@@ -5,10 +5,10 @@ package ingvar.android.processor.source;
  */
 public interface ISourceManager {
 
-    Source get(Object key);
+    Source getSource(Class<Source> key);
 
-    void put(Object key, Source source);
+    void addSource(Class<? extends Source> key, Source source);
 
-    boolean isRegistered(Object key);
+    boolean isRegistered(Class<Source> key);
 
 }

@@ -167,7 +167,7 @@ public class DefaultWorker implements IWorker {
                 throw new ProcessorException(String.format("Source type '%s' not registered", request.getSourceType()));
             }
 
-            Source source = sourceManager.get(request.getSourceType());
+            Source source = sourceManager.getSource(request.getSourceType());
             if(source.isAvailable()) {
                 request.setStatus(RequestStatus.LOADING_FROM_EXTERNAL);
 
@@ -176,7 +176,7 @@ public class DefaultWorker implements IWorker {
                 do {
                     checkCancellation(request);
                     try {
-                        result = (R) request.loadFromExternalSource(observerManager);
+                        result = (R) request.loadFromExternalSource(observerManager, sourceManager.getSource(request.getSourceType()));
                         if(result != null) {
                             cacheManager.put(request.getRequestKey(), result);
                             break flow;

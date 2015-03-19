@@ -1,22 +1,23 @@
 package ingvar.android.processor.request;
 
 import ingvar.android.processor.observation.IObserverManager;
+import ingvar.android.processor.source.Source;
 
 /**
  * Created by Igor Zubenko on 2015.03.18.
  */
-public abstract class SingleRequest<K, R> implements IRequest<K, R> {
+public abstract class SingleRequest<K, R, S extends Source> implements IRequest<K, R> {
 
     private K key;
     private Class<R> resultClass;
     private boolean cancelled;
     private RequestStatus status;
-    private Object sourceType;
+    private Class<? extends Source> sourceType;
     private long cacheExpirationTime;
     private int retryCount;
     private boolean mergeable;
 
-    public SingleRequest(K key, Class<R> resultClass, Object sourceType, long cacheExpirationTime) {
+    public SingleRequest(K key, Class<R> resultClass, Class<? extends Source> sourceType, long cacheExpirationTime) {
         this.key = key;
         this.resultClass = resultClass;
         this.sourceType = sourceType;
@@ -28,9 +29,9 @@ public abstract class SingleRequest<K, R> implements IRequest<K, R> {
         this.mergeable = true;
     }
 
-    public abstract R loadFromExternalSource(IObserverManager observerManager);
+    public abstract R loadFromExternalSource(IObserverManager observerManager, S source);
 
-    public Object getSourceType() {
+    public Class<? extends Source> getSourceType() {
         return sourceType;
     }
 

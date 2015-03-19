@@ -8,24 +8,24 @@ import java.util.Map;
  */
 public class SourceManager implements ISourceManager {
 
-    private Map<Object, Source> sources;
+    private Map<Class<Source>, Source> sources;
 
     public SourceManager() {
         sources = new HashMap<>();
     }
 
     @Override
-    public Source get(Object key) {
+    public Source getSource(Class<Source> key) {
         return sources.get(key);
     }
 
     @Override
-    public void put(Object key, Source source) {
+    public void addSource(Class key, Source source) {
         sources.put(key, source);
     }
 
     @Override
-    public boolean isRegistered(Object key) {
+    public boolean isRegistered(Class<Source> key) {
         return sources.get(key) != null;
     }
 

@@ -7,7 +7,7 @@ public interface IPersister<K, R> {
 
     R persist(K key, R data);
 
-    R obtain(K key);
+    R obtain(K key, long expiryTime);
 
     void remove(K key);
 

@@ -29,7 +29,7 @@ public class CacheManager implements ICacheManager {
     @Override
     public <K, R> R obtain(K key, Class dataClass, long expiryTime) {
         IPersister<K, R> persister = getAppropriatePersister(dataClass);
-        return persister.obtain(key);
+        return persister.obtain(key, expiryTime);
     }
 
     @Override

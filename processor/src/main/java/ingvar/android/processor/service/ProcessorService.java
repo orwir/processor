@@ -23,7 +23,7 @@ import ingvar.android.processor.worker.IWorker;
 /**
  * Created by Igor Zubenko on 2015.03.18.
  */
-public class ProcessorService extends Service {
+public abstract class ProcessorService extends Service {
 
     protected static final int DEFAULT_PARALLEL_THREADS = 7;
 
@@ -70,10 +70,15 @@ public class ProcessorService extends Service {
         sourceManager = createSourceManager();
         observerManager = createObserverManager();
         worker = createWorker(executorService, cacheManager, sourceManager, observerManager);
+
+        providePersisters(cacheManager);
+        provideSources(sourceManager);
     }
 
-    public <K, R> Future<R> execute(IRequest<K, R> request, IObserver<R> observer) {
-        observerManager.add(request, observer);
+    public <K, R> Future<R> execute(IRequest<K, R> request, IObserver<R>... observers) {
+        for(IObserver observer : observers) {
+            observerManager.add(request, observer);
+        }
 
         Future<R> future = worker.getExecuted(request);
         if(future == null || !request.isMergeable()) {
@@ -83,13 +88,17 @@ public class ProcessorService extends Service {
         return future;
     }
 
-    //execute request
-    //obtain from cache
-    //remove listener
+    public <K, R> R obtainFromCache(K key, Class dataClass, long expiryTime) {
+        return cacheManager.obtain(key, dataClass, expiryTime);
+    }
 
     public int getThreadCount() {
         return DEFAULT_PARALLEL_THREADS;
     }
+
+    protected abstract void provideSources(ISourceManager sourceManager);
+
+    protected abstract void providePersisters(ICacheManager cacheManager);
 
     protected ExecutorService createExecutorService() {
         return Executors.newFixedThreadPool(getThreadCount());
