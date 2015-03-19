@@ -13,6 +13,8 @@ public interface IObserverManager {
 
     void remove(IRequest request);
 
+    void removeGroup(String group);
+
     void notifyProgress(IRequest request, float progress);
 
     <R> void notifyCompleted(IRequest request, R result);

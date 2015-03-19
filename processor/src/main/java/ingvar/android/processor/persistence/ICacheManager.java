@@ -5,7 +5,11 @@ package ingvar.android.processor.persistence;
  */
 public interface ICacheManager {
 
-    <K, R> R obtain(K key, long expiryTime);
+    void addPersister(IPersister persister);
+
+    void removePersister(IPersister persister);
+
+    <K, R> R obtain(K key, Class dataClass, long expiryTime);
 
     <K, R> R put(K key, R data);
 

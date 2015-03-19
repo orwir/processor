@@ -6,6 +6,7 @@ package ingvar.android.processor.persistence;
 public class Time {
 
     public static long ALWAYS_EXPIRED = -1;
+    public static long ALWAYS_RETURNED = 0;
 
     private Time() {}
 }

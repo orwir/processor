@@ -47,6 +47,22 @@ public class ObserverManager implements IObserverManager {
     }
 
     @Override
+    public void removeGroup(String group) {
+        if(group == null) {
+            throw new IllegalArgumentException("Group can't be null!");
+        }
+
+        for(Map.Entry<IRequest, Set<IObserver>> entry : observers.entrySet()) {
+            Set<IObserver> requestObservers = entry.getValue();
+            for(IObserver observer : requestObservers) {
+                if(group.equals(observer.getGroup())) {
+                    requestObservers.remove(observer);
+                }
+            }
+        }
+    }
+
+    @Override
     public void notifyProgress(IRequest request, float progress) {
         Set<IObserver> requestObservers = observers.get(request);
         if(requestObservers != null) {

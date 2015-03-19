@@ -1,10 +1,13 @@
 package ingvar.android.processor.worker;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import ingvar.android.processor.exception.ProcessorException;
@@ -17,8 +20,8 @@ import ingvar.android.processor.request.AggregatedRequest;
 import ingvar.android.processor.request.IRequest;
 import ingvar.android.processor.request.RequestStatus;
 import ingvar.android.processor.request.SingleRequest;
+import ingvar.android.processor.source.ISourceManager;
 import ingvar.android.processor.source.Source;
-import ingvar.android.processor.source.SourceManager;
 
 /**
  * Default implementation of async worker
@@ -29,14 +32,16 @@ public class DefaultWorker implements IWorker {
 
     protected final ExecutorService executorService;
     protected final ICacheManager cacheManager;
-    protected final SourceManager sourceManager;
+    protected final ISourceManager sourceManager;
     protected final IObserverManager observerManager;
+    private final Map<IRequest, Future> executingRequests;
 
-    public DefaultWorker(ICacheManager cacheManager, SourceManager sourceManager, IObserverManager observerManager) {
-        this.executorService = null; //TODO: executorService;
+    public DefaultWorker(ExecutorService executorService, ICacheManager cacheManager, ISourceManager sourceManager, IObserverManager observerManager) {
+        this.executorService = executorService;
         this.cacheManager = cacheManager;
         this.sourceManager = sourceManager;
         this.observerManager = observerManager;
+        this.executingRequests = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -47,22 +52,35 @@ public class DefaultWorker implements IWorker {
                 return process(request);
             }
         };
-        return executorService.submit(callable);
+        Future<R> future = executorService.submit(callable);
+        executingRequests.put(request, future);
+        return future;
+    }
+
+    @Override
+    public <R> Future<R> getExecuted(IRequest request) {
+        return executingRequests.get(request);
     }
 
     protected <R> R process(IRequest request) {
         request.setStatus(RequestStatus.PROCESSING);
+        notifyProgress(request, IObserver.MIN_PROGRESS);
         checkCancellation(request);
 
         try {
             R result;
             if (request instanceof AggregatedRequest) {
                 result = processAggregatedRequest((AggregatedRequest) request);
-            } else {
+            }
+            else if(request instanceof SingleRequest) {
                 result = processSingleRequest((SingleRequest) request);
+            }
+            else {
+                result = processCacheRequest(request);
             }
 
             checkCancellation(request);
+            notifyProgress(request, IObserver.MAX_PROGRESS);
             notifyCompleted(request, result);
             return result;
 
@@ -73,6 +91,10 @@ public class DefaultWorker implements IWorker {
         } catch (RuntimeException e) {
             notifyFailed(request, e);
             throw e;
+
+        } finally {
+            executingRequests.remove(request);
+            observerManager.remove(request);
         }
     }
 
@@ -84,25 +106,41 @@ public class DefaultWorker implements IWorker {
         for(final IRequest inner : requests) {
             checkCancellation(request);
 
-            Future future = innerExecutor.submit(new Callable() {
+            innerExecutor.submit(new Callable() {
                 @Override
                 public Object call() throws Exception {
                     checkCancellation(request);
-                    checkCancellation(inner);
-                    Object innerResult = process(inner);
 
-                    int current = completed.incrementAndGet();
-                    float progress = current * IObserver.MAX_PROGRESS / requests.size();
-                    synchronized (request) {
-                        checkCancellation(request);
-                        notifyProgress(request, progress);
-                        request.onRequestComplete(inner, innerResult);
+                    Object innerResult = null;
+                    try {
+                        innerResult = process(inner);
+
+                        int current = completed.incrementAndGet();
+                        float progress = current * IObserver.MAX_PROGRESS / requests.size();
+                        synchronized (request) {
+                            checkCancellation(request);
+                            notifyProgress(request, progress);
+                            request.onRequestComplete(inner, innerResult);
+                        }
+                    } catch (RequestCancelledException e) {
+                        //nothing to do
+                    } catch (Exception e) {
+                        synchronized (request) {
+                            checkCancellation(request);
+                            request.addRequestException(inner, e);
+                        }
+                        throw e;
                     }
                     return innerResult;
                 }
             });
         }
-        //TODO: check throwing inner exception
+
+        checkCancellation(request);
+        innerExecutor.shutdown();
+        try {
+            innerExecutor.awaitTermination(request.getWaitTimeout(), TimeUnit.MINUTES);
+        } catch (InterruptedException e) {}
 
         return (R) request.getCumulativeResult();
     }
@@ -110,16 +148,17 @@ public class DefaultWorker implements IWorker {
     protected <R> R processSingleRequest(SingleRequest request) {
         R result = null;
 
-        do { //for interrupting flow (loop executed only once)
+        flow: do { //for interrupting flow (loop executed only once)
+            //start of flow ------------------------------------------------------------------------
 
             //try to get data from cache
             if (request.getExpirationTime() != Time.ALWAYS_EXPIRED) {
                 request.setStatus(RequestStatus.LOADING_FROM_CACHE);
 
                 checkCancellation(request);
-                result = cacheManager.obtain(request.getRequestKey(), request.getExpirationTime());
+                result = cacheManager.obtain(request.getRequestKey(), request.getResultClass(), request.getExpirationTime());
                 if (result != null) {
-                    break;
+                    break flow;
                 }
             }
 
@@ -132,22 +171,38 @@ public class DefaultWorker implements IWorker {
             if(source.isAvailable()) {
                 request.setStatus(RequestStatus.LOADING_FROM_EXTERNAL);
 
-                checkCancellation(request);
-                try {
-                    result = (R) request.loadFromExternalSource();
-                } catch (RuntimeException e) {
-                    //TODO: try to load if failed
-                    throw e;
-                }
-                //put to cache before checking cancellation
-                if(result != null) {
-                    cacheManager.put(request.getRequestKey(), result);
-                    break;
+                int tries = request.getRetryCount();
+                RuntimeException exception = null;
+                do {
+                    checkCancellation(request);
+                    try {
+                        result = (R) request.loadFromExternalSource(observerManager);
+                        if(result != null) {
+                            cacheManager.put(request.getRequestKey(), result);
+                            break flow;
+                        }
+                    } catch (RuntimeException e) {
+                        exception = e;
+                    }
+                } while (--tries > 0 && result == null);
+
+                if(result == null && exception != null) {
+                    throw exception;
                 }
             }
 
+            //end of flow --------------------------------------------------------------------------
         } while (false);
 
+        return result;
+    }
+
+    protected <R> R processCacheRequest(IRequest request) {
+        R result = null;
+        request.setStatus(RequestStatus.LOADING_FROM_CACHE);
+
+        checkCancellation(request);
+        result = cacheManager.obtain(request.getRequestKey(), request.getResultClass(), Time.ALWAYS_RETURNED);
         return result;
     }
 

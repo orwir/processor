@@ -6,10 +6,19 @@ package ingvar.android.processor.request;
 public interface IRequest<K, R> {
 
     K getRequestKey();
+
     Class<R> getResultClass();
-    long getExpirationTime();
+
+    void cancel();
+
     boolean isCancelled();
+
     void setStatus(RequestStatus status);
+
     RequestStatus getStatus();
+
+    void setMergeable(boolean mergeable);
+
+    boolean isMergeable();
 
 }

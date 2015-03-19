@@ -10,5 +10,7 @@ import ingvar.android.processor.request.IRequest;
 public interface IWorker {
 
     <R> Future<R> execute(IRequest request);
+
+    <R> Future<R> getExecuted(IRequest request);
     
 }
