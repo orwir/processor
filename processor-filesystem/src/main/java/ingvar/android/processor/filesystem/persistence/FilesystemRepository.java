@@ -3,6 +3,7 @@ package ingvar.android.processor.filesystem.persistence;
 import java.io.File;
 import java.io.Serializable;
 
+import ingvar.android.processor.filesystem.util.DiskLruCache;
 import ingvar.android.processor.persistence.IRepository;
 
 /**

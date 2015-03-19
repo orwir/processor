@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ingvar.android.processor.filesystem.persistence;
+package ingvar.android.processor.filesystem.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -33,10 +33,6 @@ import java.util.Scanner;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import static ingvar.android.processor.filesystem.util.BytesUtils.fromBytes;
-import static ingvar.android.processor.filesystem.util.BytesUtils.toByteArray;
-import static ingvar.android.processor.filesystem.util.BytesUtils.toBytes;
 
 public class DiskLruCache {
 
@@ -176,8 +172,8 @@ public class DiskLruCache {
         if(file.exists() && file.isFile()) {
             try {
                 InputStream in = new BufferedInputStream(new FileInputStream(file));
-                byte[] bytes = toByteArray(in);
-                result = fromBytes(bytes);
+                byte[] bytes = BytesUtils.toByteArray(in);
+                result = BytesUtils.fromBytes(bytes);
                 updateKey(key);
                 close(in);
             } catch (IOException e) {
@@ -212,7 +208,7 @@ public class DiskLruCache {
         synchronized (key.intern()) {
             try {
                 OutputStream out = new BufferedOutputStream(new FileOutputStream(file, false), 1024);
-                out.write(toBytes(data));
+                out.write(BytesUtils.toBytes(data));
                 updateKey(key);
 
                 close(out);
