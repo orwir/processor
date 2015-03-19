@@ -10,7 +10,7 @@ import ingvar.android.processor.exception.PersistenceException;
  */
 public class CacheManager implements ICacheManager {
 
-    private Set<IPersister> persisters;
+    private final Set<IPersister> persisters;
 
     public CacheManager() {
         persisters = new LinkedHashSet<>();
@@ -63,7 +63,7 @@ public class CacheManager implements ICacheManager {
     protected IPersister getAppropriatePersister(Class dataClass) {
         IPersister appropriate = null;
         for(IPersister persister : persisters) {
-            if(persister.getDataClass().equals(dataClass)) {
+            if(persister.canHandle(dataClass)) {
                 appropriate = persister;
                 break;
             }

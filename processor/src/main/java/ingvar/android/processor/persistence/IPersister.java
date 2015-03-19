@@ -13,6 +13,6 @@ public interface IPersister<K, R> {
 
     void removeAll();
 
-    Class<R> getDataClass();
+    boolean canHandle(Class dataClass);
 
 }

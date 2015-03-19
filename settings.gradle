@@ -1,1 +1,1 @@
-include ':processor', ':processor-ram'
+include ':processor', 'processor-memory'

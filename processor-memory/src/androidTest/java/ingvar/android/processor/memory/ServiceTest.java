@@ -1,37 +1,37 @@
-package ingvar.android.processor.ram;
+package ingvar.android.processor.memory;
 
 import android.content.Intent;
 import android.test.ServiceTestCase;
 
 import java.util.concurrent.Future;
 
+import ingvar.android.processor.memory.request.MemoryRequest;
+import ingvar.android.processor.memory.service.MemoryProcessorService;
 import ingvar.android.processor.observation.IObserver;
 import ingvar.android.processor.persistence.Time;
-import ingvar.android.processor.ram.request.RamRequest;
-import ingvar.android.processor.ram.service.RamProcessorService;
 import ingvar.android.processor.service.ProcessorService;
 
 /**
  * Created by Igor Zubenko on 2015.03.19.
  */
-public class ServiceTest extends ServiceTestCase<RamProcessorService> {
+public class ServiceTest extends ServiceTestCase<MemoryProcessorService> {
 
     private Intent serviceIntent;
     private ProcessorService.ProcessorBinder binder;
 
     public ServiceTest() {
-        super(RamProcessorService.class);
+        super(MemoryProcessorService.class);
     }
 
     public void testRequest() throws Exception {
-        RamRequest request = new RamRequest("test");
+        MemoryRequest request = new MemoryRequest("test");
         Future<Object> future = getService().execute(request);
 
         assertEquals("Returned result not match", "test_value", future.get());
     }
 
     public void testCache() throws Exception {
-        RamRequest request = new RamRequest("test2");
+        MemoryRequest request = new MemoryRequest("test2");
         Future<Object> future = getService().execute(request);
         //wait until it saved
         future.get();
@@ -43,7 +43,7 @@ public class ServiceTest extends ServiceTestCase<RamProcessorService> {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        serviceIntent = new Intent(getContext(), RamProcessorService.class);
+        serviceIntent = new Intent(getContext(), MemoryProcessorService.class);
         serviceIntent.putExtra(IObserver.KEY_GROUP, "ram-group");
         binder = (ProcessorService.ProcessorBinder) bindService(serviceIntent);
     }

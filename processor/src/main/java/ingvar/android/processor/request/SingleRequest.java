@@ -88,12 +88,20 @@ public abstract class SingleRequest<K, R, S extends Source> implements IRequest<
     }
 
     @Override
+    public int hashCode() {
+        int hashCode = 42;
+        hashCode += 42 * getRequestKey().hashCode();
+        hashCode += 42 * getResultClass().hashCode();
+        return hashCode;
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if(obj instanceof SingleRequest) {
             SingleRequest o = (SingleRequest) obj;
             return getRequestKey().equals(o.getRequestKey())
                     && getResultClass().equals(o.getResultClass())
-                    && isMergeable() == o.isMergeable();
+                    && isMergeable() && o.isMergeable();
         }
         return false;
     }

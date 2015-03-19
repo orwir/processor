@@ -177,17 +177,17 @@ public class DefaultWorker implements IWorker {
                     checkCancellation(request);
                     try {
                         result = (R) request.loadFromExternalSource(observerManager, sourceManager.getSource(request.getSourceType()));
-                        if(result != null) {
-                            cacheManager.put(request.getRequestKey(), result);
-                            break flow;
-                        }
+                        exception = null;
                     } catch (RuntimeException e) {
                         exception = e;
                     }
                 } while (--tries > 0 && result == null);
-
-                if(result == null && exception != null) {
+                if(exception != null) {
                     throw exception;
+                }
+                if(result != null) {
+                    cacheManager.put(request.getRequestKey(), result);
+                    break flow;
                 }
             }
 
