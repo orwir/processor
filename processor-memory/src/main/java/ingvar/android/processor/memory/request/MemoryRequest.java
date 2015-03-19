@@ -1,7 +1,5 @@
 package ingvar.android.processor.memory.request;
 
-import java.util.concurrent.TimeUnit;
-
 import ingvar.android.processor.memory.source.MemorySource;
 import ingvar.android.processor.observation.IObserverManager;
 import ingvar.android.processor.request.SingleRequest;
@@ -11,8 +9,8 @@ import ingvar.android.processor.request.SingleRequest;
  */
 public class MemoryRequest extends SingleRequest<String, Object, MemorySource> {
 
-    public MemoryRequest(String key) {
-        super(key, Object.class, MemorySource.class, TimeUnit.HOURS.toMillis(1));
+    public MemoryRequest(String key, long cacheExpirationTime) {
+        super(key, Object.class, MemorySource.class, cacheExpirationTime);
     }
 
     @Override

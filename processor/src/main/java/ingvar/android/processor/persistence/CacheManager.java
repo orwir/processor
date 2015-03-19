@@ -10,59 +10,59 @@ import ingvar.android.processor.exception.PersistenceException;
  */
 public class CacheManager implements ICacheManager {
 
-    private final Set<IPersister> persisters;
+    private final Set<IRepository> persisters;
 
     public CacheManager() {
         persisters = new LinkedHashSet<>();
     }
 
     @Override
-    public void addPersister(IPersister persister) {
+    public void addPersister(IRepository persister) {
         persisters.add(persister);
     }
 
     @Override
-    public void removePersister(IPersister persister) {
+    public void removePersister(IRepository persister) {
         persisters.remove(persister);
     }
 
     @Override
     public <K, R> R obtain(K key, Class dataClass, long expiryTime) {
-        IPersister<K, R> persister = getAppropriatePersister(dataClass);
+        IRepository<K, R> persister = getAppropriatePersister(dataClass);
         return persister.obtain(key, expiryTime);
     }
 
     @Override
     public <K, R> R put(K key, R data) {
-        IPersister<K, R> persister = getAppropriatePersister(data.getClass());
+        IRepository<K, R> persister = getAppropriatePersister(data.getClass());
         persister.persist(key, data);
         return data;
     }
 
     @Override
     public <K> void remove(Class dataClass, K key) {
-        IPersister persister = getAppropriatePersister(dataClass);
+        IRepository persister = getAppropriatePersister(dataClass);
         persister.remove(key);
     }
 
     @Override
     public void remove(Class dataClass) {
-        IPersister persister = getAppropriatePersister(dataClass);
+        IRepository persister = getAppropriatePersister(dataClass);
         persister.removeAll();
     }
 
     @Override
     public void remove() {
         synchronized (persisters) {
-            for (IPersister persister : persisters) {
+            for (IRepository persister : persisters) {
                 persister.removeAll();
             }
         }
     }
 
-    protected IPersister getAppropriatePersister(Class dataClass) {
-        IPersister appropriate = null;
-        for(IPersister persister : persisters) {
+    protected IRepository getAppropriatePersister(Class dataClass) {
+        IRepository appropriate = null;
+        for(IRepository persister : persisters) {
             if(persister.canHandle(dataClass)) {
                 appropriate = persister;
                 break;

@@ -3,7 +3,7 @@ package ingvar.android.processor.persistence;
 /**
  * Created by Igor Zubenko on 2015.03.19.
  */
-public interface IPersister<K, R> {
+public interface IRepository<K, R> {
 
     R persist(K key, R data);
 

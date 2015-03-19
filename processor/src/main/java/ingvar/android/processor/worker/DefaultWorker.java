@@ -20,8 +20,8 @@ import ingvar.android.processor.request.AggregatedRequest;
 import ingvar.android.processor.request.IRequest;
 import ingvar.android.processor.request.RequestStatus;
 import ingvar.android.processor.request.SingleRequest;
+import ingvar.android.processor.source.ISource;
 import ingvar.android.processor.source.ISourceManager;
-import ingvar.android.processor.source.Source;
 
 /**
  * Default implementation of async worker
@@ -167,7 +167,7 @@ public class DefaultWorker implements IWorker {
                 throw new ProcessorException(String.format("Source type '%s' not registered", request.getSourceType()));
             }
 
-            Source source = sourceManager.getSource(request.getSourceType());
+            ISource source = sourceManager.getSource(request.getSourceType());
             if(source.isAvailable()) {
                 request.setStatus(RequestStatus.LOADING_FROM_EXTERNAL);
 

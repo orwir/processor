@@ -1,6 +1,6 @@
 package ingvar.android.processor.memory.service;
 
-import ingvar.android.processor.memory.persistence.MemoryPersister;
+import ingvar.android.processor.memory.persistence.MemoryRepository;
 import ingvar.android.processor.memory.source.MemorySource;
 import ingvar.android.processor.persistence.ICacheManager;
 import ingvar.android.processor.service.ProcessorService;
@@ -18,7 +18,7 @@ public class MemoryProcessorService extends ProcessorService {
 
     @Override
     protected void providePersisters(ICacheManager cacheManager) {
-        cacheManager.addPersister(new MemoryPersister());
+        cacheManager.addPersister(new MemoryRepository());
     }
 
 }

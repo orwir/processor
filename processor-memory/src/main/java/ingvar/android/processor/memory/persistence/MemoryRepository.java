@@ -2,17 +2,17 @@ package ingvar.android.processor.memory.persistence;
 
 import android.util.LruCache;
 
-import ingvar.android.processor.persistence.IPersister;
+import ingvar.android.processor.persistence.IRepository;
 import ingvar.android.processor.persistence.Time;
 
 /**
  * Created by Igor Zubenko on 2015.03.19.
  */
-public class MemoryPersister implements IPersister<Object, Object> {
+public class MemoryRepository implements IRepository<Object, Object> {
 
     private LruCache<Object, Entry> storage;
 
-    public MemoryPersister() {
+    public MemoryRepository() {
         storage = new LruCache<>(20);
     }
 
