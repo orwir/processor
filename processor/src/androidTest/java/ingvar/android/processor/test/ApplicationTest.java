@@ -1,4 +1,4 @@
-package ingvar.android.processor;
+package ingvar.android.processor.test;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

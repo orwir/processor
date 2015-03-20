@@ -8,7 +8,6 @@ import java.util.concurrent.TimeUnit;
 
 import ingvar.android.processor.memory.request.MemoryRequest;
 import ingvar.android.processor.memory.service.MemoryProcessorService;
-import ingvar.android.processor.observation.IObserver;
 import ingvar.android.processor.persistence.Time;
 import ingvar.android.processor.service.ProcessorService;
 
@@ -41,11 +40,30 @@ public class ServiceTest extends ServiceTestCase<MemoryProcessorService> {
         assertEquals("Returned result not match", "test_value_2", cached);
     }
 
+    public void testAlwaysExpired() throws Exception {
+        assertTrue("Not implemented yet!", false);
+    }
+
+    public void testAlwaysReturned() throws Exception {
+        assertTrue("Not implemented yet!", false);
+    }
+
+    public void testExpired() throws Exception {
+        assertTrue("Not implemented yet!", false);
+    }
+
+    public void testDecoration() throws Exception {
+        assertTrue("Not implemented yet!", false);
+    }
+
+    public void testBitmap() throws Exception {
+        assertTrue("Not implemented yet!", false);
+    }
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
         serviceIntent = new Intent(getContext(), MemoryProcessorService.class);
-        serviceIntent.putExtra(IObserver.KEY_GROUP, "ram-group");
         binder = (ProcessorService.ProcessorBinder) bindService(serviceIntent);
     }
 

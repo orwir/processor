@@ -1,4 +1,4 @@
-package ingvar.android.processor.filesystem.util;
+package ingvar.android.processor.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

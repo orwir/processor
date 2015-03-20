@@ -52,16 +52,6 @@ public abstract class ProcessorService extends Service {
     }
 
     @Override
-    public boolean onUnbind(Intent intent) {
-        boolean unbind = super.onUnbind(intent);
-        String group = intent.getStringExtra(IObserver.KEY_GROUP);
-        if(group != null && !group.isEmpty()) {
-            observerManager.removeGroup(group);
-        }
-        return unbind;
-    }
-
-    @Override
     public void onCreate() {
         super.onCreate();
 
@@ -71,7 +61,7 @@ public abstract class ProcessorService extends Service {
         observerManager = createObserverManager();
         worker = createWorker(executorService, cacheManager, sourceManager, observerManager);
 
-        providePersisters(cacheManager);
+        provideRepository(cacheManager);
         provideSources(sourceManager);
     }
 
@@ -92,13 +82,17 @@ public abstract class ProcessorService extends Service {
         return cacheManager.obtain(key, dataClass, expiryTime);
     }
 
+    public void removeObservers(String group) {
+        observerManager.removeGroup(group);
+    }
+
     public int getThreadCount() {
         return DEFAULT_PARALLEL_THREADS;
     }
 
     protected abstract void provideSources(ISourceManager sourceManager);
 
-    protected abstract void providePersisters(ICacheManager cacheManager);
+    protected abstract void provideRepository(ICacheManager cacheManager);
 
     protected ExecutorService createExecutorService() {
         return Executors.newFixedThreadPool(getThreadCount());

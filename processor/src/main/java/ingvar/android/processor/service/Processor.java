@@ -16,15 +16,15 @@ import ingvar.android.processor.request.IRequest;
 /**
  * Created by Igor Zubenko on 2015.03.19.
  */
-public class ServiceHelper {
+public class Processor {
 
     protected final long MAX_SECONDS_WAIT_BIND = TimeUnit.SECONDS.toMillis(10);
 
-    private Class<ProcessorService> serviceClass;
+    private Class<? extends ProcessorService> serviceClass;
     private volatile ProcessorService service;
     private ServiceConnection connection;
 
-    public ServiceHelper(Class<ProcessorService> serviceClass) {
+    public Processor(Class<? extends ProcessorService> serviceClass) {
         this.serviceClass = serviceClass;
         this.service = null;
         this.connection = new Connection();
@@ -47,15 +47,15 @@ public class ServiceHelper {
 
     public void bind(Context context) {
         Intent intent = new Intent(context, serviceClass);
-        intent.putExtra(IObserver.KEY_GROUP, context.getClass().getSimpleName());
         context.bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }
 
     public void unbind(Context context) {
+        service.removeObservers(context.getClass().getSimpleName());
         context.unbindService(connection);
     }
 
-    public boolean isBind() {
+    public boolean isBound() {
         return service != null;
     }
 
@@ -67,12 +67,12 @@ public class ServiceHelper {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            ServiceHelper.this.service = ((ProcessorService.ProcessorBinder) service).getService();
+            Processor.this.service = ((ProcessorService.ProcessorBinder) service).getService();
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            ServiceHelper.this.service = null;
+            Processor.this.service = null;
         }
 
     }

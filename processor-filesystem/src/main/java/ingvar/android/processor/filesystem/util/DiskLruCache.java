@@ -34,6 +34,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import ingvar.android.processor.util.BytesUtils;
+
 public class DiskLruCache {
 
     public static enum CommitType {

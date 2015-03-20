@@ -11,12 +11,12 @@ public interface IObserver<R> {
 
     String getGroup();
 
-    void progress(float progress);
-
     void completed(R result);
+
+    void failed(Exception exception);
 
     void cancelled();
 
-    void failed(Exception exception);
+    void progress(float progress);
 
 }

@@ -1,5 +1,6 @@
 package ingvar.android.processor.memory.service;
 
+import ingvar.android.processor.memory.persistence.BitmapMemoryRepository;
 import ingvar.android.processor.memory.persistence.MemoryRepository;
 import ingvar.android.processor.memory.source.MemorySource;
 import ingvar.android.processor.persistence.ICacheManager;
@@ -17,8 +18,11 @@ public class MemoryProcessorService extends ProcessorService {
     }
 
     @Override
-    protected void providePersisters(ICacheManager cacheManager) {
-        cacheManager.addPersister(new MemoryRepository());
+    protected void provideRepository(ICacheManager cacheManager) {
+        final int maxMemorySize = 5 * 1024 * 1024;
+
+        cacheManager.addPersister(new BitmapMemoryRepository(maxMemorySize));
+        cacheManager.addPersister(new MemoryRepository(maxMemorySize));
     }
 
 }

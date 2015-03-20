@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import ingvar.android.processor.source.ISource;
 
 /**
- * FOR TESTS ONLY!
  *
  * Created by Igor Zubenko on 2015.03.19.
  */
