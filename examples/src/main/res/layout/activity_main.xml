@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/screen_horizontal_offset"
+    android:paddingRight="@dimen/screen_horizontal_offset"
+    android:orientation="vertical"
+    android:gravity="center">
+
+    <Button android:id="@+id/button_timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/vertical_spacing"
+        android:minEms="@integer/button_width"
+        android:text="@string/label_timer"
+        android:onClick="openExample"/>
+
+    <Button android:id="@+id/button_gallery"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/vertical_spacing"
+        android:minEms="@integer/button_width"
+        android:text="@string/label_gallery"
+        android:onClick="openExample"/>
+
+    <Button android:id="@+id/button_weather"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/vertical_spacing"
+        android:minEms="@integer/button_width"
+        android:text="@string/label_weather"
+        android:onClick="openExample"/>
+
+    <Button android:id="@+id/button_dictionary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minEms="@integer/button_width"
+        android:text="@string/label_dictionary"
+        android:onClick="openExample"/>
+
+</LinearLayout>

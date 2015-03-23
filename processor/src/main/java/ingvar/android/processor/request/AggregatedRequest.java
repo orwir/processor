@@ -11,8 +11,8 @@ import java.util.Map;
  */
 public abstract class AggregatedRequest<K, R> implements IRequest<K, R> {
 
-    protected static final int DEFAULT_PARALLEL_THREADS = 15;
-    protected static final int DEFAULT_WAITING_PROCESS_MINUTES = 5;
+    protected static final int DEFAULT_PARALLEL_THREADS = Math.max(15, Runtime.getRuntime().availableProcessors()); //15 at least
+    protected static final int DEFAULT_AGGREGATE_KEEP_ALIVE_TIME_SECONDS = 5 * 60;
 
     private K key;
     private Class<R> resultClass;
@@ -20,7 +20,7 @@ public abstract class AggregatedRequest<K, R> implements IRequest<K, R> {
     private boolean cancelled;
     private RequestStatus status;
     private int threadsCount;
-    private int waitTimeout;
+    private int keepAliveTimeout;
     private Map<IRequest, Exception> innerExceptions;
 
     public AggregatedRequest(K key, Class<R> resultClass) {
@@ -30,7 +30,7 @@ public abstract class AggregatedRequest<K, R> implements IRequest<K, R> {
         this.cancelled = false;
         this.requests = new LinkedList<>();
         this.threadsCount = DEFAULT_PARALLEL_THREADS;
-        this.waitTimeout = DEFAULT_WAITING_PROCESS_MINUTES;
+        this.keepAliveTimeout = DEFAULT_AGGREGATE_KEEP_ALIVE_TIME_SECONDS;
         this.innerExceptions = new HashMap<>();
     }
 
@@ -69,12 +69,12 @@ public abstract class AggregatedRequest<K, R> implements IRequest<K, R> {
         this.threadsCount = threadsCount;
     }
 
-    public int getWaitTimeout() {
-        return waitTimeout;
+    public int getKeepAliveTimeout() {
+        return keepAliveTimeout;
     }
 
-    public void setWaitTimeout(int waitTimeout) {
-        this.waitTimeout = waitTimeout;
+    public void setKeepAliveTimeout(int keepAliveTimeout) {
+        this.keepAliveTimeout = keepAliveTimeout;
     }
 
     public void addRequestException(IRequest request, Exception exception) {
@@ -122,6 +122,11 @@ public abstract class AggregatedRequest<K, R> implements IRequest<K, R> {
                     && isMergeable() && o.isMergeable();
         }
         return false;
+    }
+
+    @Override
+    public int compareTo(IRequest another) {
+        return 0;
     }
 
 }

@@ -6,8 +6,10 @@ import android.os.Binder;
 import android.os.IBinder;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import ingvar.android.processor.observation.IObserver;
 import ingvar.android.processor.observation.IObserverManager;
@@ -25,7 +27,8 @@ import ingvar.android.processor.worker.IWorker;
  */
 public abstract class ProcessorService extends Service {
 
-    protected static final int DEFAULT_PARALLEL_THREADS = 7;
+    protected static final int DEFAULT_PARALLEL_THREADS = Math.max(4, Runtime.getRuntime().availableProcessors()); //4 at least
+    protected static final int DEFAULT_KEEP_ALIVE_TIME_SECONDS = 5 * 60;
 
     public class ProcessorBinder extends Binder {
 
@@ -90,12 +93,34 @@ public abstract class ProcessorService extends Service {
         return DEFAULT_PARALLEL_THREADS;
     }
 
+    public int getAliveTime() {
+        return DEFAULT_KEEP_ALIVE_TIME_SECONDS;
+    }
+
+    /**
+     * Provide sources which is used in your application.
+     *
+     * @param sourceManager
+     */
     protected abstract void provideSources(ISourceManager sourceManager);
 
+    /**
+     * Provide repositories which is used in your application.
+     * Keep in mind what order of adding repositories to cache manager is important.
+     * First matched repository will be used to persistence.
+     *
+     * @param cacheManager
+     */
     protected abstract void provideRepository(ICacheManager cacheManager);
 
     protected ExecutorService createExecutorService() {
-        return Executors.newFixedThreadPool(getThreadCount());
+        return new ThreadPoolExecutor(
+                Runtime.getRuntime().availableProcessors(), //initial pool size
+                getThreadCount(), //max pool size
+                getAliveTime(),
+                TimeUnit.SECONDS,
+                new LinkedBlockingQueue<Runnable>()
+        );
     }
 
     protected ICacheManager createCacheManager() {

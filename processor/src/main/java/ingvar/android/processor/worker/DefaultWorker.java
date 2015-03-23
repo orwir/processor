@@ -1,5 +1,7 @@
 package ingvar.android.processor.worker;
 
+import android.util.Log;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -12,6 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import ingvar.android.processor.exception.ProcessorException;
 import ingvar.android.processor.exception.RequestCancelledException;
+import ingvar.android.processor.exception.SourceNotAvailable;
 import ingvar.android.processor.observation.IObserver;
 import ingvar.android.processor.observation.IObserverManager;
 import ingvar.android.processor.persistence.ICacheManager;
@@ -29,6 +32,8 @@ import ingvar.android.processor.source.ISourceManager;
  * Created by Igor Zubenko on 2015.03.18.
  */
 public class DefaultWorker implements IWorker {
+
+    private static final String TAG = DefaultWorker.class.getSimpleName();
 
     protected final ExecutorService executorService;
     protected final ICacheManager cacheManager;
@@ -49,6 +54,7 @@ public class DefaultWorker implements IWorker {
         Callable callable = new Callable() {
             @Override
             public R call() throws Exception {
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
                 return process(request);
             }
         };
@@ -89,12 +95,12 @@ public class DefaultWorker implements IWorker {
             return null;
 
         } catch (RuntimeException e) {
+            Log.e(TAG, e.getMessage(), e);
             notifyFailed(request, e);
             throw e;
 
         } finally {
             executingRequests.remove(request);
-            observerManager.remove(request);
         }
     }
 
@@ -110,6 +116,7 @@ public class DefaultWorker implements IWorker {
                 @Override
                 public Object call() throws Exception {
                     checkCancellation(request);
+                    android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
                     Object innerResult = null;
                     try {
@@ -139,8 +146,13 @@ public class DefaultWorker implements IWorker {
         checkCancellation(request);
         innerExecutor.shutdown();
         try {
-            innerExecutor.awaitTermination(request.getWaitTimeout(), TimeUnit.MINUTES);
-        } catch (InterruptedException e) {}
+            boolean terminated = innerExecutor.awaitTermination(request.getKeepAliveTimeout(), TimeUnit.SECONDS);
+            if(!terminated) {
+                throw new ProcessorException("Process interrupted before all inner requests was handled.");
+            }
+        } catch (InterruptedException e) {
+            throw new ProcessorException("Process interrupted before all inner requests was handled.");
+        }
 
         return (R) request.getCumulativeResult();
     }
@@ -189,6 +201,9 @@ public class DefaultWorker implements IWorker {
                     cacheManager.put(request.getRequestKey(), result);
                     break flow;
                 }
+            } else {
+                notifyFailed(request, new SourceNotAvailable(String.format("Source type '%s' is not available now", request.getSourceType())));
+                break flow;
             }
 
             //end of flow --------------------------------------------------------------------------

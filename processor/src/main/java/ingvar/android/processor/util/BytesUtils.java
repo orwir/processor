@@ -47,7 +47,7 @@ public class BytesUtils {
         return (T) result;
     }
 
-    public static byte[] toByteArray(InputStream source) {
+    public static byte[] streamToBytes(InputStream source) {
         ByteArrayOutputStream result = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
         int l;

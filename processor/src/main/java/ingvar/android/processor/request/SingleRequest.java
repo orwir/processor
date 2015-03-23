@@ -25,7 +25,7 @@ public abstract class SingleRequest<K, R, S extends ISource> implements IRequest
 
         this.cancelled = false;
         this.status = RequestStatus.PENDING;
-        this.retryCount = 0;
+        this.retryCount = 1; // 0 and 1 is same
         this.mergeable = true;
     }
 
@@ -104,6 +104,11 @@ public abstract class SingleRequest<K, R, S extends ISource> implements IRequest
                     && isMergeable() && o.isMergeable();
         }
         return false;
+    }
+
+    @Override
+    public int compareTo(IRequest another) {
+        return 0;
     }
 
 }

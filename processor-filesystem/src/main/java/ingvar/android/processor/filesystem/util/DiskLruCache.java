@@ -174,7 +174,7 @@ public class DiskLruCache {
         if(file.exists() && file.isFile()) {
             try {
                 InputStream in = new BufferedInputStream(new FileInputStream(file));
-                byte[] bytes = BytesUtils.toByteArray(in);
+                byte[] bytes = BytesUtils.streamToBytes(in);
                 result = BytesUtils.fromBytes(bytes);
                 updateKey(key);
                 close(in);

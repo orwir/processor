@@ -17,12 +17,12 @@ public class CacheManager implements ICacheManager {
     }
 
     @Override
-    public void addPersister(IRepository persister) {
+    public void addRepository(IRepository persister) {
         persisters.add(persister);
     }
 
     @Override
-    public void removePersister(IRepository persister) {
+    public void removeRepository(IRepository persister) {
         persisters.remove(persister);
     }
 

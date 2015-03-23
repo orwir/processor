@@ -41,4 +41,5 @@ public class BitmapMemoryRepository<K> extends MemoryRepository<K, Bitmap> {
     public boolean canHandle(Class dataClass) {
         return Bitmap.class.equals(dataClass);
     }
+
 }

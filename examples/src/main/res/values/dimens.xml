@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- http://www.google.ru/design/spec/layout/metrics-keylines.html#metrics-keylines-keylines-spacing -->
+
+    <dimen name="horizontal_spacing">8dp</dimen>
+    <dimen name="vertical_spacing">8dp</dimen>
+    <dimen name="square_spacing">8dp</dimen>
+    <dimen name="screen_horizontal_offset">16dp</dimen>
+    <dimen name="touch_target_size">48dp</dimen>
+
+</resources>

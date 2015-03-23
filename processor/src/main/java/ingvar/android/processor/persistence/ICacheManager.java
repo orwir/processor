@@ -5,9 +5,9 @@ package ingvar.android.processor.persistence;
  */
 public interface ICacheManager {
 
-    void addPersister(IRepository persister);
+    void addRepository(IRepository persister);
 
-    void removePersister(IRepository persister);
+    void removeRepository(IRepository persister);
 
     <K, R> R obtain(K key, Class dataClass, long expiryTime);
 
