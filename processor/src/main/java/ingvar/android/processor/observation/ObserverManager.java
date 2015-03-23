@@ -161,6 +161,7 @@ public class ObserverManager implements IObserverManager {
                     remove(request);
                 }
             }
+            bundle.clear();
 
             return true;
         }
