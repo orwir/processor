@@ -29,7 +29,7 @@ public class ExampleService extends ProcessorService {
         final int maxMemoryCacheSize = maxMemory / 8;
 
         final int diskCache = 10 * 1024 * 1024; //10Mb
-        final int memoryCache = Math.min(100 * 1024, maxMemoryCacheSize); //100Kb
+        final int memoryCache = Math.min(3 * 1024 * 1024, maxMemoryCacheSize); //3Mb
 
         File cacheDir = getCacheDir();
         if(FileUtils.isExternalStorageWritable()) {
