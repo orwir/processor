@@ -1,14 +1,14 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion "21.1.1"
+    compileSdkVersion vCompileSdkVersion
+    buildToolsVersion vBuildToolsVersion
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 21
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion vMinSdkVersion
+        targetSdkVersion vTargetSdkVersion
+        versionCode vGlobalVersionCode
+        versionName vGlobalVersionName
     }
 
     buildTypes {
@@ -26,5 +26,4 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:appcompat-v7:22.0.0'
 }

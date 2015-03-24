@@ -17,3 +17,13 @@ allprojects {
         jcenter()
     }
 }
+
+ext {
+    vCompileSdkVersion = 21
+    vBuildToolsVersion = '21.1.1'
+    vMinSdkVersion = 14
+    vTargetSdkVersion = 21
+
+    vGlobalVersionCode = 1
+    vGlobalVersionName = '1.0.0'
+}

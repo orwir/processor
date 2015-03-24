@@ -1,16 +1,18 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion "21.1.2"
+    compileSdkVersion vCompileSdkVersion
+    buildToolsVersion vBuildToolsVersion
 
     defaultConfig {
-        applicationId "ingvar.examples"
-        minSdkVersion 14
-        targetSdkVersion 21
+        minSdkVersion vMinSdkVersion
+        targetSdkVersion vTargetSdkVersion
+
+        applicationId 'ingvar.examples'
         versionCode 1
-        versionName "1.0"
+        versionName '1.0.0'
     }
+
     buildTypes {
         release {
             minifyEnabled false
