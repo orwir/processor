@@ -3,7 +3,7 @@ package ingvar.examples.view;
 import android.os.Bundle;
 
 import ingvar.android.processor.service.Processor;
-import ingvar.examples.serice.ExampleService;
+import ingvar.examples.service.ExampleService;
 import roboguice.activity.RoboActivity;
 
 /**

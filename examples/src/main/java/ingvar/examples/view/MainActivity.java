@@ -5,6 +5,7 @@ import android.widget.Toast;
 
 import ingvar.examples.R;
 import ingvar.examples.gallery.view.GalleryActivity;
+import ingvar.examples.weather.view.WeatherActivity;
 import roboguice.inject.ContentView;
 
 /**
@@ -24,7 +25,7 @@ public class MainActivity extends AbstractActivity {
                 Toast.makeText(this, "not implemented yet", Toast.LENGTH_LONG).show();
                 break;
             case R.id.button_weather:
-                Toast.makeText(this, "not implemented yet", Toast.LENGTH_LONG).show();
+                WeatherActivity.startActivity(this);
                 break;
             case R.id.button_dictionary:
                 Toast.makeText(this, "not implemented yet", Toast.LENGTH_LONG).show();

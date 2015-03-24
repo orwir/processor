@@ -5,6 +5,17 @@
     <string name="label_timer">Timer (memory, processing)</string>
     <string name="label_weather">Weather (network)</string>
     <string name="label_dictionary">Dictionary (sqlite)</string>
+    <string name="label_temperature">Temperature</string>
+    <string name="label_humidity">Humidity</string>
+    <string name="label_pressure">Pressure</string>
+    <string name="label_wind">Wind</string>
+    <string name="label_speed">Speed</string>
+    <string name="label_direction">Direction</string>
+    <string name="label_gust">Gust</string>
+    <string name="label_cloudiness">Cloudiness</string>
+    <string name="label_description">Description</string>
+    <string name="label_search_by_city">City name</string>
+    <string name="label_na">n/a</string>
 
     <string name="message_unknown_example">You are trying to open unknown example!</string>
 

@@ -1,4 +1,4 @@
-package ingvar.examples.serice;
+package ingvar.examples.service;
 
 import java.io.File;
 
@@ -11,6 +11,7 @@ import ingvar.android.processor.memory.source.MemorySource;
 import ingvar.android.processor.persistence.ICacheManager;
 import ingvar.android.processor.service.ProcessorService;
 import ingvar.android.processor.source.ISourceManager;
+import ingvar.examples.weather.network.RetrofitSource;
 
 /**
  * Created by Igor Zubenko on 2015.03.23.
@@ -19,6 +20,7 @@ public class ExampleService extends ProcessorService {
 
     @Override
     protected void provideSources(ISourceManager sourceManager) {
+        sourceManager.addSource(RetrofitSource.class, new RetrofitSource(this));
         sourceManager.addSource(FilesystemSource.class, new FilesystemSource(this));
         sourceManager.addSource(MemorySource.class, new MemorySource());
     }

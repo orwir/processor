@@ -11,7 +11,7 @@ import ingvar.android.processor.persistence.Time;
  * Created by Igor Zubenko on 2015.03.20.
  */
 public class FilesystemRepository<T> implements IRepository<String, T> {
-
+    //TODO: normalize keys
     protected DiskLruCache storage;
 
     public FilesystemRepository(File directory, int maxBytes) {
