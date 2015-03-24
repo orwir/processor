@@ -51,6 +51,8 @@ public class Processor {
     }
 
     public void bind(Context context) {
+        Log.d(TAG, String.format("Bind context '%s' to service '%s'", context.getClass().getSimpleName(), serviceClass.getSimpleName()));
+
         Intent intent = new Intent(context, serviceClass);
         if(!context.bindService(intent, connection, Context.BIND_AUTO_CREATE)) {
             throw new ProcessorException("Connection is not made. Maybe you forgot add your service to manifest?");
@@ -58,10 +60,14 @@ public class Processor {
     }
 
     public void unbind(Context context) {
+        Log.d(TAG, String.format("Unbind context '%s' from service '%s'", context.getClass().getSimpleName(), serviceClass.getSimpleName()));
+
         if(service != null) {
             service.removeObservers(context.getClass().getSimpleName());
         }
         context.unbindService(connection);
+        plannedRequests.clear();
+        service = null;
     }
 
     public boolean isBound() {
@@ -89,9 +95,8 @@ public class Processor {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             Log.d(TAG, String.format("Service '%s' disconnected.", name));
-
-            Processor.this.service = null;
             plannedRequests.clear();
+            Processor.this.service = null;
         }
 
     }
