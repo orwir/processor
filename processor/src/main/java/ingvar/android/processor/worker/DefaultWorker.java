@@ -234,7 +234,7 @@ public class DefaultWorker implements IWorker {
     }
 
     protected void notifyCancelled(IRequest request) {
-        request.setStatus(RequestStatus.COMPLETED);
+        request.setStatus(RequestStatus.CANCELLED);
         observerManager.notifyCancelled(request);
     }
 

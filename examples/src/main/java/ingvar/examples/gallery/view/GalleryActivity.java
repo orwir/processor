@@ -48,7 +48,7 @@ public class GalleryActivity extends AbstractActivity {
 
         adapter = new GalleryAdapter(this, processor);
         galleryFragment.setListAdapter(adapter);
-        //galleryFragment.getListView().setDivider(null);
+        galleryFragment.getListView().setDivider(null);
     }
 
     @Override

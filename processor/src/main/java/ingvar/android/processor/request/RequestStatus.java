@@ -9,6 +9,7 @@ public enum RequestStatus {
     PROCESSING,
     LOADING_FROM_CACHE,
     LOADING_FROM_EXTERNAL,
+    CANCELLED,
     FAILED,
     COMPLETED;
 

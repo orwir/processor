@@ -1,12 +1,10 @@
 package ingvar.android.processor.request;
 
-import java.io.Serializable;
-
 /**
  *
  * Created by Igor Zubenko on 2015.03.18.
  */
-public interface IRequest<K, R> extends Comparable<IRequest<K, R>>, Serializable {
+public interface IRequest<K, R> extends Comparable<IRequest<K, R>> {
 
     /**
      * Return request key.
@@ -17,7 +15,6 @@ public interface IRequest<K, R> extends Comparable<IRequest<K, R>>, Serializable
 
     /**
      * Return result class.
-     * IMPORTANT: must implement Serializable or Parcelable
      *
      * @return class that represent the result
      */

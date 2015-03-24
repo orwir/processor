@@ -1,28 +1,20 @@
 package ingvar.android.processor.observation;
 
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcelable;
 
-import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import ingvar.android.processor.exception.ProcessorException;
 import ingvar.android.processor.request.IRequest;
 
 /**
  * Created by Igor Zubenko on 2015.03.18.
  */
 public class ObserverManager implements IObserverManager {
-
-    protected static final String EXTRA_REQUEST = "request";
-    protected static final String EXTRA_DATA = "data";
-    protected static final String EXTRA_IS_PARCELABLE = "is_parcelable";
 
     private Handler handler;
     private Map<IRequest, Set<IObserver>> observers;
@@ -97,21 +89,7 @@ public class ObserverManager implements IObserverManager {
     }
 
     private void sendMessage(IRequest request, Type type, Object data) {
-        Bundle bundle = new Bundle(3);
-        bundle.putSerializable(EXTRA_REQUEST, request);
-        if(data instanceof Serializable) {
-            bundle.putSerializable(EXTRA_DATA, (Serializable) data);
-        }
-        else if(data instanceof Parcelable) {
-            bundle.putParcelable(EXTRA_DATA, (Parcelable) data);
-            bundle.putBoolean(EXTRA_IS_PARCELABLE, true);
-        }
-        else if(data != null) {
-            throw new ProcessorException("Data must be implemented Serializable or Parcelable interface");
-        }
-
-        Message message = handler.obtainMessage(type.ordinal());
-        message.setData(bundle);
+        Message message = handler.obtainMessage(type.ordinal(), new Transfer(request, data));
         message.sendToTarget();
     }
 
@@ -122,47 +100,45 @@ public class ObserverManager implements IObserverManager {
         FAILED;
     }
 
+    private class Transfer {
+        private IRequest request;
+        private Object data;
+
+        public Transfer(IRequest request, Object data) {
+            this.request = request;
+            this.data = data;
+        }
+    }
+
     private class ObserverCallback implements Handler.Callback {
 
         @Override
         public boolean handleMessage(Message msg) {
-            Bundle bundle = msg.getData();
-
-            IRequest request = (IRequest) bundle.getSerializable(EXTRA_REQUEST);
             Type type = Type.values()[msg.what];
-            Object data = null;
-            if(bundle.containsKey(EXTRA_DATA)) {
-                if(bundle.getBoolean(EXTRA_IS_PARCELABLE, false)) {
-                    data = bundle.getParcelable(EXTRA_DATA);
-                } else {
-                    data = bundle.getSerializable(EXTRA_DATA);
-                }
-            }
+            Transfer transfer = (Transfer) msg.obj;
 
-            Set<IObserver> requestObservers = observers.get(request);
+            Set<IObserver> requestObservers = observers.get(transfer.request);
             if(requestObservers != null) {
                 for(IObserver observer : requestObservers) {
                     switch (type) {
                         case PROGRESS:
-                            observer.progress((Float) data);
+                            observer.progress((Float) transfer.data);
                             break;
                         case COMPLETED:
-                            observer.completed(data);
+                            observer.completed(transfer.data);
                             break;
                         case CANCELLED:
                             observer.cancelled();
                             break;
                         case FAILED:
-                            observer.failed((Exception) data);
+                            observer.failed((Exception) transfer.data);
                             break;
                     }
                 }
                 if(!Type.PROGRESS.equals(type)) {
-                    remove(request);
+                    remove(transfer.request);
                 }
             }
-            bundle.clear();
-
             return true;
         }
 

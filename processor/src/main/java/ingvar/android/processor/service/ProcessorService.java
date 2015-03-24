@@ -27,7 +27,8 @@ import ingvar.android.processor.worker.IWorker;
  */
 public abstract class ProcessorService extends Service {
 
-    protected static final int DEFAULT_PARALLEL_THREADS = Math.max(4, Runtime.getRuntime().availableProcessors()); //4 at least
+    protected static final int DEFAULT_MIN_PARALLEL_THREADS = Runtime.getRuntime().availableProcessors() + 1;
+    protected static final int DEFAULT_PARALLEL_THREADS = Math.max(4, DEFAULT_MIN_PARALLEL_THREADS); //4 at least
     protected static final int DEFAULT_KEEP_ALIVE_TIME_SECONDS = 5 * 60;
 
     public class ProcessorBinder extends Binder {
@@ -115,8 +116,8 @@ public abstract class ProcessorService extends Service {
 
     protected ExecutorService createExecutorService() {
         return new ThreadPoolExecutor(
-                Runtime.getRuntime().availableProcessors(), //initial pool size
-                getThreadCount(), //max pool size
+                DEFAULT_MIN_PARALLEL_THREADS, //initial pool size
+                Math.max(getThreadCount(), DEFAULT_MIN_PARALLEL_THREADS), //max pool size
                 getAliveTime(),
                 TimeUnit.SECONDS,
                 new LinkedBlockingQueue<Runnable>()

@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public abstract class AggregatedRequest<K, R> implements IRequest<K, R> {
 
-    protected static final int DEFAULT_PARALLEL_THREADS = Math.max(15, Runtime.getRuntime().availableProcessors()); //15 at least
+    protected static final int DEFAULT_PARALLEL_THREADS = Math.max(15, Runtime.getRuntime().availableProcessors() + 1); //15 at least
     protected static final int DEFAULT_AGGREGATE_KEEP_ALIVE_TIME_SECONDS = 5 * 60;
 
     private K key;
