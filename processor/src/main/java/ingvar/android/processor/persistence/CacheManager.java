@@ -10,66 +10,66 @@ import ingvar.android.processor.exception.PersistenceException;
  */
 public class CacheManager implements ICacheManager {
 
-    private final Set<IRepository> persisters;
+    private final Set<IRepository> repositories;
 
     public CacheManager() {
-        persisters = new LinkedHashSet<>();
+        repositories = new LinkedHashSet<>();
     }
 
     @Override
-    public void addRepository(IRepository persister) {
-        persisters.add(persister);
+    public void addRepository(IRepository repository) {
+        repositories.add(repository);
     }
 
     @Override
     public void removeRepository(IRepository persister) {
-        persisters.remove(persister);
+        repositories.remove(persister);
     }
 
     @Override
     public <K, R> R obtain(K key, Class dataClass, long expiryTime) {
-        IRepository<K, R> persister = getAppropriatePersister(dataClass);
-        return persister.obtain(key, expiryTime);
+        IRepository<K, R> repository = getAppropriateRepository(dataClass);
+        return repository.obtain(key, expiryTime);
     }
 
     @Override
     public <K, R> R put(K key, R data) {
-        IRepository<K, R> persister = getAppropriatePersister(data.getClass());
-        persister.persist(key, data);
+        IRepository<K, R> repository = getAppropriateRepository(data.getClass());
+        repository.persist(key, data);
         return data;
     }
 
     @Override
     public <K> void remove(Class dataClass, K key) {
-        IRepository persister = getAppropriatePersister(dataClass);
-        persister.remove(key);
+        IRepository repository = getAppropriateRepository(dataClass);
+        repository.remove(key);
     }
 
     @Override
     public void remove(Class dataClass) {
-        IRepository persister = getAppropriatePersister(dataClass);
-        persister.removeAll();
+        IRepository repository = getAppropriateRepository(dataClass);
+        repository.removeAll();
     }
 
     @Override
     public void remove() {
-        synchronized (persisters) {
-            for (IRepository persister : persisters) {
-                persister.removeAll();
+        synchronized (repositories) {
+            for (IRepository repository : repositories) {
+                repository.removeAll();
             }
         }
     }
 
-    protected IRepository getAppropriatePersister(Class dataClass) {
+    protected IRepository getAppropriateRepository(Class dataClass) {
         IRepository appropriate = null;
-        for(IRepository persister : persisters) {
-            if(persister.canHandle(dataClass)) {
-                appropriate = persister;
+        for(IRepository repository : repositories) {
+            if(repository.canHandle(dataClass)) {
+                appropriate = repository;
                 break;
             }
         }
         if(appropriate == null) {
-            throw new PersistenceException("Can't find appropriate persister for class: " + dataClass.getName());
+            throw new PersistenceException("Can't find appropriate repository for class: " + dataClass.getName());
         }
         return appropriate;
     }
