@@ -1,0 +1,29 @@
+apply plugin: 'com.android.library'
+
+android {
+
+    compileSdkVersion vCompileSdkVersion
+    buildToolsVersion vBuildToolsVersion
+
+    defaultConfig {
+        minSdkVersion vMinSdkVersion
+        targetSdkVersion vTargetSdkVersion
+        versionCode vGlobalVersionCode
+        versionName vGlobalVersionName
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(':processor')
+    compile 'ingvar.android.literepo:literepo:1.0.0'
+    compile 'ingvar.android.literepo:literepo-conversion:1.0.0'
+}

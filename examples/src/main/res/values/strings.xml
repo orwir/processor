@@ -18,5 +18,6 @@
     <string name="label_na">n/a</string>
 
     <string name="message_unknown_example">You are trying to open unknown example!</string>
+    <string name="message_request_was_cancelled">Request was cancelled.</string>
 
 </resources>

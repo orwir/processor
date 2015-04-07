@@ -25,12 +25,16 @@ public class NetworkSource implements ISource {
         return network != null && network.isConnectedOrConnecting();
     }
 
-    public ConnectivityManager getConnectivityManager() {
+    public Context getContext() {
         Context context = contextRef.get();
         if(context == null) {
             throw new IllegalStateException("Context is stale!");
         }
-        return (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        return context;
+    }
+
+    public ConnectivityManager getConnectivityManager() {
+        return (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
     public NetworkInfo getNetworkInfo() {

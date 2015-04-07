@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import ingvar.android.processor.observation.AbstractObserver;
 import ingvar.examples.R;
@@ -113,11 +114,13 @@ public class WeatherActivity extends AbstractActivity {
         @Override
         public void cancelled() {
             setUIEnabled(true);
+            Toast.makeText(WeatherActivity.this, R.string.message_request_was_cancelled, Toast.LENGTH_LONG).show();
         }
 
         @Override
         public void failed(Exception exception) {
             setUIEnabled(true);
+            Toast.makeText(WeatherActivity.this, exception.getMessage(), Toast.LENGTH_LONG).show();
         }
 
     }

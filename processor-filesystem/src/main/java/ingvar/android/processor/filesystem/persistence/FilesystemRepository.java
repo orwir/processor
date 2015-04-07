@@ -10,7 +10,7 @@ import ingvar.android.processor.persistence.Time;
 /**
  * Created by Igor Zubenko on 2015.03.20.
  */
-public class FilesystemRepository<T> implements IRepository<String, T> {
+public class FilesystemRepository<R> implements IRepository<String, R> {
     //TODO: normalize keys
     protected DiskLruCache storage;
 
@@ -20,14 +20,14 @@ public class FilesystemRepository<T> implements IRepository<String, T> {
     }
 
     @Override
-    public T persist(String key, T data) {
+    public R persist(String key, R data) {
         storage.put(key, (Serializable) data);
         return data;
     }
 
     @Override
-    public T obtain(String key, long expiryTime) {
-        T result = null;
+    public R obtain(String key, long expiryTime) {
+        R result = null;
         if(storage.contains(key) && isNotExpired(key, expiryTime)) {
             result = storage.get(key);
         }
