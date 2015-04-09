@@ -5,7 +5,7 @@
     android:orientation="vertical"
     android:paddingLeft="@dimen/screen_horizontal_offset"
     android:paddingRight="@dimen/screen_horizontal_offset">
-    
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

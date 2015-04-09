@@ -33,7 +33,9 @@ public class WeatherDeserializer implements JsonDeserializer<Weather> {
         JsonObject jWind = jWeather.getAsJsonObject("wind");
         weather.setSpeed(jWind.get("speed").getAsInt());
         weather.setDirection(jWind.get("deg").getAsInt());
-        weather.setGust(jWind.get("gust").getAsInt());
+        if(jWind.get("gust") != null) {
+            weather.setGust(jWind.get("gust").getAsInt());
+        }
 
         JsonObject jClouds = jWeather.getAsJsonObject("clouds");
         weather.setCloudiness(jClouds.get("all").getAsInt());

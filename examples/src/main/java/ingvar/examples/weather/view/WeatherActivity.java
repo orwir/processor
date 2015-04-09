@@ -107,7 +107,9 @@ public class WeatherActivity extends AbstractActivity {
             description.setText(result.getDescription());
             speed.setText(result.getSpeed().toString() + " mps");
             direction.setText(result.getDirection().toString() + "°");
-            gust.setText(result.getGust().toString() + " mps");
+            if(result.getGust() != null) {
+                gust.setText(result.getGust().toString() + " mps");
+            }
             cloudiness.setText(result.getCloudiness().toString() + "%");
         }
 
