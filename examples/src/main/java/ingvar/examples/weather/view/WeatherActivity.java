@@ -94,7 +94,7 @@ public class WeatherActivity extends AbstractActivity {
 
         @Override
         public String getGroup() {
-            return Weather.class.getSimpleName();
+            return Weather.class.getName();
         }
 
         @Override

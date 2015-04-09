@@ -20,7 +20,14 @@
         <activity android:name=".weather.view.WeatherActivity"
             android:label="@string/label_weather"/>
 
+        <activity android:name=".dictionary.view.DictionaryActivity"
+            android:label="@string/label_dictionary"/>
+
         <service android:name=".service.ExampleService"/>
+
+        <provider
+            android:authorities="ingvar.android.examples.dictionary.provider"
+            android:name=".dictionary.storage.DictionaryProvider"/>
 
     </application>
 

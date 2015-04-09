@@ -27,9 +27,11 @@ dependencies {
     compile project(':processor-memory')
     compile project(':processor-filesystem')
     compile project(':processor-network')
+    compile project(':processor-sqlite')
 
     compile 'com.android.support:appcompat-v7:22.0.0'
     compile 'org.roboguice:roboguice:3.0.1'
     provided 'org.roboguice:roboblender:3.0.1'
     compile 'com.squareup.retrofit:retrofit:1.9.0'
+    compile 'commons-lang:commons-lang:2.6'
 }

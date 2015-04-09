@@ -11,6 +11,7 @@ import ingvar.android.processor.memory.source.MemorySource;
 import ingvar.android.processor.persistence.ICacheManager;
 import ingvar.android.processor.service.ProcessorService;
 import ingvar.android.processor.source.ISourceManager;
+import ingvar.android.processor.sqlite.source.SqliteSource;
 import ingvar.examples.weather.network.RetrofitSource;
 
 /**
@@ -23,6 +24,7 @@ public class ExampleService extends ProcessorService {
         sourceManager.addSource(RetrofitSource.class, new RetrofitSource(this));
         sourceManager.addSource(FilesystemSource.class, new FilesystemSource(this));
         sourceManager.addSource(MemorySource.class, new MemorySource());
+        sourceManager.addSource(SqliteSource.class, new SqliteSource(this));
     }
 
     @Override

@@ -67,7 +67,7 @@ public class GalleryAdapter extends ArrayAdapter<String> {
 
         @Override
         public String getGroup() {
-            return getContext().getClass().getSimpleName();
+            return getContext().getClass().getName();
         }
 
         @Override

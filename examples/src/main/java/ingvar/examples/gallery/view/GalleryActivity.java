@@ -81,7 +81,7 @@ public class GalleryActivity extends AbstractActivity {
 
         @Override
         public String getGroup() {
-            return GalleryActivity.this.getClass().getSimpleName();
+            return GalleryActivity.this.getClass().getName();
         }
 
         @Override

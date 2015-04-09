@@ -91,7 +91,9 @@ public class SqliteRepository<R> implements IRepository<Key, R> {
 
     protected boolean isNotExpired(Key key, long expiryTime) {
         long creationTime = getCreationTime(key);
-        return expiryTime == Time.ALWAYS_RETURNED || System.currentTimeMillis() - expiryTime <= creationTime;
+        return creationTime >= 0
+            && (expiryTime == Time.ALWAYS_RETURNED
+            || System.currentTimeMillis() - expiryTime <= creationTime);
     }
 
     protected Context getContext() {

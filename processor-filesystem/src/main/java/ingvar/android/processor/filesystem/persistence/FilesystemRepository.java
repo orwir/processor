@@ -61,7 +61,9 @@ public class FilesystemRepository<R> implements IRepository<String, R> {
 
     protected boolean isNotExpired(String key, long expiryTime) {
         long creationTime = storage.getTime(key);
-        return expiryTime == Time.ALWAYS_RETURNED || System.currentTimeMillis() - expiryTime <= creationTime;
+        return creationTime >= 0
+            && (expiryTime == Time.ALWAYS_RETURNED
+            || System.currentTimeMillis() - expiryTime <= creationTime);
     }
 
 }

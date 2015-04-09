@@ -4,6 +4,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import ingvar.examples.R;
+import ingvar.examples.dictionary.view.DictionaryActivity;
 import ingvar.examples.gallery.view.GalleryActivity;
 import ingvar.examples.weather.view.WeatherActivity;
 import roboguice.inject.ContentView;
@@ -28,7 +29,7 @@ public class MainActivity extends AbstractActivity {
                 WeatherActivity.startActivity(this);
                 break;
             case R.id.button_dictionary:
-                Toast.makeText(this, "not implemented yet", Toast.LENGTH_LONG).show();
+                DictionaryActivity.startActivity(this);
                 break;
             default:
                 Toast.makeText(this, R.string.message_unknown_example, Toast.LENGTH_LONG).show();

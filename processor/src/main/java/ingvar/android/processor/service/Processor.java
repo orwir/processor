@@ -63,7 +63,7 @@ public class Processor {
         Log.d(TAG, String.format("Unbind context '%s' from service '%s'", context.getClass().getSimpleName(), serviceClass.getSimpleName()));
 
         if(service != null) {
-            service.removeObservers(context.getClass().getSimpleName());
+            service.removeObservers(context.getClass().getName());
         }
         context.unbindService(connection);
         plannedRequests.clear();
