@@ -1,5 +1,6 @@
 package ingvar.examples.dictionary.view;
 
+import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -27,7 +28,7 @@ import roboguice.inject.InjectView;
  * Created by Igor Zubenko on 2015.04.09.
  */
 @ContentView(R.layout.activity_dictionary)
-public class DictionaryActivity extends AbstractActivity {
+public class DictionaryActivity extends AbstractActivity implements DictionaryCreationFragment.Listener {
 
     @InjectView(R.id.dictionaries)
     private Spinner dictionaries;
@@ -39,14 +40,20 @@ public class DictionaryActivity extends AbstractActivity {
     }
 
     public void createDictionary(View view) {
-        //TODO:
-        Toast.makeText(this, "not implemented yet", Toast.LENGTH_LONG).show();
+        DialogFragment dialog = new DictionaryCreationFragment();
+        dialog.show(getFragmentManager(), "create_dictionary");
     }
 
     public void removeDictionary(View view) {
         //TODO: show alert
         //TODO: remove
         Toast.makeText(this, "not implemented yet", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void dictionaryCreated(String name) {
+        //reload dictionaries
+        processor.execute(new DictionaryRequest(DictionaryContract.Dictionary.CONTENT_URI), dictionariesObserver);
     }
 
     @Override

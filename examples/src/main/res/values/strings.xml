@@ -18,6 +18,10 @@
     <string name="label_na">n/a</string>
     <string name="label_choose_dictionary">Dictionary:</string>
     <string name="label_default">Default</string>
+    <string name="label_dictionary_name">Dictionary name</string>
+    <string name="label_create">Create</string>
+    <string name="label_cancel">Cancel</string>
+    <string name="label_dictionary_creation">Create dictionary</string>
 
     <string name="message_unknown_example">You are trying to open unknown example!</string>
     <string name="message_request_was_cancelled">Request was cancelled.</string>
