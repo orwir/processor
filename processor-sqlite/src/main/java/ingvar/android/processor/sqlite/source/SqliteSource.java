@@ -30,7 +30,7 @@ public class SqliteSource extends ContextSource {
         converters.remove(dataClass);
     }
 
-    public Converter getConverter(Class dataClass) {
+    public <T> Converter<T> getConverter(Class dataClass) {
         Converter converter = converters.get(dataClass);
         if(converter == null) {
             synchronized (dataClass) {

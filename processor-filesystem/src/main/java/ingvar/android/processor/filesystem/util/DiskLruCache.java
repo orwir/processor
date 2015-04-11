@@ -78,9 +78,8 @@ public class DiskLruCache {
     public static DiskLruCache open(File directory, int maxBytes, boolean useLock) {
         //create directory
         if(!directory.exists()) {
-            directory.mkdir();
-            if(!directory.exists()) {
-                throw new IllegalStateException("Can't create cache directory!");
+            if(!directory.mkdirs() || !directory.isDirectory()) {
+                throw new IllegalStateException("Can't create cache directory: " + directory.getPath());
             }
         }
         //validate

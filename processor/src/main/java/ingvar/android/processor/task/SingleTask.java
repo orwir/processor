@@ -25,6 +25,14 @@ public abstract class SingleTask<K, R, S extends ISource> extends AbstractTask<K
         return sourceType;
     }
 
+    public long getExpirationTime() {
+        return cacheExpirationTime;
+    }
+
+    public void setExpirationTime(long cacheExpirationTime) {
+        this.cacheExpirationTime = cacheExpirationTime;
+    }
+
     public void setRetryCount(int tries) {
         retryCount = tries;
     }

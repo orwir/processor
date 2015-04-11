@@ -8,7 +8,7 @@ android {
         minSdkVersion vMinSdkVersion
         targetSdkVersion vTargetSdkVersion
 
-        applicationId 'ingvar.examples'
+        applicationId 'ingvar.android.processor.examples'
         versionCode 1
         versionName '1.0.0'
     }
