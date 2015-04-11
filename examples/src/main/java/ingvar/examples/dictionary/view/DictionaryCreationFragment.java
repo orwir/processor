@@ -12,8 +12,8 @@ import android.widget.EditText;
 
 import ingvar.android.processor.observation.IObserverManager;
 import ingvar.android.processor.persistence.Time;
-import ingvar.android.processor.request.SingleRequest;
 import ingvar.android.processor.sqlite.source.SqliteSource;
+import ingvar.android.processor.task.SingleTask;
 import ingvar.examples.R;
 import ingvar.examples.dictionary.pojo.Dictionary;
 import ingvar.examples.dictionary.storage.DictionaryContract;
@@ -57,14 +57,14 @@ public class DictionaryCreationFragment extends RoboDialogFragment {
                 .create();
     }
 
-    private class CreationRequest extends SingleRequest<Uri, Dictionary, SqliteSource> {
+    private class CreationTask extends SingleTask<Uri, Dictionary, SqliteSource> {
 
-        public CreationRequest(Uri key) {
+        public CreationTask(Uri key) {
             super(key, Dictionary.class, SqliteSource.class, Time.ALWAYS_RETURNED);
         }
 
         @Override
-        public Dictionary loadFromExternalSource(IObserverManager observerManager, SqliteSource source) {
+        public Dictionary process(IObserverManager observerManager, SqliteSource source) {
             Dictionary newDictionary = new Dictionary(dictionaryName.getText().toString());
             ContentValues values = source.getConverter(Dictionary.class).convert(newDictionary);
             source.getContentResolver().insert(DictionaryContract.Dictionary.CONTENT_URI, values);

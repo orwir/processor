@@ -6,8 +6,8 @@ import android.test.ServiceTestCase;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import ingvar.android.processor.memory.request.MemoryRequest;
 import ingvar.android.processor.memory.service.MemoryProcessorService;
+import ingvar.android.processor.memory.task.MemoryTask;
 import ingvar.android.processor.persistence.Time;
 import ingvar.android.processor.service.ProcessorService;
 
@@ -24,14 +24,14 @@ public class ServiceTest extends ServiceTestCase<MemoryProcessorService> {
     }
 
     public void testRequest() throws Exception {
-        MemoryRequest request = new MemoryRequest("test", TimeUnit.HOURS.toMillis(1));
+        MemoryTask request = new MemoryTask("test", TimeUnit.HOURS.toMillis(1));
         Future<Object> future = getService().execute(request);
 
         assertEquals("Returned result not match", "test_value", future.get());
     }
 
     public void testCache() throws Exception {
-        MemoryRequest request = new MemoryRequest("test2", TimeUnit.HOURS.toMillis(1));
+        MemoryTask request = new MemoryTask("test2", TimeUnit.HOURS.toMillis(1));
         Future<Object> future = getService().execute(request);
         //wait until it saved
         future.get();

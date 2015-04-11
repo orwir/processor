@@ -16,9 +16,9 @@ import ingvar.android.processor.observation.IObserverManager;
 import ingvar.android.processor.observation.ObserverManager;
 import ingvar.android.processor.persistence.CacheManager;
 import ingvar.android.processor.persistence.ICacheManager;
-import ingvar.android.processor.request.IRequest;
 import ingvar.android.processor.source.ISourceManager;
 import ingvar.android.processor.source.SourceManager;
+import ingvar.android.processor.task.ITask;
 import ingvar.android.processor.worker.DefaultWorker;
 import ingvar.android.processor.worker.IWorker;
 
@@ -39,12 +39,12 @@ public abstract class ProcessorService extends Service {
 
     }
 
-    private ProcessorBinder binder;
-    private ExecutorService executorService;
-    private ICacheManager cacheManager;
-    private ISourceManager sourceManager;
-    private IObserverManager observerManager;
-    private IWorker worker;
+    protected ExecutorService executorService;
+    protected ICacheManager cacheManager;
+    protected ISourceManager sourceManager;
+    protected IObserverManager observerManager;
+    protected IWorker worker;
+    private final ProcessorBinder binder;
 
     public ProcessorService() {
         binder = new ProcessorBinder();
@@ -65,18 +65,18 @@ public abstract class ProcessorService extends Service {
         observerManager = createObserverManager();
         worker = createWorker(executorService, cacheManager, sourceManager, observerManager);
 
-        provideRepository(cacheManager);
+        provideRepositories(cacheManager);
         provideSources(sourceManager);
     }
 
-    public <K, R> Future<R> execute(IRequest<K, R> request, IObserver<R>... observers) {
+    public <K, R> Future<R> execute(ITask<K, R> task, IObserver<R>... observers) {
         for(IObserver observer : observers) {
-            observerManager.add(request, observer);
+            observerManager.add(task, observer);
         }
 
-        Future<R> future = worker.getExecuted(request);
-        if(future == null || !request.isMergeable()) {
-            future = worker.execute(request);
+        Future<R> future = worker.getExecuted(task);
+        if(future == null || !task.isMergeable()) {
+            future = worker.execute(task);
         }
 
         return future;
@@ -112,7 +112,7 @@ public abstract class ProcessorService extends Service {
      *
      * @param cacheManager
      */
-    protected abstract void provideRepository(ICacheManager cacheManager);
+    protected abstract void provideRepositories(ICacheManager cacheManager);
 
     protected ExecutorService createExecutorService() {
         return new ThreadPoolExecutor(

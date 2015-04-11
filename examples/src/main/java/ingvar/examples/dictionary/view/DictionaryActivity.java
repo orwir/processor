@@ -14,8 +14,8 @@ import ingvar.android.literepo.conversion.Converter;
 import ingvar.android.processor.observation.AbstractObserver;
 import ingvar.android.processor.observation.IObserverManager;
 import ingvar.android.processor.persistence.Time;
-import ingvar.android.processor.request.SingleRequest;
 import ingvar.android.processor.sqlite.source.SqliteSource;
+import ingvar.android.processor.task.SingleTask;
 import ingvar.examples.R;
 import ingvar.examples.dictionary.pojo.Dictionaries;
 import ingvar.examples.dictionary.pojo.Dictionary;
@@ -95,14 +95,14 @@ public class DictionaryActivity extends AbstractActivity implements DictionaryCr
         }
     }
 
-    private class DictionaryRequest extends SingleRequest<Uri, Dictionaries, SqliteSource> {
+    private class DictionaryRequest extends SingleTask<Uri, Dictionaries, SqliteSource> {
 
         public DictionaryRequest(Uri key) {
             super(key, Dictionaries.class, SqliteSource.class, Time.ALWAYS_RETURNED);
         }
 
         @Override
-        public Dictionaries loadFromExternalSource(IObserverManager observerManager, SqliteSource source) {
+        public Dictionaries process(IObserverManager observerManager, SqliteSource source) {
             Dictionaries dictionaries = new Dictionaries();
 
             Converter<Dictionary> converter = source.getConverter(Dictionary.class);

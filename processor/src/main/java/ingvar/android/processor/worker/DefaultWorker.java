@@ -13,18 +13,18 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import ingvar.android.processor.exception.ProcessorException;
-import ingvar.android.processor.exception.RequestCancelledException;
 import ingvar.android.processor.exception.SourceNotAvailable;
+import ingvar.android.processor.exception.TaskCancelledException;
 import ingvar.android.processor.observation.IObserver;
 import ingvar.android.processor.observation.IObserverManager;
 import ingvar.android.processor.persistence.ICacheManager;
 import ingvar.android.processor.persistence.Time;
-import ingvar.android.processor.request.AggregatedRequest;
-import ingvar.android.processor.request.IRequest;
-import ingvar.android.processor.request.RequestStatus;
-import ingvar.android.processor.request.SingleRequest;
 import ingvar.android.processor.source.ISource;
 import ingvar.android.processor.source.ISourceManager;
+import ingvar.android.processor.task.AggregatedTask;
+import ingvar.android.processor.task.ITask;
+import ingvar.android.processor.task.SingleTask;
+import ingvar.android.processor.task.TaskStatus;
 
 /**
  * Default implementation of async worker
@@ -39,102 +39,102 @@ public class DefaultWorker implements IWorker {
     protected final ICacheManager cacheManager;
     protected final ISourceManager sourceManager;
     protected final IObserverManager observerManager;
-    private final Map<IRequest, Future> executingRequests;
+    private final Map<ITask, Future> executingTasks;
 
     public DefaultWorker(ExecutorService executorService, ICacheManager cacheManager, ISourceManager sourceManager, IObserverManager observerManager) {
         this.executorService = executorService;
         this.cacheManager = cacheManager;
         this.sourceManager = sourceManager;
         this.observerManager = observerManager;
-        this.executingRequests = new ConcurrentHashMap<>();
+        this.executingTasks = new ConcurrentHashMap<>();
     }
 
     @Override
-    public <R> Future<R> execute(final IRequest request) {
+    public <R> Future<R> execute(final ITask task) {
         Callable callable = new Callable() {
             @Override
             public R call() throws Exception {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-                return process(request);
+                return process(task);
             }
         };
         Future<R> future = executorService.submit(callable);
-        executingRequests.put(request, future);
+        executingTasks.put(task, future);
         return future;
     }
 
     @Override
-    public <R> Future<R> getExecuted(IRequest request) {
-        return executingRequests.get(request);
+    public <R> Future<R> getExecuted(ITask request) {
+        return executingTasks.get(request);
     }
 
-    protected <R> R process(IRequest request) {
-        request.setStatus(RequestStatus.PROCESSING);
-        notifyProgress(request, IObserver.MIN_PROGRESS);
-        checkCancellation(request);
+    protected <R> R process(ITask task) {
+        task.setStatus(TaskStatus.STARTED);
+        notifyProgress(task, IObserver.MIN_PROGRESS);
+        checkCancellation(task);
 
         try {
             R result;
-            if (request instanceof AggregatedRequest) {
-                result = processAggregatedRequest((AggregatedRequest) request);
+            if (task instanceof AggregatedTask) {
+                result = processAggregatedTask((AggregatedTask) task);
             }
-            else if(request instanceof SingleRequest) {
-                result = processSingleRequest((SingleRequest) request);
+            else if(task instanceof SingleTask) {
+                result = processSingleTask((SingleTask) task);
             }
             else {
-                result = processCacheRequest(request);
+                result = processTask(task);
             }
 
-            checkCancellation(request);
-            notifyProgress(request, IObserver.MAX_PROGRESS);
-            notifyCompleted(request, result);
+            checkCancellation(task);
+            notifyProgress(task, IObserver.MAX_PROGRESS);
+            notifyCompleted(task, result);
             return result;
 
-        } catch (RequestCancelledException e) {
-            notifyCancelled(request);
+        } catch (TaskCancelledException e) {
+            notifyCancelled(task);
             return null;
 
         } catch (RuntimeException e) {
             Log.e(TAG, e.getMessage(), e);
-            notifyFailed(request, e);
+            notifyFailed(task, e);
             throw e;
 
         } finally {
-            executingRequests.remove(request);
+            executingTasks.remove(task);
         }
     }
 
-    protected <R> R processAggregatedRequest(final AggregatedRequest request) {
-        final ExecutorService innerExecutor = Executors.newFixedThreadPool(request.getThreadsCount());
+    protected <R> R processAggregatedTask(final AggregatedTask aggregatedTask) {
+        final ExecutorService innerExecutor = Executors.newFixedThreadPool(aggregatedTask.getThreadsCount());
 
         final AtomicInteger completed = new AtomicInteger(0);
-        final List<IRequest> requests = request.getRequests();
-        for(final IRequest inner : requests) {
-            checkCancellation(request);
+        final List<ITask> tasks = aggregatedTask.getTasks();
+        for(final ITask innerTask : tasks) {
+            checkCancellation(aggregatedTask);
 
             innerExecutor.submit(new Callable() {
                 @Override
                 public Object call() throws Exception {
-                    checkCancellation(request);
+                    checkCancellation(aggregatedTask);
                     android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
                     Object innerResult = null;
                     try {
-                        innerResult = process(inner);
+                        innerResult = process(innerTask);
 
                         int current = completed.incrementAndGet();
-                        float progress = current * IObserver.MAX_PROGRESS / requests.size();
-                        synchronized (request) {
-                            checkCancellation(request);
-                            notifyProgress(request, progress);
-                            request.onRequestComplete(inner, innerResult);
+                        float progress = current * IObserver.MAX_PROGRESS / tasks.size();
+                        synchronized (aggregatedTask) {
+                            checkCancellation(aggregatedTask);
+                            notifyProgress(aggregatedTask, progress);
+                            aggregatedTask.onTaskComplete(innerTask, innerResult);
                         }
-                    } catch (RequestCancelledException e) {
+                    } catch (TaskCancelledException e) {
                         //nothing to do
                     } catch (Exception e) {
-                        synchronized (request) {
-                            checkCancellation(request);
-                            request.addRequestException(inner, e);
+                        synchronized (aggregatedTask) {
+                            checkCancellation(aggregatedTask);
+                            aggregatedTask.addTaskException(innerTask, e);
                         }
                         throw e;
                     }
@@ -143,10 +143,10 @@ public class DefaultWorker implements IWorker {
             });
         }
 
-        checkCancellation(request);
+        checkCancellation(aggregatedTask);
         innerExecutor.shutdown();
         try {
-            boolean terminated = innerExecutor.awaitTermination(request.getKeepAliveTimeout(), TimeUnit.SECONDS);
+            boolean terminated = innerExecutor.awaitTermination(aggregatedTask.getKeepAliveTimeout(), TimeUnit.SECONDS);
             if(!terminated) {
                 throw new ProcessorException("Process interrupted before all inner requests was handled.");
             }
@@ -154,41 +154,41 @@ public class DefaultWorker implements IWorker {
             throw new ProcessorException("Process interrupted before all inner requests was handled.");
         }
 
-        return (R) request.getCumulativeResult();
+        return (R) aggregatedTask.getCumulativeResult();
     }
 
-    protected <R> R processSingleRequest(SingleRequest request) {
+    protected <R> R processSingleTask(SingleTask task) {
         R result = null;
 
         flow: do { //for interrupting flow (loop executed only once)
             //start of flow ------------------------------------------------------------------------
 
             //try to get data from cache
-            if (request.getExpirationTime() != Time.ALWAYS_EXPIRED) {
-                request.setStatus(RequestStatus.LOADING_FROM_CACHE);
+            if (task.getExpirationTime() != Time.ALWAYS_EXPIRED) {
+                task.setStatus(TaskStatus.LOADING_FROM_CACHE);
 
-                checkCancellation(request);
-                result = cacheManager.obtain(request.getRequestKey(), request.getResultClass(), request.getExpirationTime());
+                checkCancellation(task);
+                result = cacheManager.obtain(task.getTaskKey(), task.getResultClass(), task.getExpirationTime());
                 if (result != null) {
                     break flow;
                 }
             }
 
-            //try to get from external source
-            if(!sourceManager.isRegistered(request.getSourceType())) {
-                throw new ProcessorException(String.format("Source type '%s' not registered", request.getSourceType()));
+            //check is source type registered
+            if(!sourceManager.isRegistered(task.getSourceType())) {
+                throw new ProcessorException(String.format("Source type '%s' not registered", task.getSourceType()));
             }
 
-            ISource source = sourceManager.getSource(request.getSourceType());
+            ISource source = sourceManager.getSource(task.getSourceType());
             if(source.isAvailable()) {
-                request.setStatus(RequestStatus.LOADING_FROM_EXTERNAL);
+                task.setStatus(TaskStatus.PROCESSING);
 
-                int tries = request.getRetryCount();
-                RuntimeException exception = null;
+                int tries = task.getRetryCount();
+                RuntimeException exception;
                 do {
-                    checkCancellation(request);
+                    checkCancellation(task);
                     try {
-                        result = (R) request.loadFromExternalSource(observerManager, sourceManager.getSource(request.getSourceType()));
+                        result = (R) task.process(observerManager, source);
                         exception = null;
                     } catch (RuntimeException e) {
                         exception = e;
@@ -198,11 +198,11 @@ public class DefaultWorker implements IWorker {
                     throw exception;
                 }
                 if(result != null) {
-                    cacheManager.put(request.getRequestKey(), result);
+                    cacheManager.put(task.getTaskKey(), result);
                     break flow;
                 }
             } else {
-                notifyFailed(request, new SourceNotAvailable(String.format("Source type '%s' is not available now", request.getSourceType())));
+                notifyFailed(task, new SourceNotAvailable(String.format("Source type '%s' is not available now", task.getSourceType())));
                 break flow;
             }
 
@@ -212,40 +212,40 @@ public class DefaultWorker implements IWorker {
         return result;
     }
 
-    protected <R> R processCacheRequest(IRequest request) {
-        R result = null;
-        request.setStatus(RequestStatus.LOADING_FROM_CACHE);
+    protected <R> R processTask(ITask task) {
+        R result;
+        task.setStatus(TaskStatus.LOADING_FROM_CACHE);
 
-        checkCancellation(request);
-        result = cacheManager.obtain(request.getRequestKey(), request.getResultClass(), Time.ALWAYS_RETURNED);
+        checkCancellation(task);
+        result = cacheManager.obtain(task.getTaskKey(), task.getResultClass(), Time.ALWAYS_RETURNED);
         return result;
     }
 
-    protected void notifyProgress(IRequest request, float progress) {
+    protected void notifyProgress(ITask task, float progress) {
         //adjust progress
         progress = Math.max(IObserver.MIN_PROGRESS, progress);
         progress = Math.min(IObserver.MAX_PROGRESS, progress);
-        observerManager.notifyProgress(request, progress);
+        observerManager.notifyProgress(task, progress);
     }
 
-    protected <R> void notifyCompleted(IRequest request, R result) {
-        request.setStatus(RequestStatus.COMPLETED);
-        observerManager.notifyCompleted(request, result);
+    protected <R> void notifyCompleted(ITask task, R result) {
+        task.setStatus(TaskStatus.COMPLETED);
+        observerManager.notifyCompleted(task, result);
     }
 
-    protected void notifyCancelled(IRequest request) {
-        request.setStatus(RequestStatus.CANCELLED);
-        observerManager.notifyCancelled(request);
+    protected void notifyCancelled(ITask task) {
+        task.setStatus(TaskStatus.CANCELLED);
+        observerManager.notifyCancelled(task);
     }
 
-    protected void notifyFailed(IRequest request, Exception e) {
-        request.setStatus(RequestStatus.FAILED);
-        observerManager.notifyFailed(request, e);
+    protected void notifyFailed(ITask task, Exception e) {
+        task.setStatus(TaskStatus.FAILED);
+        observerManager.notifyFailed(task, e);
     }
 
-    protected void checkCancellation(IRequest request) {
-        if(request.isCancelled()) {
-            throw new RequestCancelledException(String.format("Request '%s' was cancelled!", request.getRequestKey().toString()));
+    protected void checkCancellation(ITask task) {
+        if(task.isCancelled()) {
+            throw new TaskCancelledException(String.format("Task '%s' was cancelled!", task.getTaskKey().toString()));
         }
     }
 

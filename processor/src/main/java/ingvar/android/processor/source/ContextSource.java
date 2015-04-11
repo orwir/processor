@@ -7,11 +7,11 @@ import java.lang.ref.WeakReference;
 /**
  * Created by Igor Zubenko on 2015.03.23.
  */
-public class DummySource implements ISource {
+public class ContextSource implements ISource {
 
     private WeakReference<Context> contextRef;
 
-    public DummySource(Context context) {
+    public ContextSource(Context context) {
         this.contextRef = new WeakReference<>(context);
     }
 

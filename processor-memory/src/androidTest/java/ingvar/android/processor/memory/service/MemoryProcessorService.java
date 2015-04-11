@@ -18,7 +18,7 @@ public class MemoryProcessorService extends ProcessorService {
     }
 
     @Override
-    protected void provideRepository(ICacheManager cacheManager) {
+    protected void provideRepositories(ICacheManager cacheManager) {
         final int maxMemorySize = 5 * 1024 * 1024;
 
         cacheManager.addRepository(new BitmapMemoryRepository(maxMemorySize));

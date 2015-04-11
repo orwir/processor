@@ -11,7 +11,7 @@ import android.widget.TextView;
 import ingvar.android.processor.observation.AbstractObserver;
 import ingvar.android.processor.service.Processor;
 import ingvar.examples.R;
-import ingvar.examples.gallery.request.ImageRequest;
+import ingvar.examples.gallery.request.ImageTask;
 
 /**
  * Created by Igor Zubenko on 2015.03.23.
@@ -43,7 +43,7 @@ public class GalleryAdapter extends ArrayAdapter<String> {
             if (holder.request != null) {
                 holder.request.cancel();
             }
-            holder.request = new ImageRequest(getItem(position));
+            holder.request = new ImageTask(getItem(position));
             processor.execute(holder.request, new ImageObserver(holder));
         }
 
@@ -54,7 +54,7 @@ public class GalleryAdapter extends ArrayAdapter<String> {
         TextView name;
         ImageView view;
 
-        ImageRequest request;
+        ImageTask request;
     }
 
     private class ImageObserver extends AbstractObserver<Bitmap> {

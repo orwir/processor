@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import ingvar.android.processor.request.IRequest;
+import ingvar.android.processor.task.ITask;
 
 /**
  * Created by Igor Zubenko on 2015.03.18.
@@ -17,7 +17,7 @@ import ingvar.android.processor.request.IRequest;
 public class ObserverManager implements IObserverManager {
 
     private Handler handler;
-    private Map<IRequest, Set<IObserver>> observers;
+    private Map<ITask, Set<IObserver>> observers;
 
     public ObserverManager() {
         this.observers = new ConcurrentHashMap<>();
@@ -25,14 +25,14 @@ public class ObserverManager implements IObserverManager {
     }
 
     @Override
-    public void add(IRequest request, IObserver observer) {
-        Set<IObserver> requestObservers = observers.get(request);
+    public void add(ITask task, IObserver observer) {
+        Set<IObserver> requestObservers = observers.get(task);
         if(requestObservers == null) {
-            synchronized (request) {
-                requestObservers = observers.get(request);
+            synchronized (task) {
+                requestObservers = observers.get(task);
                 if(requestObservers == null) {
                     requestObservers = new ConcurrentSkipListSet<>();
-                    observers.put(request, requestObservers);
+                    observers.put(task, requestObservers);
                 }
             }
         }
@@ -40,7 +40,7 @@ public class ObserverManager implements IObserverManager {
     }
 
     @Override
-    public void remove(IRequest request, IObserver observer) {
+    public void remove(ITask task, IObserver observer) {
         Set<IObserver> requestObservers = observers.get(observer);
         if(requestObservers != null) {
             requestObservers.remove(observer);
@@ -48,8 +48,8 @@ public class ObserverManager implements IObserverManager {
     }
 
     @Override
-    public void remove(IRequest request) {
-        observers.remove(request);
+    public void remove(ITask task) {
+        observers.remove(task);
     }
 
     @Override
@@ -58,54 +58,54 @@ public class ObserverManager implements IObserverManager {
             throw new IllegalArgumentException("Group can't be null!");
         }
 
-        for(Map.Entry<IRequest, Set<IObserver>> entry : observers.entrySet()) {
-            Set<IObserver> requestObservers = entry.getValue();
-            for(IObserver observer : requestObservers) {
-                if(observer.getGroup() != null && group.equals(observer.getGroup())) {
-                    requestObservers.remove(observer);
+        for(Map.Entry<ITask, Set<IObserver>> entry : observers.entrySet()) {
+            Set<IObserver> taskObservers = entry.getValue();
+            for(IObserver observer : taskObservers) {
+                if(group.equals(observer.getGroup())) {
+                    taskObservers.remove(observer);
                 }
             }
         }
     }
 
     @Override
-    public void notifyProgress(IRequest request, float progress) {
-        sendMessage(request, Type.PROGRESS, progress);
+    public void notifyProgress(ITask task, float progress) {
+        sendMessage(task, Type.IN_PROGRESS, progress);
     }
 
     @Override
-    public <R> void notifyCompleted(IRequest request, R result) {
-        sendMessage(request, Type.COMPLETED, result);
+    public <R> void notifyCompleted(ITask task, R result) {
+        sendMessage(task, Type.COMPLETED, result);
     }
 
     @Override
-    public void notifyCancelled(IRequest request) {
-        sendMessage(request, Type.CANCELLED, null);
+    public void notifyCancelled(ITask task) {
+        sendMessage(task, Type.CANCELLED, null);
     }
 
     @Override
-    public void notifyFailed(IRequest request, Exception exception) {
-        sendMessage(request, Type.FAILED, exception);
+    public void notifyFailed(ITask task, Exception exception) {
+        sendMessage(task, Type.FAILED, exception);
     }
 
-    private void sendMessage(IRequest request, Type type, Object data) {
-        Message message = handler.obtainMessage(type.ordinal(), new Transfer(request, data));
+    private void sendMessage(ITask request, Type type, Object data) {
+        Message message = handler.obtainMessage(type.ordinal(), new Wrapper(request, data));
         message.sendToTarget();
     }
 
     private enum Type {
-        PROGRESS,
+        IN_PROGRESS,
         COMPLETED,
         CANCELLED,
         FAILED;
     }
 
-    private class Transfer {
-        private IRequest request;
+    private class Wrapper {
+        private ITask task;
         private Object data;
 
-        public Transfer(IRequest request, Object data) {
-            this.request = request;
+        public Wrapper(ITask task, Object data) {
+            this.task = task;
             this.data = data;
         }
     }
@@ -115,28 +115,28 @@ public class ObserverManager implements IObserverManager {
         @Override
         public boolean handleMessage(Message msg) {
             Type type = Type.values()[msg.what];
-            Transfer transfer = (Transfer) msg.obj;
+            Wrapper wrapper = (Wrapper) msg.obj;
 
-            Set<IObserver> requestObservers = observers.get(transfer.request);
-            if(requestObservers != null) {
-                for(IObserver observer : requestObservers) {
+            Set<IObserver> taskObservers = observers.get(wrapper.task);
+            if(taskObservers != null) {
+                for(IObserver observer : taskObservers) {
                     switch (type) {
-                        case PROGRESS:
-                            observer.progress((Float) transfer.data);
+                        case IN_PROGRESS:
+                            observer.progress((Float) wrapper.data);
                             break;
                         case COMPLETED:
-                            observer.completed(transfer.data);
+                            observer.completed(wrapper.data);
                             break;
                         case CANCELLED:
                             observer.cancelled();
                             break;
                         case FAILED:
-                            observer.failed((Exception) transfer.data);
+                            observer.failed((Exception) wrapper.data);
                             break;
                     }
                 }
-                if(!Type.PROGRESS.equals(type)) {
-                    remove(transfer.request);
+                if(!Type.IN_PROGRESS.equals(type)) {
+                    remove(wrapper.task);
                 }
             }
             return true;

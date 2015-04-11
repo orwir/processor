@@ -13,7 +13,7 @@ import java.util.concurrent.Future;
 
 import ingvar.android.processor.exception.ProcessorException;
 import ingvar.android.processor.observation.IObserver;
-import ingvar.android.processor.request.IRequest;
+import ingvar.android.processor.task.ITask;
 
 /**
  *
@@ -26,27 +26,27 @@ public class Processor {
     private Class<? extends ProcessorService> serviceClass;
     private ProcessorService service;
     private ServiceConnection connection;
-    private Map<IRequest, IObserver[]> plannedRequests;
+    private Map<ITask, IObserver[]> plannedTasks;
 
     public Processor(Class<? extends ProcessorService> serviceClass) {
         this.serviceClass = serviceClass;
         this.service = null;
         this.connection = new Connection();
-        this.plannedRequests = new ConcurrentHashMap<>();
+        this.plannedTasks = new ConcurrentHashMap<>();
     }
 
-    public <K, R> Future<R> execute(IRequest<K, R> request, IObserver<R>... observers) {
+    public <K, R> Future<R> execute(ITask<K, R> task, IObserver<R>... observers) {
         if(service == null) {
             throw new ProcessorException("Service not bind yet");
         }
-        return service.execute(request, observers);
+        return service.execute(task, observers);
     }
 
-    public <K, R> void planExecute(IRequest<K, R> request, IObserver<R>... observers) {
+    public <K, R> void planExecute(ITask<K, R> task, IObserver<R>... observers) {
         if(isBound()) {
-            execute(request, observers);
+            execute(task, observers);
         } else {
-            plannedRequests.put(request, observers);
+            plannedTasks.put(task, observers);
         }
     }
 
@@ -55,7 +55,7 @@ public class Processor {
 
         Intent intent = new Intent(context, serviceClass);
         if(!context.bindService(intent, connection, Context.BIND_AUTO_CREATE)) {
-            throw new ProcessorException("Connection is not made. Maybe you forgot add your service to manifest?");
+            throw new ProcessorException("Connection is not made. Maybe you forgot add your service to AndroidManifest.xml?");
         }
     }
 
@@ -66,7 +66,7 @@ public class Processor {
             service.removeObservers(context.getClass().getName());
         }
         context.unbindService(connection);
-        plannedRequests.clear();
+        plannedTasks.clear();
         service = null;
     }
 
@@ -82,20 +82,20 @@ public class Processor {
 
             Processor.this.service = ((ProcessorService.ProcessorBinder) service).getService();
 
-            if(plannedRequests.size() > 0) {
-                Log.d(TAG, "Execute planned requests. Total: " + Integer.toString(plannedRequests.size()));
+            if(plannedTasks.size() > 0) {
+                Log.d(TAG, "Execute planned tasks. Total: " + Integer.toString(plannedTasks.size()));
 
-                for (Map.Entry<IRequest, IObserver[]> entry : plannedRequests.entrySet()) {
+                for (Map.Entry<ITask, IObserver[]> entry : plannedTasks.entrySet()) {
                     Processor.this.service.execute(entry.getKey(), entry.getValue());
                 }
-                plannedRequests.clear();
+                plannedTasks.clear();
             }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             Log.d(TAG, String.format("Service '%s' disconnected.", name));
-            plannedRequests.clear();
+            plannedTasks.clear();
             Processor.this.service = null;
         }
 

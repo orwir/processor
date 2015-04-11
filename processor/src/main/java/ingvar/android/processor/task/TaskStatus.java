@@ -1,14 +1,14 @@
-package ingvar.android.processor.request;
+package ingvar.android.processor.task;
 
 /**
  * Created by Igor Zubenko on 2015.03.18.
  */
-public enum RequestStatus {
+public enum TaskStatus {
 
     PENDING,
-    PROCESSING,
+    STARTED,
     LOADING_FROM_CACHE,
-    LOADING_FROM_EXTERNAL,
+    PROCESSING,
     CANCELLED,
     FAILED,
     COMPLETED;

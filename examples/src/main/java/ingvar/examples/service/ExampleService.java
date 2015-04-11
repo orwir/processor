@@ -28,7 +28,7 @@ public class ExampleService extends ProcessorService {
     }
 
     @Override
-    protected void provideRepository(ICacheManager cacheManager) {
+    protected void provideRepositories(ICacheManager cacheManager) {
         final int maxMemory = (int) (Runtime.getRuntime().maxMemory());
         final int maxMemoryCacheSize = maxMemory / 8;
 

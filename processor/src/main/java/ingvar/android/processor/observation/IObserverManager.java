@@ -1,26 +1,26 @@
 package ingvar.android.processor.observation;
 
-import ingvar.android.processor.request.IRequest;
+import ingvar.android.processor.task.ITask;
 
 /**
  * Created by Igor Zubenko on 2015.03.18.
  */
 public interface IObserverManager {
 
-    void add(IRequest request, IObserver observer);
+    void add(ITask task, IObserver observer);
 
-    void remove(IRequest request, IObserver observer);
+    void remove(ITask task, IObserver observer);
 
-    void remove(IRequest request);
+    void remove(ITask task);
 
     void removeGroup(String group);
 
-    void notifyProgress(IRequest request, float progress);
+    void notifyProgress(ITask task, float progress); //TODO: add extras
 
-    <R> void notifyCompleted(IRequest request, R result);
+    <R> void notifyCompleted(ITask task, R result);
 
-    void notifyCancelled(IRequest request);
+    void notifyCancelled(ITask task);
 
-    void notifyFailed(IRequest request, Exception e);
+    void notifyFailed(ITask task, Exception e);
 
 }

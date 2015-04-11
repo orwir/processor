@@ -13,29 +13,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.lang.ref.WeakReference;
 
-import ingvar.android.processor.source.ISource;
+import ingvar.android.processor.source.ContextSource;
 import ingvar.android.processor.util.BytesUtils;
 
 /**
  *
  * Created by Igor Zubenko on 2015.03.20.
  */
-public class FilesystemSource implements ISource {
-
-    private WeakReference<Context> contextRef;
+public class FilesystemSource extends ContextSource {
 
     public FilesystemSource(Context context) {
-        this.contextRef = new WeakReference<>(context);
+        super(context);
     }
 
     public AssetManager getAssetManager() {
-        Context context = contextRef.get();
-        if(context == null) {
-            throw new IllegalStateException("Context is stale!");
-        }
-        return context.getAssets();
+        return getContext().getAssets();
     }
 
     public File save(String filename, Serializable object) {
@@ -67,11 +60,6 @@ public class FilesystemSource implements ISource {
             }
         }
         return (T) result;
-    }
-
-    @Override
-    public boolean isAvailable() {
-        return true;
     }
 
     private void close(Closeable closeable) {

@@ -13,8 +13,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import ingvar.android.processor.exception.ProcessorException;
-import ingvar.android.processor.filesystem.request.FilesystemRequest;
 import ingvar.android.processor.filesystem.source.FilesystemSource;
+import ingvar.android.processor.filesystem.task.FilesystemTask;
 import ingvar.android.processor.observation.AbstractObserver;
 import ingvar.android.processor.observation.IObserverManager;
 import ingvar.android.processor.persistence.Time;
@@ -56,21 +56,21 @@ public class GalleryActivity extends AbstractActivity {
         super.onStart();
         if(adapter.isEmpty()) {
             Log.d(TAG, "load images list from assets dir: " + ASSETS_DIR);
-            processor.planExecute(new ImagesRequest(ASSETS_DIR), new ImagesObserver());
+            processor.planExecute(new ImagesTask(ASSETS_DIR), new ImagesObserver());
         }
     }
 
-    private class ImagesRequest extends FilesystemRequest<List<String>> {
+    private class ImagesTask extends FilesystemTask<List<String>> {
 
-        public ImagesRequest(String assetDir) {
+        public ImagesTask(String assetDir) {
             super(assetDir, CastUtils.<List<String>>cast(List.class), Time.ALWAYS_RETURNED);
         }
 
         @Override
-        public List<String> loadFromExternalSource(IObserverManager observerManager, FilesystemSource source) {
+        public List<String> process(IObserverManager observerManager, FilesystemSource source) {
             AssetManager assets = source.getAssetManager();
             try {
-                return Arrays.asList(assets.list(getRequestKey()));
+                return Arrays.asList(assets.list(getTaskKey()));
             } catch (IOException e) {
                 throw new ProcessorException(e);
             }
