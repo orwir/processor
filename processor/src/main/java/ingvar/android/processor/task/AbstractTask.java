@@ -2,6 +2,8 @@ package ingvar.android.processor.task;
 
 import java.util.UUID;
 
+import ingvar.android.processor.exception.ProcessorException;
+
 /**
  * Created by Igor Zubenko on 2015.04.11.
  */
@@ -54,6 +56,9 @@ public abstract class AbstractTask<K, R> implements ITask<K, R> {
 
     @Override
     public void setMergeable(boolean mergeable) {
+        if(!TaskStatus.PENDING.equals(status)) {
+            throw new ProcessorException("Mergeable flag can be changed only in the pending task!");
+        }
         this.mergeable = mergeable;
         uuid = mergeable ? "" : UUID.randomUUID().toString();
     }
