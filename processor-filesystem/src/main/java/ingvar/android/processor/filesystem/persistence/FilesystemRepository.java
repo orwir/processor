@@ -10,7 +10,7 @@ import ingvar.android.processor.persistence.Time;
 /**
  * Created by Igor Zubenko on 2015.03.20.
  */
-public class FilesystemRepository<R> implements IRepository<String, R> {
+public class FilesystemRepository<K, R> implements IRepository<K, R> {
     //TODO: normalize keys
     protected DiskLruCache storage;
 
@@ -20,28 +20,32 @@ public class FilesystemRepository<R> implements IRepository<String, R> {
     }
 
     @Override
-    public R persist(String key, R data) {
-        storage.put(key, (Serializable) data);
+    public R persist(K key, R data) {
+        String filename = filenameFromKey(key);
+        storage.put(filename, (Serializable) data);
         return data;
     }
 
     @Override
-    public R obtain(String key, long expiryTime) {
+    public R obtain(K key, long expiryTime) {
+        String filename = filenameFromKey(key);
         R result = null;
-        if(storage.contains(key) && isNotExpired(key, expiryTime)) {
-            result = storage.get(key);
+        if(storage.contains(filename) && isNotExpired(key, expiryTime)) {
+            result = storage.get(filename);
         }
         return result;
     }
 
     @Override
-    public long getCreationTime(String key) {
-        return storage.getTime(key);
+    public long getCreationTime(K key) {
+        String filename = filenameFromKey(key);
+        return storage.getTime(filename);
     }
 
     @Override
-    public void remove(String key) {
-        storage.remove(key);
+    public void remove(K key) {
+        String filename = filenameFromKey(key);
+        storage.remove(filename);
     }
 
     @Override
@@ -59,8 +63,13 @@ public class FilesystemRepository<R> implements IRepository<String, R> {
         return false;
     }
 
-    protected boolean isNotExpired(String key, long expiryTime) {
-        long creationTime = storage.getTime(key);
+    protected String filenameFromKey(K key) {
+        return Integer.toString(key.hashCode());
+    }
+
+    protected boolean isNotExpired(K key, long expiryTime) {
+        String filename = filenameFromKey(key);
+        long creationTime = storage.getTime(filename);
         return creationTime >= 0
             && (expiryTime == Time.ALWAYS_RETURNED
             || System.currentTimeMillis() - expiryTime <= creationTime);

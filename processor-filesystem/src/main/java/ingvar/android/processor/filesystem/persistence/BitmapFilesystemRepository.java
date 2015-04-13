@@ -16,7 +16,7 @@ import ingvar.android.processor.exception.PersistenceException;
 /**
  * Created by Igor Zubenko on 2015.03.20.
  */
-public class BitmapFilesystemRepository extends FilesystemRepository<Bitmap> {
+public class BitmapFilesystemRepository extends FilesystemRepository<String, Bitmap> {
 
     private static final int DEFAULT_QUALITY = 100;
 
