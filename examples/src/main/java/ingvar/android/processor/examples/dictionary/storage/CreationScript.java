@@ -34,9 +34,9 @@ public class CreationScript {
         private static final String createTableWords() {
             String sql =
             "create table ${table} (" +
-                "${id} primary key," +
+                "${id} primary key on conflict replace," +
                 "${dictionary_id} integer not null references ${dictionary_table}(${dt_id})," +
-                "${value} text not null," +
+                "${value} text not null unique on conflict replace," +
                 "${creation_date} integer default(strftime('%s', 'now') * 1000) not null" +
             ")";
             Map<String, String> values = new HashMap<>();
@@ -54,8 +54,8 @@ public class CreationScript {
             String sql =
             "create table ${table} (" +
                 "${id} primary key," +
-                "${dictionary_id} integer not null references ${dictionary_table}(${dt_id})," +
-                "${word_id} integer not null references ${words_table}(${wt_id})," +
+                "${dictionary_id} integer not null references ${dictionary_table}(${dt_id}) on delete cascade," +
+                "${word_id} integer not null references ${words_table}(${wt_id}) on delete cascade," +
                 "${value} text not null," +
                 "${creation_date} integer default(strftime('%s', 'now') * 1000) not null" +
             ")";

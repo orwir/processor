@@ -2,6 +2,8 @@ package ingvar.android.processor.examples.service;
 
 import java.io.File;
 
+import ingvar.android.processor.examples.dictionary.persistence.WordConverter;
+import ingvar.android.processor.examples.dictionary.pojo.Word;
 import ingvar.android.processor.examples.weather.network.RetrofitSource;
 import ingvar.android.processor.filesystem.persistence.BitmapFilesystemRepository;
 import ingvar.android.processor.filesystem.source.FilesystemSource;
@@ -24,7 +26,10 @@ public class ExampleService extends ProcessorService {
         sourceManager.addSource(RetrofitSource.class, new RetrofitSource(this));
         sourceManager.addSource(FilesystemSource.class, new FilesystemSource(this));
         sourceManager.addSource(MemorySource.class, new MemorySource());
-        sourceManager.addSource(SqliteSource.class, new SqliteSource(this));
+
+        SqliteSource sqliteSource = new SqliteSource(this);
+        sqliteSource.addConverter(Word.class, new WordConverter());
+        sourceManager.addSource(SqliteSource.class, sqliteSource);
     }
 
     @Override
@@ -42,7 +47,7 @@ public class ExampleService extends ProcessorService {
         cacheDir = new File(cacheDir, "lru"); //use inner folder for evade possible conflicts.
 
         BitmapFilesystemRepository bitmapFsRepo = new BitmapFilesystemRepository(cacheDir, diskCache);
-        BitmapMemoryRepository<String> bitmapMemoryRepo = new BitmapMemoryRepository<>(memoryCache, bitmapFsRepo);
+        BitmapMemoryRepository<String> bitmapMemoryRepo = new BitmapMemoryRepository<String>(memoryCache, bitmapFsRepo);
 
 
         cacheManager.addRepository(bitmapMemoryRepo);

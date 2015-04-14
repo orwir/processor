@@ -11,9 +11,9 @@ import android.widget.Toast;
 
 import ingvar.android.processor.examples.R;
 import ingvar.android.processor.examples.view.AbstractActivity;
-import ingvar.android.processor.examples.weather.network.WeatherRequest;
 import ingvar.android.processor.examples.weather.pojo.Weather;
-import ingvar.android.processor.observation.AbstractObserver;
+import ingvar.android.processor.examples.weather.task.WeatherRequest;
+import ingvar.android.processor.observation.ActivityObserver;
 import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
 
@@ -59,7 +59,7 @@ public class WeatherActivity extends AbstractActivity {
         search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                getProcessor().execute(new WeatherRequest(query), new WeatherObserver());
+                getProcessor().execute(new WeatherRequest(query), new WeatherObserver(WeatherActivity.this));
                 setUIEnabled(false);
                 clearFields();
                 return false;
@@ -90,39 +90,43 @@ public class WeatherActivity extends AbstractActivity {
         cloudiness.setText(na);
     }
 
-    private class WeatherObserver extends AbstractObserver<Weather> {
+    private class WeatherObserver extends ActivityObserver<WeatherActivity, Weather> {
 
-        @Override
-        public String getGroup() {
-            return Weather.class.getName();
+        public WeatherObserver(WeatherActivity activity) {
+            super(activity);
         }
 
         @Override
         public void completed(Weather result) {
-            setUIEnabled(true);
+            WeatherActivity activity = getActivity();
 
-            temp.setText(result.getTemp().toString() + "°C");
-            humidity.setText(result.getHumidity().toString() + "%");
-            pressure.setText(result.getPressure().toString() + " hPa");
-            description.setText(result.getDescription());
-            speed.setText(result.getSpeed().toString() + " mps");
-            direction.setText(result.getDirection().toString() + "°");
+            activity.setUIEnabled(true);
+            activity.temp.setText(result.getTemp().toString() + "°C");
+            activity.humidity.setText(result.getHumidity().toString() + "%");
+            activity.pressure.setText(result.getPressure().toString() + " hPa");
+            activity.description.setText(result.getDescription());
+            activity.speed.setText(result.getSpeed().toString() + " mps");
+            activity.direction.setText(result.getDirection().toString() + "°");
             if(result.getGust() != null) {
-                gust.setText(result.getGust().toString() + " mps");
+                activity.gust.setText(result.getGust().toString() + " mps");
             }
-            cloudiness.setText(result.getCloudiness().toString() + "%");
+            activity.cloudiness.setText(result.getCloudiness().toString() + "%");
         }
 
         @Override
         public void cancelled() {
-            setUIEnabled(true);
-            Toast.makeText(WeatherActivity.this, R.string.message_request_was_cancelled, Toast.LENGTH_LONG).show();
+            WeatherActivity activity = getActivity();
+
+            activity.setUIEnabled(true);
+            Toast.makeText(activity, R.string.message_request_was_cancelled, Toast.LENGTH_LONG).show();
         }
 
         @Override
         public void failed(Exception exception) {
-            setUIEnabled(true);
-            Toast.makeText(WeatherActivity.this, exception.getMessage(), Toast.LENGTH_LONG).show();
+            WeatherActivity activity = getActivity();
+
+            activity.setUIEnabled(true);
+            Toast.makeText(activity, exception.getMessage(), Toast.LENGTH_LONG).show();
         }
 
     }

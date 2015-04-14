@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import ingvar.android.processor.examples.R;
-import ingvar.android.processor.examples.gallery.request.ImageTask;
+import ingvar.android.processor.examples.gallery.task.ImageTask;
 import ingvar.android.processor.observation.AbstractObserver;
 import ingvar.android.processor.service.Processor;
 

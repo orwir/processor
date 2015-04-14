@@ -9,6 +9,7 @@ import java.util.List;
  */
 public class Word {
 
+    private Dictionary dictionary;
     private Long id;
     private String word;
     private List<String> meanings;
@@ -16,6 +17,22 @@ public class Word {
     public Word(String word, String... meanings) {
         this.word = word;
         this.meanings = Arrays.asList(meanings);
+    }
+
+    public Dictionary getDictionary() {
+        return dictionary;
+    }
+
+    public void setDictionary(Dictionary dictionary) {
+        this.dictionary = dictionary;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getWord() {

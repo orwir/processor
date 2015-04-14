@@ -1,4 +1,4 @@
-package ingvar.android.processor.examples.gallery.request;
+package ingvar.android.processor.examples.gallery.task;
 
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;

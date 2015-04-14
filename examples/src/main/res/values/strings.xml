@@ -22,6 +22,7 @@
     <string name="label_create">Create</string>
     <string name="label_cancel">Cancel</string>
     <string name="label_dictionary_creation">Create dictionary</string>
+    <string name="label_type_word">Type your word</string>
 
     <string name="message_unknown_example">You are trying to open unknown example!</string>
     <string name="message_request_was_cancelled">Request was cancelled.</string>

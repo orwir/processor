@@ -28,6 +28,8 @@ public class DictionaryContract {
 
         public static final String TABLE_NAME = "words";
         public static final Uri CONTENT_URI = Uri.withAppendedPath(PROVIDER_URI, TABLE_NAME);
+        public static final String[] PROJECTION = {Col._ID, Col.DICTIONARY_ID, Col.VALUE, Col._CREATION_DATE};
+        public static final String SORT = Col.VALUE + " asc";
 
         public static class Col implements ExtendedColumns {
             public static final String DICTIONARY_ID = "dictionary_id";
@@ -40,6 +42,7 @@ public class DictionaryContract {
 
         public static final String TABLE_NAME = "meanings";
         public static final Uri CONTENT_URI = Uri.withAppendedPath(PROVIDER_URI, TABLE_NAME);
+        public static final String[] PROJECTION = {Col._ID, Col.DICTIONARY_ID, Col.WORD_ID, Col.VALUE, Col._CREATION_DATE};
 
         public static class Col implements ExtendedColumns {
             public static final String DICTIONARY_ID = "dictionary_id";

@@ -3,25 +3,24 @@ package ingvar.android.processor.examples.dictionary.view;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import ingvar.android.literepo.builder.UriBuilder;
-import ingvar.android.literepo.conversion.Converter;
 import ingvar.android.processor.examples.R;
 import ingvar.android.processor.examples.dictionary.pojo.Dictionaries;
 import ingvar.android.processor.examples.dictionary.pojo.Dictionary;
+import ingvar.android.processor.examples.dictionary.pojo.Word;
 import ingvar.android.processor.examples.dictionary.storage.DictionaryContract;
+import ingvar.android.processor.examples.dictionary.task.CreateWordTask;
+import ingvar.android.processor.examples.dictionary.task.DeleteDictionaryTask;
+import ingvar.android.processor.examples.dictionary.task.RequestDictionariesTask;
+import ingvar.android.processor.examples.dictionary.widget.DividerItemDecoration;
 import ingvar.android.processor.examples.view.AbstractActivity;
-import ingvar.android.processor.observation.AbstractObserver;
-import ingvar.android.processor.observation.IObserverManager;
-import ingvar.android.processor.persistence.Time;
-import ingvar.android.processor.sqlite.source.SqliteSource;
-import ingvar.android.processor.task.SingleTask;
+import ingvar.android.processor.observation.ActivityObserver;
 import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
 
@@ -33,6 +32,10 @@ public class DictionaryActivity extends AbstractActivity implements DictionaryCr
 
     @InjectView(R.id.dictionaries)
     private Spinner dictionaries;
+    @InjectView(R.id.list_words)
+    private RecyclerView words;
+    private WordsAdapter wordsAdapter;
+
     private DictionaryAdapter dictionariesAdapter;
     private RequestDictionariesObserver requestDictionariesObserver;
 
@@ -47,7 +50,13 @@ public class DictionaryActivity extends AbstractActivity implements DictionaryCr
 
     public void removeDictionary(View view) {
         Dictionary dictionary = (Dictionary) dictionaries.getSelectedItem();
-        getProcessor().execute(new DeleteDictionaryTask(dictionary.getName()), new DeleteDictionaryObserver());
+        getProcessor().execute(new DeleteDictionaryTask(dictionary.getName()), new DeleteDictionaryObserver(this));
+    }
+
+    public void createWord(View view) {
+        Word word = new Word("");
+        word.setDictionary((Dictionary) dictionaries.getSelectedItem());
+        getProcessor().execute(new CreateWordTask(word));
     }
 
     @Override
@@ -61,7 +70,13 @@ public class DictionaryActivity extends AbstractActivity implements DictionaryCr
         super.onCreate(savedInstanceState);
         dictionariesAdapter = new DictionaryAdapter(this);
         dictionaries.setAdapter(dictionariesAdapter);
-        requestDictionariesObserver = new RequestDictionariesObserver();
+
+        words.setLayoutManager(new LinearLayoutManager(this));
+        words.setHasFixedSize(true);
+        words.addItemDecoration(new DividerItemDecoration(this));
+        words.setAdapter(wordsAdapter = new WordsAdapter(this, getProcessor()));
+
+        requestDictionariesObserver = new RequestDictionariesObserver(this);
     }
 
     @Override
@@ -72,86 +87,45 @@ public class DictionaryActivity extends AbstractActivity implements DictionaryCr
         }
     }
 
-    private class RequestDictionariesObserver extends AbstractObserver<Dictionaries> {
+    private class RequestDictionariesObserver extends ActivityObserver<DictionaryActivity, Dictionaries> {
 
-        @Override
-        public String getGroup() {
-            return DictionaryActivity.class.getName();
+        public RequestDictionariesObserver(DictionaryActivity activity) {
+            super(activity);
         }
 
         @Override
         public void completed(Dictionaries result) {
-            dictionariesAdapter.swap(result);
+            getActivity().dictionariesAdapter.swap(result);
         }
 
         @Override
         public void cancelled() {
-            Toast.makeText(DictionaryActivity.this, R.string.message_request_was_cancelled, Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), R.string.message_request_was_cancelled, Toast.LENGTH_LONG).show();
         }
 
         @Override
         public void failed(Exception exception) {
-            Toast.makeText(DictionaryActivity.this, exception.getMessage(), Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private class RequestDictionariesTask extends SingleTask<Uri, Dictionaries, SqliteSource> {
-
-        public RequestDictionariesTask(Uri key) {
-            super(key, Dictionaries.class, SqliteSource.class, Time.ALWAYS_EXPIRED);
-        }
-
-        @Override
-        public Dictionaries process(IObserverManager observerManager, SqliteSource source) {
-            Dictionaries dictionaries = new Dictionaries();
-
-            Converter<Dictionary> converter = source.getConverter(Dictionary.class);
-            Cursor cursor = source.getContentResolver().query(DictionaryContract.Dictionaries.CONTENT_URI,
-                    DictionaryContract.Dictionaries.PROJECTION, null, null, null);
-
-            while(cursor.moveToNext()) {
-                dictionaries.add(converter.convert(cursor));
-            }
-            cursor.close();
-
-            return dictionaries;
+            Toast.makeText(getActivity(), exception.getMessage(), Toast.LENGTH_LONG).show();
         }
 
     }
 
-    private class DeleteDictionaryObserver extends AbstractObserver<String> {
+    private class DeleteDictionaryObserver extends ActivityObserver<DictionaryActivity, String> {
 
-        @Override
-        public String getGroup() {
-            return DictionaryActivity.class.getName();
+        public DeleteDictionaryObserver(DictionaryActivity activity) {
+            super(activity);
         }
 
         @Override
         public void completed(String result) {
-            Toast.makeText(DictionaryActivity.this,
+            Toast.makeText(getActivity(),
                 getString(R.string.message_dictionary_deleted, result),
                 Toast.LENGTH_LONG)
             .show();
-            getProcessor().execute(new RequestDictionariesTask(DictionaryContract.Dictionaries.CONTENT_URI), requestDictionariesObserver);
-        }
-
-    }
-
-    private class DeleteDictionaryTask extends SingleTask<String, String, SqliteSource> {
-
-        public DeleteDictionaryTask(String key) {
-            super(key, String.class, SqliteSource.class, Time.ALWAYS_EXPIRED);
-        }
-
-        @Override
-        public String process(IObserverManager observerManager, SqliteSource source) {
-            Uri uri = new UriBuilder()
-                .authority(DictionaryContract.AUTHORITY)
-                .table(DictionaryContract.Dictionaries.TABLE_NAME)
-                .eq(DictionaryContract.Dictionaries.Col.NAME, getTaskKey())
-            .build();
-            source.getContentResolver().delete(uri, null, null);
-            return getTaskKey();
+            //update spinner
+            getActivity().getProcessor()
+                    .execute(new RequestDictionariesTask(DictionaryContract.Dictionaries.CONTENT_URI),
+                            getActivity().requestDictionariesObserver);
         }
 
     }

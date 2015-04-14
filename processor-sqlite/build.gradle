@@ -24,6 +24,6 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(':processor')
-    compile 'ingvar.android.literepo:literepo:1.0.0'
+    compile 'ingvar.android.literepo:literepo:1.0.1'
     compile 'ingvar.android.literepo:literepo-conversion:1.0.0'
 }

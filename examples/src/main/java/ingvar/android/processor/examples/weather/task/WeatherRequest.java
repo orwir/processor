@@ -1,7 +1,8 @@
-package ingvar.android.processor.examples.weather.network;
+package ingvar.android.processor.examples.weather.task;
 
 import java.util.concurrent.TimeUnit;
 
+import ingvar.android.processor.examples.weather.network.RetrofitSource;
 import ingvar.android.processor.examples.weather.pojo.Weather;
 import ingvar.android.processor.observation.IObserverManager;
 import ingvar.android.processor.task.SingleTask;
