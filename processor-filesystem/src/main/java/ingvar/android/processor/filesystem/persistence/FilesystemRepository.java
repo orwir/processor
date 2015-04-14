@@ -2,21 +2,30 @@ package ingvar.android.processor.filesystem.persistence;
 
 import java.io.File;
 import java.io.Serializable;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import ingvar.android.processor.filesystem.util.DiskLruCache;
 import ingvar.android.processor.persistence.IRepository;
 import ingvar.android.processor.persistence.Time;
 
+import static ingvar.android.processor.util.BytesUtils.toBytes;
+
 /**
  * Created by Igor Zubenko on 2015.03.20.
  */
 public class FilesystemRepository<K, R> implements IRepository<K, R> {
-    //TODO: normalize keys
+
     protected DiskLruCache storage;
+    protected MessageDigest md5;
 
     public FilesystemRepository(File directory, int maxBytes) {
         storage = DiskLruCache.open(directory, maxBytes);
         storage.setCommitType(DiskLruCache.CommitType.BY_UPDATES, 10);
+        try {
+            md5 = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {}
     }
 
     @Override
@@ -64,7 +73,13 @@ public class FilesystemRepository<K, R> implements IRepository<K, R> {
     }
 
     protected String filenameFromKey(K key) {
-        return Integer.toString(key.hashCode());
+        if(md5 != null) {
+            md5.reset();
+            md5.update(toBytes(key));
+            return new BigInteger(1, md5.digest()).toString();
+        } else {
+            return String.valueOf(key.hashCode());
+        }
     }
 
     protected boolean isNotExpired(K key, long expiryTime) {

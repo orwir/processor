@@ -16,7 +16,7 @@ import ingvar.android.processor.exception.PersistenceException;
 /**
  * Created by Igor Zubenko on 2015.03.20.
  */
-public class BitmapFilesystemRepository extends FilesystemRepository<String, Bitmap> {
+public class BitmapFilesystemRepository<K> extends FilesystemRepository<K, Bitmap> {
 
     private static final int DEFAULT_QUALITY = 100;
 
@@ -29,10 +29,12 @@ public class BitmapFilesystemRepository extends FilesystemRepository<String, Bit
     }
 
     @Override
-    public Bitmap persist(String key, Bitmap data) {
+    public Bitmap persist(K key, Bitmap data) {
+        String filename = filenameFromKey(key);
+
         BufferedOutputStream out = null;
         try {
-            File file = storage.put(String.valueOf(key), "placeholder");
+            File file = storage.put(filename, "placeholder");
             out = new BufferedOutputStream(new FileOutputStream(file));
 
             boolean didCompress = data.compress(compressFormat, quality, out);
@@ -52,10 +54,12 @@ public class BitmapFilesystemRepository extends FilesystemRepository<String, Bit
     }
 
     @Override
-    public Bitmap obtain(String key, long expiryTime) {
+    public Bitmap obtain(K key, long expiryTime) {
+        String filename = filenameFromKey(key);
+
         Bitmap result = null;
-        if(storage.contains(key) && isNotExpired(key, expiryTime)) {
-            File file = storage.getFile(String.valueOf(key));
+        if(storage.contains(filename) && isNotExpired(key, expiryTime)) {
+            File file = storage.getFile(filename);
             InputStream is = null;
             try {
                 is = new BufferedInputStream(new FileInputStream(file));
