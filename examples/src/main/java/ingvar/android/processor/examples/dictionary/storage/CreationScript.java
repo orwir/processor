@@ -19,7 +19,7 @@ public class CreationScript {
         private static final String createTableDictionary() {
             String sql =
             "create table ${table} (" +
-                "${id} primary key," +
+                "${id} integer primary key," +
                 "${name} text not null unique," +
                 "${creation_date} integer default(strftime('%s', 'now') * 1000) not null" +
             ")";
@@ -34,10 +34,11 @@ public class CreationScript {
         private static final String createTableWords() {
             String sql =
             "create table ${table} (" +
-                "${id} primary key on conflict replace," +
-                "${dictionary_id} integer not null references ${dictionary_table}(${dt_id})," +
-                "${value} text not null unique on conflict replace," +
-                "${creation_date} integer default(strftime('%s', 'now') * 1000) not null" +
+                "${id} integer primary key on conflict replace," +
+                "${dictionary_id} integer not null references ${dictionary_table}(${dt_id}) on delete cascade," +
+                "${value} text not null," +
+                "${creation_date} integer default(strftime('%s', 'now') * 1000) not null," +
+                "unique(${dictionary_id}, ${value})" +
             ")";
             Map<String, String> values = new HashMap<>();
             values.put("table", DictionaryContract.Words.TABLE_NAME);
@@ -53,11 +54,12 @@ public class CreationScript {
         private static final String createTableMeanings() {
             String sql =
             "create table ${table} (" +
-                "${id} primary key," +
+                "${id} integer primary key," +
                 "${dictionary_id} integer not null references ${dictionary_table}(${dt_id}) on delete cascade," +
                 "${word_id} integer not null references ${words_table}(${wt_id}) on delete cascade," +
                 "${value} text not null," +
-                "${creation_date} integer default(strftime('%s', 'now') * 1000) not null" +
+                "${creation_date} integer default(strftime('%s', 'now') * 1000) not null," +
+                "unique(${id}, ${dictionary_id}, ${word_id}) on conflict replace" +
             ")";
             Map<String, String> values = new HashMap<>();
             values.put("table", DictionaryContract.Meanings.TABLE_NAME);

@@ -1,6 +1,7 @@
 package ingvar.android.processor.task;
 
 import ingvar.android.processor.observation.IObserverManager;
+import ingvar.android.processor.persistence.Time;
 import ingvar.android.processor.source.ISource;
 
 /**
@@ -12,6 +13,25 @@ public abstract class SingleTask<K, R, S extends ISource> extends AbstractTask<K
     private long cacheExpirationTime;
     private int retryCount;
 
+    /**
+     * Task without cashing results.
+     * cacheExpirationTime is set as Time.ALWAYS_EXPIRED
+     *
+     * @param key task key
+     * @param resultClass result class
+     * @param sourceType source type
+     */
+    public SingleTask(K key, Class<R> resultClass, Class<? extends ISource> sourceType) {
+        this(key, resultClass, sourceType, Time.ALWAYS_EXPIRED);
+    }
+
+    /**
+     *
+     * @param key task key
+     * @param resultClass result class
+     * @param sourceType source type
+     * @param cacheExpirationTime through how many milliseconds result of task will be expired in the cache
+     */
     public SingleTask(K key, Class<R> resultClass, Class<? extends ISource> sourceType, long cacheExpirationTime) {
         super(key, resultClass);
         this.sourceType = sourceType;

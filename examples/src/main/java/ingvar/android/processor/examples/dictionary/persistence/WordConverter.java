@@ -27,6 +27,7 @@ public class WordConverter implements Converter<Word> {
     @Override
     public ContentValues convert(Word word) {
         ContentValues values = new ContentValues();
+        values.put(DictionaryContract.Words.Col._ID, word.getId());
         values.put(DictionaryContract.Words.Col.DICTIONARY_ID, word.getDictionary().getId());
         values.put(DictionaryContract.Words.Col.VALUE, word.getWord());
         return values;

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -14,10 +15,12 @@ import ingvar.android.processor.examples.R;
 import ingvar.android.processor.examples.dictionary.pojo.Dictionaries;
 import ingvar.android.processor.examples.dictionary.pojo.Dictionary;
 import ingvar.android.processor.examples.dictionary.pojo.Word;
+import ingvar.android.processor.examples.dictionary.pojo.Words;
 import ingvar.android.processor.examples.dictionary.storage.DictionaryContract;
 import ingvar.android.processor.examples.dictionary.task.CreateWordTask;
 import ingvar.android.processor.examples.dictionary.task.DeleteDictionaryTask;
 import ingvar.android.processor.examples.dictionary.task.RequestDictionariesTask;
+import ingvar.android.processor.examples.dictionary.task.RequestWordsTask;
 import ingvar.android.processor.examples.dictionary.widget.DividerItemDecoration;
 import ingvar.android.processor.examples.view.AbstractActivity;
 import ingvar.android.processor.observation.ActivityObserver;
@@ -56,7 +59,7 @@ public class DictionaryActivity extends AbstractActivity implements DictionaryCr
     public void createWord(View view) {
         Word word = new Word("");
         word.setDictionary((Dictionary) dictionaries.getSelectedItem());
-        getProcessor().execute(new CreateWordTask(word));
+        getProcessor().execute(new CreateWordTask(word), new CreateWordObserver(this));
     }
 
     @Override
@@ -70,6 +73,15 @@ public class DictionaryActivity extends AbstractActivity implements DictionaryCr
         super.onCreate(savedInstanceState);
         dictionariesAdapter = new DictionaryAdapter(this);
         dictionaries.setAdapter(dictionariesAdapter);
+        dictionaries.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Dictionary key = dictionariesAdapter.getItem(position);
+                getProcessor().execute(new RequestWordsTask(key, false), new RequestWordsObserver(DictionaryActivity.this));
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
 
         words.setLayoutManager(new LinearLayoutManager(this));
         words.setHasFixedSize(true);
@@ -126,6 +138,39 @@ public class DictionaryActivity extends AbstractActivity implements DictionaryCr
             getActivity().getProcessor()
                     .execute(new RequestDictionariesTask(DictionaryContract.Dictionaries.CONTENT_URI),
                             getActivity().requestDictionariesObserver);
+        }
+
+    }
+
+    private class CreateWordObserver extends ActivityObserver<DictionaryActivity, Word> {
+
+        public CreateWordObserver(DictionaryActivity activity) {
+            super(activity);
+        }
+
+        @Override
+        public void completed(Word result) {
+            getActivity().getProcessor().execute(
+                    new RequestWordsTask((Dictionary) getActivity().dictionaries.getSelectedItem(), true),
+                    new RequestWordsObserver(getActivity()));
+        }
+
+        @Override
+        public void failed(Exception exception) {
+            Toast.makeText(getActivity(), exception.getMessage(), Toast.LENGTH_LONG).show();
+        }
+
+    }
+
+    private class RequestWordsObserver extends ActivityObserver<DictionaryActivity, Words> {
+
+        public RequestWordsObserver(DictionaryActivity activity) {
+            super(activity);
+        }
+
+        @Override
+        public void completed(Words result) {
+            wordsAdapter.swap(result);
         }
 
     }

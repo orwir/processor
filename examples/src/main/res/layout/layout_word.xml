@@ -8,11 +8,19 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:singleLine="true"
+        android:imeOptions="actionDone"
         android:hint="@string/label_type_word"/>
 
     <ListView android:id="@+id/word_meanings"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"/>
+
+    <ImageButton android:id="@+id/word_remove"
+        android:layout_width="@dimen/touch_target_size"
+        android:layout_height="@dimen/touch_target_size"
+        android:src="@drawable/ic_remove"
+        android:background="@android:color/transparent"/>
 
 </LinearLayout>

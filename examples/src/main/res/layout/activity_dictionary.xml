@@ -44,6 +44,12 @@
 
         </LinearLayout>
 
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="@dimen/vertical_spacing"
+            android:background="@android:color/darker_gray"/>
+
         <android.support.v7.widget.RecyclerView android:id="@+id/list_words"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>

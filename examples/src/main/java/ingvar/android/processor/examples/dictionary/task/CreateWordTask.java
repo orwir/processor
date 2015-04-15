@@ -24,7 +24,7 @@ public class CreateWordTask extends SingleTask<Word, Word, SqliteSource> {
 
     @Override
     public Word process(IObserverManager observerManager, SqliteSource source) {
-        Word result;
+        Word result = null;
 
         ContentResolver resolver = source.getContentResolver();
         ContentValues values = source.getConverter(Word.class).convert(getTaskKey());
@@ -37,7 +37,9 @@ public class CreateWordTask extends SingleTask<Word, Word, SqliteSource> {
             .eq(DictionaryContract.Words.Col.VALUE, getTaskKey().getWord())
         .build();
         Cursor cursor = resolver.query(uri, DictionaryContract.Words.PROJECTION, null, null, null);
-        result = (Word) source.getConverter(Word.class).convert(cursor);
+        if(cursor.moveToFirst()) {
+            result = (Word) source.getConverter(Word.class).convert(cursor);
+        }
         cursor.close();
 
         return result;

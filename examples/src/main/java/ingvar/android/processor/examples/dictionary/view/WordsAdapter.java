@@ -2,13 +2,15 @@ package ingvar.android.processor.examples.dictionary.view;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
@@ -17,6 +19,7 @@ import java.util.List;
 import ingvar.android.processor.examples.R;
 import ingvar.android.processor.examples.dictionary.pojo.Word;
 import ingvar.android.processor.examples.dictionary.task.CreateWordTask;
+import ingvar.android.processor.examples.dictionary.task.DeleteWordTask;
 import ingvar.android.processor.observation.AbstractObserver;
 import ingvar.android.processor.service.Processor;
 
@@ -62,6 +65,16 @@ public class WordsAdapter extends RecyclerView.Adapter<WordsAdapter.Holder> {
         notifyDataSetChanged();
     }
 
+    public void removeByName(String word) {
+        for(Word w : words) {
+            if(w.getWord().equals(word)) {
+                words.remove(w);
+                break;
+            }
+        }
+        notifyDataSetChanged();
+    }
+
     protected Context getContext() {
         Context context = contextRef.get();
         if(context == null) {
@@ -82,30 +95,49 @@ public class WordsAdapter extends RecyclerView.Adapter<WordsAdapter.Holder> {
 
         private EditText name;
         private ListView meanings;
+        private ImageButton remove;
         private MeaningsAdapter adapter;
 
         public Holder(View itemView) {
             super(itemView);
             name = (EditText) itemView.findViewById(R.id.word_name);
+            remove = (ImageButton) itemView.findViewById(R.id.word_remove);
             meanings = (ListView) itemView.findViewById(R.id.word_meanings);
             adapter = new MeaningsAdapter();
             meanings.setAdapter(adapter);
 
-            name.addTextChangedListener(new TextWatcher() {
-
+            name.setOnEditorActionListener(new TextView.OnEditorActionListener() {
                 @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-                @Override
-                public void afterTextChanged(Editable s) {
-                    Word word = getItem(getAdapterPosition());
-                    word.setWord(s.toString());
-                    getProcessor().execute(new CreateWordTask(word), new CreateWordObserver());
+                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                    if(actionId == EditorInfo.IME_ACTION_DONE) {
+                        Word word = getItem(getAdapterPosition());
+                        word.setWord(name.getText().toString());
+                        getProcessor().execute(new CreateWordTask(word), new CreateWordObserver());
+                    }
+                    return false;
                 }
+            });
 
+            name.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if(hasFocus) {
+                        name.setTag(name.getText().toString());
+                    }
+                    else if(!name.getText().toString().equals(name.getTag())) {
+                        Word word = getItem(getAdapterPosition());
+                        word.setWord(name.getText().toString());
+                        getProcessor().execute(new CreateWordTask(word), new CreateWordObserver());
+                    }
+                }
+            });
+
+            remove.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Word word = getItem(getAdapterPosition());
+                    getProcessor().execute(new DeleteWordTask(word), new DeleteWordObserver());
+                }
             });
         }
 
@@ -135,6 +167,21 @@ public class WordsAdapter extends RecyclerView.Adapter<WordsAdapter.Holder> {
         public void failed(Exception exception) {
             Toast.makeText(getContext(), exception.getMessage(), Toast.LENGTH_LONG).show();
         }
+    }
+
+    private class DeleteWordObserver extends AbstractObserver<String> {
+
+        @Override
+        public String getGroup() {
+            return getContext().getClass().getName();
+        }
+
+        @Override
+        public void completed(String result) {
+            Toast.makeText(getContext(), getContext().getString(R.string.message_word_deleted, result), Toast.LENGTH_LONG).show();
+            removeByName(result);
+        }
+
     }
 
 }
