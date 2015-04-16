@@ -13,7 +13,7 @@ import ingvar.android.processor.examples.R;
 import ingvar.android.processor.examples.view.AbstractActivity;
 import ingvar.android.processor.examples.weather.pojo.Weather;
 import ingvar.android.processor.examples.weather.task.WeatherRequest;
-import ingvar.android.processor.observation.ActivityObserver;
+import ingvar.android.processor.observation.ContextObserver;
 import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
 
@@ -90,7 +90,7 @@ public class WeatherActivity extends AbstractActivity {
         cloudiness.setText(na);
     }
 
-    private class WeatherObserver extends ActivityObserver<WeatherActivity, Weather> {
+    private class WeatherObserver extends ContextObserver<WeatherActivity, Weather> {
 
         public WeatherObserver(WeatherActivity activity) {
             super(activity);
@@ -98,7 +98,7 @@ public class WeatherActivity extends AbstractActivity {
 
         @Override
         public void completed(Weather result) {
-            WeatherActivity activity = getActivity();
+            WeatherActivity activity = getContext();
 
             activity.setUIEnabled(true);
             activity.temp.setText(result.getTemp().toString() + "°C");
@@ -115,7 +115,7 @@ public class WeatherActivity extends AbstractActivity {
 
         @Override
         public void cancelled() {
-            WeatherActivity activity = getActivity();
+            WeatherActivity activity = getContext();
 
             activity.setUIEnabled(true);
             Toast.makeText(activity, R.string.message_request_was_cancelled, Toast.LENGTH_LONG).show();
@@ -123,7 +123,7 @@ public class WeatherActivity extends AbstractActivity {
 
         @Override
         public void failed(Exception exception) {
-            WeatherActivity activity = getActivity();
+            WeatherActivity activity = getContext();
 
             activity.setUIEnabled(true);
             Toast.makeText(activity, exception.getMessage(), Toast.LENGTH_LONG).show();

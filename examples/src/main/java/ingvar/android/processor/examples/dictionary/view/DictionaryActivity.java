@@ -23,7 +23,7 @@ import ingvar.android.processor.examples.dictionary.task.RequestDictionariesTask
 import ingvar.android.processor.examples.dictionary.task.RequestWordsTask;
 import ingvar.android.processor.examples.dictionary.widget.DividerItemDecoration;
 import ingvar.android.processor.examples.view.AbstractActivity;
-import ingvar.android.processor.observation.ActivityObserver;
+import ingvar.android.processor.observation.ContextObserver;
 import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
 
@@ -57,8 +57,7 @@ public class DictionaryActivity extends AbstractActivity implements DictionaryCr
     }
 
     public void createWord(View view) {
-        Word word = new Word("");
-        word.setDictionary((Dictionary) dictionaries.getSelectedItem());
+        Word word = new Word((Dictionary) dictionaries.getSelectedItem(), "");
         getProcessor().execute(new CreateWordTask(word), new CreateWordObserver(this));
     }
 
@@ -99,7 +98,7 @@ public class DictionaryActivity extends AbstractActivity implements DictionaryCr
         }
     }
 
-    private class RequestDictionariesObserver extends ActivityObserver<DictionaryActivity, Dictionaries> {
+    private class RequestDictionariesObserver extends ContextObserver<DictionaryActivity, Dictionaries> {
 
         public RequestDictionariesObserver(DictionaryActivity activity) {
             super(activity);
@@ -107,22 +106,22 @@ public class DictionaryActivity extends AbstractActivity implements DictionaryCr
 
         @Override
         public void completed(Dictionaries result) {
-            getActivity().dictionariesAdapter.swap(result);
+            getContext().dictionariesAdapter.swap(result);
         }
 
         @Override
         public void cancelled() {
-            Toast.makeText(getActivity(), R.string.message_request_was_cancelled, Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), R.string.message_request_was_cancelled, Toast.LENGTH_LONG).show();
         }
 
         @Override
         public void failed(Exception exception) {
-            Toast.makeText(getActivity(), exception.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), exception.getMessage(), Toast.LENGTH_LONG).show();
         }
 
     }
 
-    private class DeleteDictionaryObserver extends ActivityObserver<DictionaryActivity, String> {
+    private class DeleteDictionaryObserver extends ContextObserver<DictionaryActivity, String> {
 
         public DeleteDictionaryObserver(DictionaryActivity activity) {
             super(activity);
@@ -130,19 +129,19 @@ public class DictionaryActivity extends AbstractActivity implements DictionaryCr
 
         @Override
         public void completed(String result) {
-            Toast.makeText(getActivity(),
+            Toast.makeText(getContext(),
                 getString(R.string.message_dictionary_deleted, result),
                 Toast.LENGTH_LONG)
             .show();
             //update spinner
-            getActivity().getProcessor()
+            getContext().getProcessor()
                     .execute(new RequestDictionariesTask(DictionaryContract.Dictionaries.CONTENT_URI),
-                            getActivity().requestDictionariesObserver);
+                            getContext().requestDictionariesObserver);
         }
 
     }
 
-    private class CreateWordObserver extends ActivityObserver<DictionaryActivity, Word> {
+    private class CreateWordObserver extends ContextObserver<DictionaryActivity, Word> {
 
         public CreateWordObserver(DictionaryActivity activity) {
             super(activity);
@@ -150,19 +149,19 @@ public class DictionaryActivity extends AbstractActivity implements DictionaryCr
 
         @Override
         public void completed(Word result) {
-            getActivity().getProcessor().execute(
-                    new RequestWordsTask((Dictionary) getActivity().dictionaries.getSelectedItem(), true),
-                    new RequestWordsObserver(getActivity()));
+            getContext().getProcessor().execute(
+                    new RequestWordsTask((Dictionary) getContext().dictionaries.getSelectedItem(), true),
+                    new RequestWordsObserver(getContext()));
         }
 
         @Override
         public void failed(Exception exception) {
-            Toast.makeText(getActivity(), exception.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), exception.getMessage(), Toast.LENGTH_LONG).show();
         }
 
     }
 
-    private class RequestWordsObserver extends ActivityObserver<DictionaryActivity, Words> {
+    private class RequestWordsObserver extends ContextObserver<DictionaryActivity, Words> {
 
         public RequestWordsObserver(DictionaryActivity activity) {
             super(activity);

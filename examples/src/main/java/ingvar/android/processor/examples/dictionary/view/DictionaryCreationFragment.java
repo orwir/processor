@@ -12,7 +12,7 @@ import ingvar.android.processor.examples.R;
 import ingvar.android.processor.examples.dictionary.pojo.Dictionary;
 import ingvar.android.processor.examples.dictionary.task.CreateDictionaryTask;
 import ingvar.android.processor.examples.view.AbstractActivity;
-import ingvar.android.processor.observation.ActivityObserver;
+import ingvar.android.processor.observation.ContextObserver;
 import ingvar.android.processor.service.Processor;
 import roboguice.fragment.provided.RoboDialogFragment;
 
@@ -58,7 +58,7 @@ public class DictionaryCreationFragment extends RoboDialogFragment {
                 .create();
     }
 
-    private class CreationObserver extends ActivityObserver<Activity, Dictionary> {
+    private class CreationObserver extends ContextObserver<Activity, Dictionary> {
 
         public CreationObserver(Activity activity) {
             super(activity);

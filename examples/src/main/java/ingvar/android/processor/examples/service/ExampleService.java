@@ -2,7 +2,9 @@ package ingvar.android.processor.examples.service;
 
 import java.io.File;
 
+import ingvar.android.processor.examples.dictionary.persistence.MeaningConverter;
 import ingvar.android.processor.examples.dictionary.persistence.WordConverter;
+import ingvar.android.processor.examples.dictionary.pojo.Meaning;
 import ingvar.android.processor.examples.dictionary.pojo.Word;
 import ingvar.android.processor.examples.weather.network.RetrofitSource;
 import ingvar.android.processor.filesystem.persistence.BitmapFilesystemRepository;
@@ -29,6 +31,7 @@ public class ExampleService extends ProcessorService {
 
         SqliteSource sqliteSource = new SqliteSource(this);
         sqliteSource.addConverter(Word.class, new WordConverter());
+        sqliteSource.addConverter(Meaning.class, new MeaningConverter());
         sourceManager.addSource(SqliteSource.class, sqliteSource);
     }
 

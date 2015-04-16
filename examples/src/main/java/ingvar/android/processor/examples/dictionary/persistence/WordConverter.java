@@ -29,15 +29,16 @@ public class WordConverter implements Converter<Word> {
         ContentValues values = new ContentValues();
         values.put(DictionaryContract.Words.Col._ID, word.getId());
         values.put(DictionaryContract.Words.Col.DICTIONARY_ID, word.getDictionary().getId());
-        values.put(DictionaryContract.Words.Col.VALUE, word.getWord());
+        values.put(DictionaryContract.Words.Col.VALUE, word.getValue());
         return values;
     }
 
     @Override
     public Word convert(Cursor cursor) {
-        Word word = new Word(CursorCommon.string(cursor, DictionaryContract.Words.Col.VALUE));
+        Word word = new Word();
         word.setId(CursorCommon.longv(cursor, DictionaryContract.Words.Col._ID));
         word.setDictionary(dictionary);
+        word.setValue(CursorCommon.string(cursor, DictionaryContract.Words.Col.VALUE));
         return word;
     }
 

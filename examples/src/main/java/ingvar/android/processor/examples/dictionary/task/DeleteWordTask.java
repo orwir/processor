@@ -27,7 +27,7 @@ public class DeleteWordTask extends SingleTask<Word, String, SqliteSource> {
         .build();
         source.getContentResolver().delete(uri, null, null);
 
-        return getTaskKey().getWord();
+        return getTaskKey().getValue();
     }
 
 }

@@ -59,7 +59,8 @@ public class CreationScript {
                 "${word_id} integer not null references ${words_table}(${wt_id}) on delete cascade," +
                 "${value} text not null," +
                 "${creation_date} integer default(strftime('%s', 'now') * 1000) not null," +
-                "unique(${id}, ${dictionary_id}, ${word_id}) on conflict replace" +
+                "unique(${id}, ${dictionary_id}, ${word_id}) on conflict replace," +
+                "unique(${dictionary_id}, ${word_id}, ${value}) on conflict replace" +
             ")";
             Map<String, String> values = new HashMap<>();
             values.put("table", DictionaryContract.Meanings.TABLE_NAME);

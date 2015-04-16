@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,11 +16,16 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 
 import ingvar.android.processor.examples.R;
+import ingvar.android.processor.examples.dictionary.pojo.Meaning;
+import ingvar.android.processor.examples.dictionary.pojo.Meanings;
 import ingvar.android.processor.examples.dictionary.pojo.Word;
+import ingvar.android.processor.examples.dictionary.task.CreateMeaningTask;
 import ingvar.android.processor.examples.dictionary.task.CreateWordTask;
 import ingvar.android.processor.examples.dictionary.task.DeleteWordTask;
-import ingvar.android.processor.observation.AbstractObserver;
+import ingvar.android.processor.examples.dictionary.task.RequestMeaningsTask;
+import ingvar.android.processor.observation.ContextObserver;
 import ingvar.android.processor.service.Processor;
+import ingvar.android.processor.task.ITask;
 
 /**
  * Created by Igor Zubenko on 2015.04.14.
@@ -47,8 +51,17 @@ public class WordsAdapter extends RecyclerView.Adapter<WordsAdapter.Holder> {
     public void onBindViewHolder(Holder holder, int position) {
         Word word = words.get(position);
 
-        holder.name.setText(word.getWord());
-        holder.adapter.swap(word.getMeanings());
+        holder.name.setText(word.getValue());
+        if(holder.meaningsTask != null) {
+            holder.meaningsTask.cancel();
+        }
+
+        if(word.getMeanings() == null || word.getMeanings().isEmpty()) {
+            holder.meaningsTask = new RequestMeaningsTask(word, true);
+            getProcessor().execute(holder.meaningsTask, new RequestMeaningsObserver(getContext(), holder));
+        } else {
+            holder.setMeanings(word.getMeanings());
+        }
     }
 
     @Override
@@ -67,7 +80,7 @@ public class WordsAdapter extends RecyclerView.Adapter<WordsAdapter.Holder> {
 
     public void removeByName(String word) {
         for(Word w : words) {
-            if(w.getWord().equals(word)) {
+            if(w.getValue().equals(word)) {
                 words.remove(w);
                 break;
             }
@@ -94,25 +107,27 @@ public class WordsAdapter extends RecyclerView.Adapter<WordsAdapter.Holder> {
     class Holder extends RecyclerView.ViewHolder {
 
         private EditText name;
-        private ListView meanings;
+        private TextView meanings;
+        private EditText createMeaning;
         private ImageButton remove;
-        private MeaningsAdapter adapter;
+        private ITask meaningsTask;
 
         public Holder(View itemView) {
             super(itemView);
             name = (EditText) itemView.findViewById(R.id.word_name);
             remove = (ImageButton) itemView.findViewById(R.id.word_remove);
-            meanings = (ListView) itemView.findViewById(R.id.word_meanings);
-            adapter = new MeaningsAdapter();
-            meanings.setAdapter(adapter);
+            meanings = (TextView) itemView.findViewById(R.id.word_meanings);
+            createMeaning = (EditText) itemView.findViewById(R.id.word_create_meaning);
+
+            setMeanings(null);
 
             name.setOnEditorActionListener(new TextView.OnEditorActionListener() {
                 @Override
                 public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                     if(actionId == EditorInfo.IME_ACTION_DONE) {
                         Word word = getItem(getAdapterPosition());
-                        word.setWord(name.getText().toString());
-                        getProcessor().execute(new CreateWordTask(word), new CreateWordObserver());
+                        word.setValue(name.getText().toString());
+                        getProcessor().execute(new CreateWordTask(word), new UpdateWordObserver(getContext()));
                     }
                     return false;
                 }
@@ -126,8 +141,8 @@ public class WordsAdapter extends RecyclerView.Adapter<WordsAdapter.Holder> {
                     }
                     else if(!name.getText().toString().equals(name.getTag())) {
                         Word word = getItem(getAdapterPosition());
-                        word.setWord(name.getText().toString());
-                        getProcessor().execute(new CreateWordTask(word), new CreateWordObserver());
+                        word.setValue(name.getText().toString());
+                        getProcessor().execute(new CreateWordTask(word), new UpdateWordObserver(getContext()));
                     }
                 }
             });
@@ -136,18 +151,51 @@ public class WordsAdapter extends RecyclerView.Adapter<WordsAdapter.Holder> {
                 @Override
                 public void onClick(View v) {
                     Word word = getItem(getAdapterPosition());
-                    getProcessor().execute(new DeleteWordTask(word), new DeleteWordObserver());
+                    getProcessor().execute(new DeleteWordTask(word), new DeleteWordObserver(getContext()));
+                }
+            });
+
+            createMeaning.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                @Override
+                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                    if(actionId == EditorInfo.IME_ACTION_DONE) {
+                        String value = createMeaning.getText().toString();
+                        if(value.isEmpty()) {
+                            Toast.makeText(getContext(), R.string.message_meaning_empty, Toast.LENGTH_LONG).show();
+                        } else {
+                            Word word = getItem(getAdapterPosition());
+                            Meaning meaning = new Meaning(word, value);
+                            getProcessor().execute(new CreateMeaningTask(meaning), new CreateMeaningObserver(getContext(), word, Holder.this));
+                            createMeaning.setText("");
+                        }
+                    }
+                    return false;
                 }
             });
         }
 
+        public void setMeanings(List<Meaning> list) {
+            if(list == null || list.isEmpty()) {
+                meanings.setVisibility(View.GONE);
+            } else {
+                meanings.setVisibility(View.VISIBLE);
+                StringBuilder sb = new StringBuilder();
+                for(Meaning m : list) {
+                    if(sb.length() > 0) {
+                        sb.append(", ");
+                    }
+                    sb.append(m.getValue());
+                }
+                meanings.setText(sb.toString());
+            }
+        }
+
     }
 
-    private class CreateWordObserver extends AbstractObserver<Word> {
+    private class UpdateWordObserver extends ContextObserver<Context, Word> {
 
-        @Override
-        public String getGroup() {
-            return getContext().getClass().getName();
+        public UpdateWordObserver(Context context) {
+            super(context);
         }
 
         @Override
@@ -156,7 +204,7 @@ public class WordsAdapter extends RecyclerView.Adapter<WordsAdapter.Holder> {
             for(Word word : words) {
                 position++;
                 if(word.getId().equals(result.getId())) {
-                    word.setWord(result.getWord());
+                    word.setValue(result.getValue());
                     break;
                 }
             }
@@ -169,11 +217,11 @@ public class WordsAdapter extends RecyclerView.Adapter<WordsAdapter.Holder> {
         }
     }
 
-    private class DeleteWordObserver extends AbstractObserver<String> {
+    private class DeleteWordObserver extends ContextObserver<Context, String> {
 
-        @Override
-        public String getGroup() {
-            return getContext().getClass().getName();
+
+        public DeleteWordObserver(Context context) {
+            super(context);
         }
 
         @Override
@@ -182,6 +230,41 @@ public class WordsAdapter extends RecyclerView.Adapter<WordsAdapter.Holder> {
             removeByName(result);
         }
 
+    }
+
+    private class CreateMeaningObserver extends ContextObserver<Context, Meaning> {
+
+        private Word word;
+        private Holder holder;
+
+        public CreateMeaningObserver(Context context, Word word, Holder holder) {
+            super(context);
+            this.word = word;
+            this.holder = holder;
+        }
+
+        @Override
+        public void completed(Meaning result) {
+            holder.meaningsTask = new RequestMeaningsTask(word, true);
+            getProcessor().execute(
+                    holder.meaningsTask,
+                    new RequestMeaningsObserver(getContext(), holder));
+        }
+    }
+
+    private class RequestMeaningsObserver extends ContextObserver<Context, Meanings> {
+
+        private Holder holder;
+
+        public RequestMeaningsObserver(Context context, Holder holder) {
+            super(context);
+            this.holder = holder;
+        }
+
+        @Override
+        public void completed(Meanings result) {
+            holder.setMeanings(result);
+        }
     }
 
 }

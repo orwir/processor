@@ -12,10 +12,25 @@
         android:imeOptions="actionDone"
         android:hint="@string/label_type_word"/>
 
-    <ListView android:id="@+id/word_meanings"
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <EditText android:id="@+id/word_create_meaning"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:imeOptions="actionDone"
+            android:hint="@string/label_add_meaning"/>
+
+        <TextView android:id="@+id/word_meanings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@android:style/TextAppearance.DeviceDefault.Medium"/>
+
+    </LinearLayout>
 
     <ImageButton android:id="@+id/word_remove"
         android:layout_width="@dimen/touch_target_size"

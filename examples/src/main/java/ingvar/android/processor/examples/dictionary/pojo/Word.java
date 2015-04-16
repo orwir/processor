@@ -11,11 +11,14 @@ public class Word {
 
     private Dictionary dictionary;
     private Long id;
-    private String word;
-    private List<String> meanings;
+    private String value;
+    private List<Meaning> meanings;
 
-    public Word(String word, String... meanings) {
-        this.word = word;
+    public Word() {}
+
+    public Word(Dictionary dictionary, String value, Meaning... meanings) {
+        this.dictionary = dictionary;
+        this.value = value;
         this.meanings = Arrays.asList(meanings);
     }
 
@@ -35,23 +38,23 @@ public class Word {
         this.id = id;
     }
 
-    public String getWord() {
-        return word;
+    public String getValue() {
+        return value;
     }
 
-    public void setWord(String word) {
-        this.word = word;
+    public void setValue(String value) {
+        this.value = value;
     }
 
-    public List<String> getMeanings() {
+    public List<Meaning> getMeanings() {
         return meanings;
     }
 
-    public void setMeanings(List<String> meanings) {
+    public void setMeanings(List<Meaning> meanings) {
         this.meanings = meanings;
     }
 
-    public void addMeaning(String meaning) {
+    public void addMeaning(Meaning meaning) {
         if(meanings == null) {
             meanings = new ArrayList<>();
         }

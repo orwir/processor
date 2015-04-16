@@ -23,10 +23,12 @@
     <string name="label_cancel">Cancel</string>
     <string name="label_dictionary_creation">Create dictionary</string>
     <string name="label_type_word">Type your word</string>
+    <string name="label_add_meaning">Add meaning</string>
 
     <string name="message_unknown_example">You are trying to open unknown example!</string>
     <string name="message_request_was_cancelled">Request was cancelled.</string>
     <string name="message_dictionary_deleted">Dictionary \'%s\' was deleted.</string>
     <string name="message_word_deleted">Word \'%s\' was deleted.</string>
+    <string name="message_meaning_empty">You can\'t create empty meaning.</string>
 
 </resources>
