@@ -22,9 +22,6 @@ public class MainActivity extends AbstractActivity {
             case R.id.button_gallery:
                 GalleryActivity.startActivity(this);
                 break;
-            case R.id.button_timer:
-                Toast.makeText(this, "not implemented yet", Toast.LENGTH_LONG).show();
-                break;
             case R.id.button_weather:
                 WeatherActivity.startActivity(this);
                 break;

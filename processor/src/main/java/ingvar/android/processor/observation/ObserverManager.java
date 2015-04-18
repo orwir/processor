@@ -69,27 +69,28 @@ public class ObserverManager implements IObserverManager {
     }
 
     @Override
-    public void notifyProgress(ITask task, float progress) {
-        sendMessage(task, Type.IN_PROGRESS, progress);
+    public void notifyProgress(ITask task, float progress, Map extra) {
+        Message message = handler.obtainMessage(Type.IN_PROGRESS.ordinal(),
+                new Wrapper(task, progress, extra));
+
+        message.sendToTarget();
     }
 
     @Override
     public <R> void notifyCompleted(ITask task, R result) {
-        sendMessage(task, Type.COMPLETED, result);
+        Message message = handler.obtainMessage(Type.COMPLETED.ordinal(), new Wrapper(task, result));
+        message.sendToTarget();
     }
 
     @Override
     public void notifyCancelled(ITask task) {
-        sendMessage(task, Type.CANCELLED, null);
+        Message message = handler.obtainMessage(Type.CANCELLED.ordinal(), new Wrapper(task, null));
+        message.sendToTarget();
     }
 
     @Override
     public void notifyFailed(ITask task, Exception exception) {
-        sendMessage(task, Type.FAILED, exception);
-    }
-
-    private void sendMessage(ITask request, Type type, Object data) {
-        Message message = handler.obtainMessage(type.ordinal(), new Wrapper(request, data));
+        Message message = handler.obtainMessage(Type.FAILED.ordinal(), new Wrapper(task, exception));
         message.sendToTarget();
     }
 
@@ -103,10 +104,16 @@ public class ObserverManager implements IObserverManager {
     private class Wrapper {
         private ITask task;
         private Object data;
+        private Map extra;
 
         public Wrapper(ITask task, Object data) {
+            this(task, data, null);
+        }
+
+        public Wrapper(ITask task, Object data, Map extra) {
             this.task = task;
             this.data = data;
+            this.extra = extra;
         }
     }
 
@@ -122,7 +129,7 @@ public class ObserverManager implements IObserverManager {
                 for(IObserver observer : taskObservers) {
                     switch (type) {
                         case IN_PROGRESS:
-                            observer.progress((Float) wrapper.data);
+                            observer.progress((Float) wrapper.data, wrapper.extra);
                             break;
                         case COMPLETED:
                             observer.completed(wrapper.data);

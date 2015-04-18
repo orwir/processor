@@ -1,5 +1,7 @@
 package ingvar.android.processor.observation;
 
+import java.util.Map;
+
 import ingvar.android.processor.task.ITask;
 
 /**
@@ -15,7 +17,7 @@ public interface IObserverManager {
 
     void removeGroup(String group);
 
-    void notifyProgress(ITask task, float progress); //TODO: add extras
+    void notifyProgress(ITask task, float progress, Map extra);
 
     <R> void notifyCompleted(ITask task, R result);
 

@@ -1,5 +1,7 @@
 package ingvar.android.processor.observation;
 
+import java.util.Map;
+
 /**
  * Created by Igor Zubenko on 2015.03.18.
  */
@@ -17,6 +19,6 @@ public interface IObserver<R> extends Comparable<R> {
 
     void cancelled();
 
-    void progress(float progress);
+    void progress(float progress, Map extra);
 
 }

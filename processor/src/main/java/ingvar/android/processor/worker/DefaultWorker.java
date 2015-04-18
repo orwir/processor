@@ -225,7 +225,7 @@ public class DefaultWorker implements IWorker {
         //adjust progress
         progress = Math.max(IObserver.MIN_PROGRESS, progress);
         progress = Math.min(IObserver.MAX_PROGRESS, progress);
-        observerManager.notifyProgress(task, progress);
+        observerManager.notifyProgress(task, progress, null);
     }
 
     protected <R> void notifyCompleted(ITask task, R result) {

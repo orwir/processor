@@ -1,24 +1,20 @@
 package ingvar.android.processor.observation;
 
+import java.util.Map;
+
 /**
  * Created by Igor Zubenko on 2015.03.23.
  */
 public abstract class AbstractObserver<R> implements IObserver<R> {
 
     @Override
-    public void failed(Exception exception) {
-
-    }
+    public void failed(Exception exception) {}
 
     @Override
-    public void cancelled() {
-
-    }
+    public void cancelled() {}
 
     @Override
-    public void progress(float progress) {
-
-    }
+    public void progress(float progress, Map extra) {}
 
     @Override
     public int compareTo(R another) {

@@ -7,14 +7,6 @@
     android:orientation="vertical"
     android:gravity="center">
 
-    <Button android:id="@+id/button_timer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/vertical_spacing"
-        android:minEms="@integer/button_width"
-        android:text="@string/label_timer"
-        android:onClick="openExample"/>
-
     <Button android:id="@+id/button_gallery"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
