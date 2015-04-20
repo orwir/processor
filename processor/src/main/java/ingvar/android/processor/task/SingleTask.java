@@ -15,7 +15,8 @@ public abstract class SingleTask<K, R, S extends ISource> extends AbstractTask<K
 
     /**
      * Task without cashing results.
-     * cacheExpirationTime is set as Time.ALWAYS_EXPIRED
+     * cacheExpirationTime is set as Time.ALWAYS_EXPIRED.
+     * Note: result will not cached.
      *
      * @param key task key
      * @param resultClass result class
@@ -26,6 +27,7 @@ public abstract class SingleTask<K, R, S extends ISource> extends AbstractTask<K
     }
 
     /**
+     * Note: if you set cacheExpirationTime as Time.ALWAYS_EXPIRED result of task will not cached.
      *
      * @param key task key
      * @param resultClass result class

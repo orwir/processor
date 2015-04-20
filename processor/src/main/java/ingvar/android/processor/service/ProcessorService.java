@@ -1,9 +1,11 @@
 package ingvar.android.processor.service;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.util.Log;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -30,6 +32,7 @@ public abstract class ProcessorService extends Service {
     protected static final int DEFAULT_MIN_PARALLEL_THREADS = Runtime.getRuntime().availableProcessors() + 1;
     protected static final int DEFAULT_PARALLEL_THREADS = Math.max(4, DEFAULT_MIN_PARALLEL_THREADS); //4 at least
     protected static final int DEFAULT_KEEP_ALIVE_TIME_SECONDS = 5 * 60;
+    private static final String TAG = ProcessorService.class.getSimpleName();
 
     public class ProcessorBinder extends Binder {
 
@@ -77,6 +80,9 @@ public abstract class ProcessorService extends Service {
         Future<R> future = worker.getExecuted(task);
         if(future == null || !task.isMergeable()) {
             future = worker.execute(task);
+            Log.d(TAG, "Executed new task with key '" + task.getTaskKey() + "'");
+        } else {
+            Log.d(TAG, "Returned future from previous task with the same key '" + task.getTaskKey() + "'");
         }
 
         return future;
@@ -86,8 +92,24 @@ public abstract class ProcessorService extends Service {
         return cacheManager.obtain(key, dataClass, expiryTime);
     }
 
+    public <K> void removeFromCache(Class dataClass, K key) {
+        cacheManager.remove(dataClass, key);
+    }
+
+    public void removeFromCache(Class dataClass) {
+        cacheManager.remove(dataClass);
+    }
+
+    public void clearCache() {
+        cacheManager.remove();
+    }
+
     public void removeObservers(String group) {
         observerManager.removeGroup(group);
+    }
+
+    public void removeObservers(Context context) {
+        observerManager.removeGroup(context.getClass().getName());
     }
 
     public int getThreadCount() {

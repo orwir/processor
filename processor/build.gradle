@@ -9,6 +9,11 @@ android {
         targetSdkVersion vTargetSdkVersion
         versionCode vGlobalVersionCode
         versionName vGlobalVersionName
+
+        testApplicationId 'ingvar.android.processor.test'
+        testInstrumentationRunner 'android.test.InstrumentationTestRunner'
+        testHandleProfiling true
+        testFunctionalTest true
     }
 
     buildTypes {

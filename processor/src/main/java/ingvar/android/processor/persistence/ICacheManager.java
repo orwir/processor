@@ -11,7 +11,7 @@ public interface ICacheManager {
 
     <K, R> R obtain(K key, Class dataClass, long expiryTime);
 
-    <K, R> R put(K key, R data);
+    <K, R> R persist(K key, R data);
 
     <K> void remove(Class dataClass, K key);
 

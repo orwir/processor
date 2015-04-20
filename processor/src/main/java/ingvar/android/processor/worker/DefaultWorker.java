@@ -2,8 +2,8 @@ package ingvar.android.processor.worker;
 
 import android.util.Log;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -108,7 +108,7 @@ public class DefaultWorker implements IWorker {
         final ExecutorService innerExecutor = Executors.newFixedThreadPool(aggregatedTask.getThreadsCount());
 
         final AtomicInteger completed = new AtomicInteger(0);
-        final List<ITask> tasks = aggregatedTask.getTasks();
+        final Set<ITask> tasks = aggregatedTask.getTasks();
         for(final ITask innerTask : tasks) {
             checkCancellation(aggregatedTask);
 
@@ -197,8 +197,8 @@ public class DefaultWorker implements IWorker {
                 if(exception != null) {
                     throw exception;
                 }
-                if(result != null) {
-                    cacheManager.put(task.getTaskKey(), result);
+                if(result != null && task.getExpirationTime() != Time.ALWAYS_EXPIRED) {
+                    cacheManager.persist(task.getTaskKey(), result);
                     break flow;
                 }
             } else {

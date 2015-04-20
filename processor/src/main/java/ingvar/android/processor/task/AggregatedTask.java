@@ -2,9 +2,9 @@ package ingvar.android.processor.task;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Igor Zubenko on 2015.03.18.
@@ -14,14 +14,14 @@ public abstract class AggregatedTask<K, R> extends AbstractTask<K, R> {
     protected static final int DEFAULT_PARALLEL_THREADS = Math.max(15, Runtime.getRuntime().availableProcessors() + 1); //15 at least
     protected static final int DEFAULT_AGGREGATE_KEEP_ALIVE_TIME_SECONDS = 5 * 60;
 
-    private List<ITask<K, R>> tasks;
+    private Set<ITask<K, R>> tasks;
     private int threadsCount;
     private int keepAliveTimeout;
     private Map<ITask, Exception> innerExceptions;
 
     public AggregatedTask(K key, Class<R> resultClass) {
         super(key, resultClass);
-        this.tasks = new LinkedList<>();
+        this.tasks = new HashSet<>();
         this.threadsCount = DEFAULT_PARALLEL_THREADS;
         this.keepAliveTimeout = DEFAULT_AGGREGATE_KEEP_ALIVE_TIME_SECONDS;
         this.innerExceptions = new HashMap<>();
@@ -40,8 +40,8 @@ public abstract class AggregatedTask<K, R> extends AbstractTask<K, R> {
         innerExceptions.remove(task);
     }
 
-    public List<ITask<K, R>> getTasks() {
-        return Collections.unmodifiableList(tasks);
+    public Set<ITask<K, R>> getTasks() {
+        return Collections.unmodifiableSet(tasks);
     }
 
     public int getThreadsCount() {
@@ -66,6 +66,10 @@ public abstract class AggregatedTask<K, R> extends AbstractTask<K, R> {
 
     public Map<ITask, Exception> getTasksExceptions() {
         return Collections.unmodifiableMap(innerExceptions);
+    }
+
+    public boolean hasTasksExceptions() {
+        return innerExceptions.size() > 0;
     }
 
 }

@@ -4,10 +4,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
+import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import ingvar.android.processor.task.ITask;
 
@@ -16,8 +16,8 @@ import ingvar.android.processor.task.ITask;
  */
 public class ObserverManager implements IObserverManager {
 
-    private Handler handler;
-    private Map<ITask, Set<IObserver>> observers;
+    protected Map<ITask, Collection<IObserver>> observers;
+    protected Handler handler;
 
     public ObserverManager() {
         this.observers = new ConcurrentHashMap<>();
@@ -26,12 +26,12 @@ public class ObserverManager implements IObserverManager {
 
     @Override
     public void add(ITask task, IObserver observer) {
-        Set<IObserver> requestObservers = observers.get(task);
+        Collection<IObserver> requestObservers = observers.get(task);
         if(requestObservers == null) {
             synchronized (task) {
                 requestObservers = observers.get(task);
                 if(requestObservers == null) {
-                    requestObservers = new ConcurrentSkipListSet<>();
+                    requestObservers = new CopyOnWriteArraySet<>();
                     observers.put(task, requestObservers);
                 }
             }
@@ -41,7 +41,7 @@ public class ObserverManager implements IObserverManager {
 
     @Override
     public void remove(ITask task, IObserver observer) {
-        Set<IObserver> requestObservers = observers.get(observer);
+        Collection<IObserver> requestObservers = observers.get(observer);
         if(requestObservers != null) {
             requestObservers.remove(observer);
         }
@@ -58,12 +58,15 @@ public class ObserverManager implements IObserverManager {
             throw new IllegalArgumentException("Group can't be null!");
         }
 
-        for(Map.Entry<ITask, Set<IObserver>> entry : observers.entrySet()) {
-            Set<IObserver> taskObservers = entry.getValue();
+        for(Map.Entry<ITask, Collection<IObserver>> entry : observers.entrySet()) {
+            Collection<IObserver> taskObservers = entry.getValue();
             for(IObserver observer : taskObservers) {
                 if(group.equals(observer.getGroup())) {
                     taskObservers.remove(observer);
                 }
+            }
+            if(taskObservers.size() == 0) {
+                observers.remove(entry.getKey());
             }
         }
     }
@@ -124,7 +127,7 @@ public class ObserverManager implements IObserverManager {
             Type type = Type.values()[msg.what];
             Wrapper wrapper = (Wrapper) msg.obj;
 
-            Set<IObserver> taskObservers = observers.get(wrapper.task);
+            Collection<IObserver> taskObservers = observers.get(wrapper.task);
             if(taskObservers != null) {
                 for(IObserver observer : taskObservers) {
                     switch (type) {
