@@ -41,12 +41,28 @@ public class FilesystemRepositoryTest extends ApplicationTestCase<Application> {
         assertNull(repo.obtain(uri, 100));
     }
 
-    //overflow test in the BitmapFilesystemRepositoryTest.java
+    public void testOverflow() throws Exception {
+        Uri uri1 = Uri.parse("content://example.com/test1");
+        Uri uri2 = Uri.parse("content://example.com/test2");
+        TestObject object1 = new TestObject(1, "name1", 11.2);
+        TestObject object2 = new TestObject(2, "name2", 12.2);
+
+        repo.persist(uri1, object1);
+        TestObject actual1 = repo.obtain(uri1, Time.ALWAYS_RETURNED);
+        assertEquals(object1, actual1);
+
+        repo.persist(uri2, object2);
+        TestObject actual2 = repo.obtain(uri2, Time.ALWAYS_RETURNED);
+        assertEquals(object2, actual2);
+
+        Thread.sleep(20);
+        assertNull("Old file was not deleted", repo.obtain(uri1, Time.ALWAYS_RETURNED));
+    }
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        repo = new FilesystemRepository<>(new File(getContext().getCacheDir(), "test-cache"), 50 * 1024);
+        repo = new FilesystemRepository<>(new File(getContext().getCacheDir(), "test-cache"), 460);
     }
 
     @Override
