@@ -17,10 +17,10 @@ import ingvar.android.processor.examples.gallery.widget.GalleryAdapter;
 import ingvar.android.processor.examples.view.AbstractActivity;
 import ingvar.android.processor.exception.ProcessorException;
 import ingvar.android.processor.filesystem.source.FilesystemSource;
-import ingvar.android.processor.filesystem.task.FilesystemTask;
 import ingvar.android.processor.observation.AbstractObserver;
 import ingvar.android.processor.observation.IObserverManager;
 import ingvar.android.processor.persistence.Time;
+import ingvar.android.processor.task.SingleTask;
 import ingvar.android.processor.util.CastUtils;
 import roboguice.inject.ContentView;
 import roboguice.inject.InjectFragment;
@@ -60,10 +60,10 @@ public class GalleryActivity extends AbstractActivity {
         }
     }
 
-    private class ImagesTask extends FilesystemTask<List<String>> {
+    private class ImagesTask extends SingleTask<String, List<String>, FilesystemSource> {
 
         public ImagesTask(String assetDir) {
-            super(assetDir, CastUtils.<List<String>>cast(List.class), Time.ALWAYS_RETURNED);
+            super(assetDir, CastUtils.<List<String>>cast(List.class), FilesystemSource.class, Time.ALWAYS_RETURNED);
         }
 
         @Override

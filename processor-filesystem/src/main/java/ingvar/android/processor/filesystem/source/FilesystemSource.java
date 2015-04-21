@@ -32,8 +32,11 @@ public class FilesystemSource extends ContextSource {
     }
 
     public File save(String filename, Serializable object) {
-        File file = new File(filename);
-        synchronized (filename.intern()) {
+        return save(new File(filename), object);
+    }
+
+    public File save(File file, Serializable object) {
+        synchronized (file.getPath().intern()) {
             try {
                 OutputStream out = new BufferedOutputStream(new FileOutputStream(file, false), 1024);
                 out.write(BytesUtils.toBytes(object));
@@ -47,8 +50,11 @@ public class FilesystemSource extends ContextSource {
     }
 
     public <T> T load(String filename) {
+        return load(new File(filename));
+    }
+
+    public <T> T load(File file) {
         Object result = null;
-        File file = new File(filename);
         if(file.exists() && file.isFile()) {
             try {
                 InputStream in = new BufferedInputStream(new FileInputStream(file));
@@ -62,7 +68,7 @@ public class FilesystemSource extends ContextSource {
         return (T) result;
     }
 
-    private void close(Closeable closeable) {
+    public void close(Closeable closeable) {
         try {
             if(closeable != null) {
                 closeable.close();

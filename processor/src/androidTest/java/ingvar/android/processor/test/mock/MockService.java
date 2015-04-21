@@ -11,7 +11,7 @@ import ingvar.android.processor.source.ISourceManager;
 public class MockService extends ProcessorService {
 
     public ExtendedObserverManager getObserverManager() {
-        return (ExtendedObserverManager) observerManager;
+        return (ExtendedObserverManager) getObserverManager();
     }
 
     @Override

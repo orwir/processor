@@ -1,4 +1,4 @@
-package ingvar.android.processor.memory.task;
+package ingvar.android.processor.memory.test.task;
 
 import ingvar.android.processor.memory.source.MemorySource;
 import ingvar.android.processor.observation.IObserverManager;
@@ -15,7 +15,7 @@ public class MemoryTask extends SingleTask<String, Object, MemorySource> {
 
     @Override
     public Object process(IObserverManager observerManager, MemorySource source) {
-        return source.get(getTaskKey());
+        return getTaskKey() + "_value";
     }
 
 }

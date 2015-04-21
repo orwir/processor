@@ -18,6 +18,7 @@ import ingvar.android.processor.observation.IObserverManager;
 import ingvar.android.processor.observation.ObserverManager;
 import ingvar.android.processor.persistence.CacheManager;
 import ingvar.android.processor.persistence.ICacheManager;
+import ingvar.android.processor.persistence.Time;
 import ingvar.android.processor.source.ISourceManager;
 import ingvar.android.processor.source.SourceManager;
 import ingvar.android.processor.task.ITask;
@@ -42,11 +43,11 @@ public abstract class ProcessorService extends Service {
 
     }
 
-    protected ExecutorService executorService;
-    protected ICacheManager cacheManager;
-    protected ISourceManager sourceManager;
-    protected IObserverManager observerManager;
-    protected IWorker worker;
+    private ExecutorService executorService;
+    private ICacheManager cacheManager;
+    private ISourceManager sourceManager;
+    private IObserverManager observerManager;
+    private IWorker worker;
     private final ProcessorBinder binder;
 
     public ProcessorService() {
@@ -92,6 +93,10 @@ public abstract class ProcessorService extends Service {
         return cacheManager.obtain(key, dataClass, expiryTime);
     }
 
+    public <K, R> R obtainFromCache(K key, Class dataClass) {
+        return obtainFromCache(key, dataClass, Time.ALWAYS_RETURNED);
+    }
+
     public <K> void removeFromCache(Class dataClass, K key) {
         cacheManager.remove(dataClass, key);
     }
@@ -135,6 +140,26 @@ public abstract class ProcessorService extends Service {
      * @param cacheManager
      */
     protected abstract void provideRepositories(ICacheManager cacheManager);
+
+    protected ExecutorService getExecutorService() {
+        return executorService;
+    }
+
+    protected ICacheManager getCacheManager() {
+        return cacheManager;
+    }
+
+    protected ISourceManager getSourceManager() {
+        return sourceManager;
+    }
+
+    protected IObserverManager getObserverManager() {
+        return observerManager;
+    }
+
+    protected IWorker getWorker() {
+        return worker;
+    }
 
     protected ExecutorService createExecutorService() {
         return new ThreadPoolExecutor(

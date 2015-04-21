@@ -38,7 +38,7 @@ import ingvar.android.processor.util.BytesUtils;
 
 public class DiskLruCache {
 
-    public static enum CommitType {
+    public enum CommitType {
         IMMEDIATELY,
         BY_UPDATES;
     }
@@ -162,6 +162,23 @@ public class DiskLruCache {
     }
 
     /**
+     * Create new file. This file not registered as cached file.
+     * For register use {@link DiskLruCache#register(File)}.
+     *
+     * @param key filename
+     * @return created file
+     */
+    public File createEmptyFile(String key) {
+        File file = new File(root, key);
+        try {
+            file.createNewFile();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return file;
+    }
+
+    /**
      * Get cached serializable object from file
      * @param key
      * @param <T> - object type
@@ -217,6 +234,15 @@ public class DiskLruCache {
                 throw new RuntimeException(e);
             }
         }
+        adjustCacheAsync();
+        return file;
+    }
+
+    public File register(File file) {
+        if(!root.getPath().equals(file.getParent())) {
+            throw new IllegalArgumentException(String.format("For registering file '%s' must be in the cache dir!", file.getName()));
+        }
+        updateKey(file.getName());
         adjustCacheAsync();
         return file;
     }

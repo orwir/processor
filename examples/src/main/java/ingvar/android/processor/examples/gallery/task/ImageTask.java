@@ -11,17 +11,16 @@ import java.io.InputStream;
 import ingvar.android.processor.examples.gallery.view.GalleryActivity;
 import ingvar.android.processor.exception.PersistenceException;
 import ingvar.android.processor.filesystem.source.FilesystemSource;
-import ingvar.android.processor.filesystem.task.FilesystemTask;
 import ingvar.android.processor.observation.IObserverManager;
-import ingvar.android.processor.persistence.Time;
+import ingvar.android.processor.task.SingleTask;
 
 /**
  * Created by Igor Zubenko on 2015.03.23.
  */
-public class ImageTask extends FilesystemTask<Bitmap> {
+public class ImageTask extends SingleTask<String, Bitmap, FilesystemSource> {
 
     public ImageTask(String imageName) {
-        super(imageName, Bitmap.class, Time.ALWAYS_RETURNED);
+        super(imageName, Bitmap.class, FilesystemSource.class);
     }
 
     @Override
@@ -36,11 +35,8 @@ public class ImageTask extends FilesystemTask<Bitmap> {
         } catch (IOException e) {
             throw new PersistenceException(e);
         } finally {
-            if(is != null) {
-                try {is.close();} catch (Exception e) {}
-            }
+            source.close(is);
         }
-
         return result;
     }
 

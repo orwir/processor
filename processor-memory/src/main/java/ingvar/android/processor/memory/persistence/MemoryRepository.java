@@ -55,7 +55,7 @@ public class MemoryRepository<K, R> implements IRepository<K, R> {
 
     @Override
     public R persist(K key, R data) {
-        synchronized (storage) {
+        synchronized (key) {
             storage.put(key, new Entry(data));
             if(decorated != null) {
                 decorated.persist(key, data);
@@ -100,15 +100,21 @@ public class MemoryRepository<K, R> implements IRepository<K, R> {
 
     @Override
     public void remove(K key) {
-        synchronized (storage) {
+        synchronized (key) {
             storage.remove(key);
+            if(decorated != null) {
+                decorated.remove(key);
+            }
         }
     }
 
     @Override
     public synchronized void removeAll() {
-        synchronized (storage) {
+        synchronized (this) {
             storage.evictAll();
+            if(decorated != null) {
+                decorated.removeAll();
+            }
         }
     }
 

@@ -34,13 +34,14 @@ public class BitmapFilesystemRepository<K> extends FilesystemRepository<K, Bitma
 
         BufferedOutputStream out = null;
         try {
-            File file = storage.put(filename, "placeholder");
+            File file = storage.createEmptyFile(filename);
             out = new BufferedOutputStream(new FileOutputStream(file));
 
             boolean didCompress = data.compress(compressFormat, quality, out);
             if (!didCompress) {
                 throw new PersistenceException(String.format("Could not compress bitmap for path: %s", file.getAbsolutePath()));
             }
+            storage.register(file);
 
         } catch (IOException e) {
             throw new PersistenceException(e);

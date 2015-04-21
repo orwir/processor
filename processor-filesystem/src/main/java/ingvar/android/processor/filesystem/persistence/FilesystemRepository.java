@@ -74,9 +74,22 @@ public class FilesystemRepository<K, R> implements IRepository<K, R> {
 
     protected String filenameFromKey(K key) {
         if(md5 != null) {
-            md5.reset();
-            md5.update(toBytes(key));
-            return new BigInteger(1, md5.digest()).toString();
+            try {
+                byte[] bytes;
+                if (key instanceof String) {
+                    bytes = ((String) key).getBytes("UTF-8");
+                } else if (key instanceof Serializable) {
+                    bytes = toBytes(key);
+                } else {
+                    bytes = key.toString().getBytes("UTF-8");
+                }
+                md5.reset();
+                md5.update(bytes);
+                return new BigInteger(1, md5.digest()).toString();
+
+            } catch (Exception e) {
+                return String.valueOf(key.hashCode());
+            }
         } else {
             return String.valueOf(key.hashCode());
         }

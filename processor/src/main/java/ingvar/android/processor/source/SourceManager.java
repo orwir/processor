@@ -15,7 +15,7 @@ public class SourceManager implements ISourceManager {
     }
 
     @Override
-    public ISource getSource(Class<ISource> key) {
+    public ISource getSource(Class<? extends ISource> key) {
         return sources.get(key);
     }
 
@@ -25,7 +25,7 @@ public class SourceManager implements ISourceManager {
     }
 
     @Override
-    public boolean isRegistered(Class<ISource> key) {
+    public boolean isRegistered(Class<? extends ISource> key) {
         return sources.get(key) != null;
     }
 
