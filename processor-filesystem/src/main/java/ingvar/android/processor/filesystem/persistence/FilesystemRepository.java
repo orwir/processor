@@ -12,7 +12,8 @@ import java.util.List;
 
 import ingvar.android.processor.exception.PersistenceException;
 import ingvar.android.processor.filesystem.util.DiskLruCache;
-import ingvar.android.processor.persistence.IRepository;
+import ingvar.android.processor.persistence.AbstractRepository;
+import ingvar.android.processor.persistence.ListKey;
 import ingvar.android.processor.persistence.Time;
 
 import static ingvar.android.processor.util.BytesUtils.toBytes;
@@ -20,7 +21,7 @@ import static ingvar.android.processor.util.BytesUtils.toBytes;
 /**
  * Created by Igor Zubenko on 2015.03.20.
  */
-public class FilesystemRepository<K, R> implements IRepository<K, R> {
+public class FilesystemRepository extends AbstractRepository {
 
     protected DiskLruCache storage;
     protected MessageDigest md5;
@@ -34,77 +35,9 @@ public class FilesystemRepository<K, R> implements IRepository<K, R> {
     }
 
     @Override
-    public R persist(K key, R data) {
-        if(key instanceof CollectionKey) {
-            CollectionKey<K> colKey = (CollectionKey) key;
-            Collection colData = (Collection) data;
-            if(colKey.getKeys().size() != colData.size()) {
-                throw new PersistenceException("Count of keys and data are mismatched!");
-            }
-
-            Iterator<K> ki = colKey.getKeys().iterator();
-            Iterator<Serializable> di = colData.iterator();
-            while(ki.hasNext()) {
-                K k = ki.next();
-                Serializable d = di.next();
-
-                String filename = colKey.getPrefix() + filenameFromKey(k);
-                storage.put(filename, d);
-            }
-
-        } else {
-            String filename = filenameFromKey(key);
-            storage.put(filename, (Serializable) data);
-        }
-        return data;
-    }
-
-    @Override
-    public R obtain(K key, long expiryTime) {
-        R result = null;
-
-        if(key instanceof CollectionKey) {
-            CollectionKey<K> colKey = (CollectionKey) key;
-            boolean onlyPrefix = colKey.getKeys().isEmpty();
-            List<String> nameFilter = null;
-            if(!onlyPrefix) {
-                nameFilter = new ArrayList<>();
-                for(K k : colKey.getKeys()) {
-                    nameFilter.add(colKey.getPrefix() + filenameFromKey(k));
-                }
-            }
-
-            List data = new ArrayList();
-            for(String filename : storage.getAllKeys()) {
-                if(filename.startsWith(colKey.getPrefix()) && (onlyPrefix || nameFilter.contains(filename))) {
-                    if(fileNotExpired(filename, expiryTime)) {
-                        data.add(storage.get(filename));
-                    }
-                }
-            }
-            result = (R) data;
-
-        } else {
-            String filename = filenameFromKey(key);
-            if(storage.contains(filename) && isNotExpired(key, expiryTime)) {
-                result = storage.get(filename);
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public long getCreationTime(K key) {
-        //TODO: CollectionKey
+    public <K> long getCreationTime(K key) {
         String filename = filenameFromKey(key);
         return storage.getTime(filename);
-    }
-
-    @Override
-    public void remove(K key) {
-        //TODO: CollectionKey
-        String filename = filenameFromKey(key);
-        storage.remove(filename);
     }
 
     @Override
@@ -122,8 +55,106 @@ public class FilesystemRepository<K, R> implements IRepository<K, R> {
         return false;
     }
 
-    protected String filenameFromKey(K key) {
-        if(md5 != null) {
+    @Override
+    protected Object composeKey(Object major, Object minor) {
+        return filenameFromKey(major) + filenameFromKey(minor);
+    }
+
+    @Override
+    protected <K, R> R persistSingle(K key, R data) {
+        String filename = filenameFromKey(key);
+        writeFile(filename, data);
+        return data;
+    }
+
+    @Override
+    protected <R> R persistCollection(ListKey key, R data) {
+        Collection collection = (Collection) data;
+
+        if(key.getMinors().size() != collection.size()) {
+            throw new PersistenceException("Count of keys and data are mismatched!");
+        }
+        Iterator ikeys = key.getMinors().iterator();
+        Iterator idata = collection.iterator();
+        while(ikeys.hasNext()) {
+            String compositeKey = (String) composeKey(key.getMajor(), ikeys.next());
+            writeFile(compositeKey, idata.next());
+        }
+        return data;
+    }
+
+    @Override
+    protected <K, R> R obtainSingle(K key, long expiryTime) {
+        R result = null;
+        String filename = filenameFromKey(key);
+        if(storage.contains(filename) && fileNotExpired(filename, expiryTime)) {
+            result = readFile(filename);
+        }
+        return result;
+    }
+
+    @Override
+    protected List obtainCollection(ListKey key, long expiryTime) {
+        List result = new ArrayList();
+
+        List<String> filenameFilter = new ArrayList<>();
+        for(Object minor : key.getMinors()) {
+            filenameFilter.add((String) composeKey(key.getMajor(), minor));
+        }
+        String filenamePrefix = filenameFromKey(key.getMajor());
+        boolean onlyPrefix = filenameFilter.isEmpty();
+
+        for(String filename : storage.getAllKeys()) {
+            if(filename.startsWith(filenamePrefix) && (onlyPrefix || filenameFilter.contains(filename))) {
+                if(fileNotExpired(filename, expiryTime)) {
+                    result.add(readFile(filename));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    protected <K> void removeSingle(K key) {
+        String filename = filenameFromKey(key);
+        storage.remove(filename);
+    }
+
+    @Override
+    protected void removeList(ListKey key) {
+        List<String> filenameFilter = new ArrayList<>();
+        for(Object minor : key.getMinors()) {
+            filenameFilter.add((String) composeKey(key.getMajor(), minor));
+        }
+        String filenamePrefix = filenameFromKey(key.getMajor());
+        boolean onlyPrefix = filenameFilter.isEmpty();
+
+        for(String filename : storage.getAllKeys()) {
+            if(filename.startsWith(filenamePrefix) && (onlyPrefix || filenameFilter.contains(filename))) {
+                storage.remove(filename);
+            }
+        }
+    }
+
+    protected <R> R readFile(String filename) {
+        return storage.get(filename);
+    }
+
+    protected void writeFile(String filename, Object data) {
+        storage.put(filename, (Serializable) data);
+    }
+
+    protected <K> String filenameFromKey(K key) {
+        //This method used for creating name from composite key
+        //that's why handled null and empty.
+        if(key == null) {
+            return "";
+        }
+        else if(key instanceof String && ((String) key).isEmpty()) {
+            return "";
+        }
+        else if(md5 != null) {
             try {
                 byte[] bytes;
                 if (key instanceof String) {
@@ -143,11 +174,6 @@ public class FilesystemRepository<K, R> implements IRepository<K, R> {
         } else {
             return String.valueOf(key.hashCode());
         }
-    }
-
-    protected boolean isNotExpired(K key, long expiryTime) {
-        String filename = filenameFromKey(key);
-        return fileNotExpired(filename, expiryTime);
     }
 
     protected boolean fileNotExpired(String filename, long expiryTime) {

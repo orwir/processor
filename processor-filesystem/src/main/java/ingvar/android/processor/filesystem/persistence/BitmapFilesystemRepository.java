@@ -12,11 +12,12 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import ingvar.android.processor.exception.PersistenceException;
+import ingvar.android.processor.filesystem.util.FileUtils;
 
 /**
  * Created by Igor Zubenko on 2015.03.20.
  */
-public class BitmapFilesystemRepository<K> extends FilesystemRepository<K, Bitmap> {
+public class BitmapFilesystemRepository extends FilesystemRepository {
 
     private static final int DEFAULT_QUALITY = 100;
 
@@ -26,55 +27,6 @@ public class BitmapFilesystemRepository<K> extends FilesystemRepository<K, Bitma
 
     public BitmapFilesystemRepository(File directory, int maxBytes) {
         super(directory, maxBytes);
-    }
-
-    @Override
-    public Bitmap persist(K key, Bitmap data) {
-        String filename = filenameFromKey(key);
-
-        BufferedOutputStream out = null;
-        try {
-            File file = storage.createEmptyFile(filename);
-            out = new BufferedOutputStream(new FileOutputStream(file));
-
-            boolean didCompress = data.compress(compressFormat, quality, out);
-            if (!didCompress) {
-                throw new PersistenceException(String.format("Could not compress bitmap for path: %s", file.getAbsolutePath()));
-            }
-            storage.register(file);
-
-        } catch (IOException e) {
-            throw new PersistenceException(e);
-        } finally {
-            if(out != null) {
-                try {out.close();} catch (Exception e) {}
-            }
-        }
-
-        return data;
-    }
-
-    @Override
-    public Bitmap obtain(K key, long expiryTime) {
-        String filename = filenameFromKey(key);
-
-        Bitmap result = null;
-        if(storage.contains(filename) && isNotExpired(key, expiryTime)) {
-            File file = storage.getFile(filename);
-            InputStream is = null;
-            try {
-                is = new BufferedInputStream(new FileInputStream(file));
-                result = BitmapFactory.decodeStream(is, null, decodingOptions);
-            } catch (IOException e) {
-                throw new PersistenceException(e);
-            } finally {
-                if(is != null) {
-                    try {is.close();} catch (Exception e) {}
-                }
-            }
-        }
-
-        return result;
     }
 
     @Override
@@ -104,6 +56,46 @@ public class BitmapFilesystemRepository<K> extends FilesystemRepository<K, Bitma
 
     public void setQuality(int quality) {
         this.quality = quality;
+    }
+
+    @Override
+    protected <R> R readFile(String filename) {
+        Bitmap result = null;
+
+        File file = storage.getFile(filename);
+        InputStream is = null;
+        try {
+            is = new BufferedInputStream(new FileInputStream(file));
+            result = BitmapFactory.decodeStream(is, null, decodingOptions);
+        } catch (IOException e) {
+            throw new PersistenceException(e);
+        } finally {
+            FileUtils.close(is);
+        }
+
+        return (R) result;
+    }
+
+    @Override
+    protected void writeFile(String filename, Object data) {
+        Bitmap bitmap = (Bitmap) data;
+
+        BufferedOutputStream out = null;
+        try {
+            File file = storage.createEmptyFile(filename);
+            out = new BufferedOutputStream(new FileOutputStream(file));
+
+            boolean didCompress = bitmap.compress(compressFormat, quality, out);
+            if (!didCompress) {
+                throw new PersistenceException(String.format("Could not compress bitmap for path: %s", file.getAbsolutePath()));
+            }
+            storage.register(file);
+
+        } catch (IOException e) {
+            throw new PersistenceException(e);
+        } finally {
+            FileUtils.close(out);
+        }
     }
 
 }

@@ -18,6 +18,7 @@ import ingvar.android.processor.exception.ProcessorException;
 import ingvar.android.processor.filesystem.source.FilesystemSource;
 import ingvar.android.processor.filesystem.test.pojo.TestObject;
 import ingvar.android.processor.filesystem.test.service.MockFilesystemService;
+import ingvar.android.processor.filesystem.util.FileUtils;
 import ingvar.android.processor.observation.IObserverManager;
 import ingvar.android.processor.task.SingleTask;
 
@@ -89,7 +90,7 @@ public class ServiceTest extends ServiceTestCase<MockFilesystemService> {
             } catch (IOException e) {
                 throw new ProcessorException(e);
             } finally {
-                source.close(stream);
+                FileUtils.close(stream);
             }
         }
 
@@ -113,7 +114,7 @@ public class ServiceTest extends ServiceTestCase<MockFilesystemService> {
                     } catch (IOException e) {
                         throw new ProcessorException(e);
                     } finally {
-                        source.close(stream);
+                        FileUtils.close(stream);
                     }
                 }
             } catch (IOException e) {

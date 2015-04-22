@@ -28,13 +28,13 @@ public class CacheManager implements ICacheManager {
 
     @Override
     public <K, R> R obtain(K key, Class dataClass, long expiryTime) {
-        IRepository<K, R> repository = getAppropriateRepository(dataClass);
+        IRepository repository = getAppropriateRepository(dataClass);
         return repository.obtain(key, expiryTime);
     }
 
     @Override
     public <K, R> R persist(K key, R data) {
-        IRepository<K, R> repository = getAppropriateRepository(data.getClass());
+        IRepository repository = getAppropriateRepository(data.getClass());
         repository.persist(key, data);
         return data;
     }

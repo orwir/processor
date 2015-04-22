@@ -15,7 +15,7 @@ import ingvar.android.processor.persistence.Time;
  */
 public class BitmapFilesystemRepositoryTest extends ApplicationTestCase<Application> {
 
-    private BitmapFilesystemRepository<String> repo;
+    private BitmapFilesystemRepository repo;
 
     public BitmapFilesystemRepositoryTest() {
         super(Application.class);
@@ -52,7 +52,7 @@ public class BitmapFilesystemRepositoryTest extends ApplicationTestCase<Applicat
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        repo = new BitmapFilesystemRepository<>(new File(getContext().getCacheDir(), "test-cache"), 60 * 1024);
+        repo = new BitmapFilesystemRepository(new File(getContext().getCacheDir(), "test-cache"), 60 * 1024);
     }
 
     @Override

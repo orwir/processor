@@ -5,9 +5,12 @@ import android.net.Uri;
 import android.test.ApplicationTestCase;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 import ingvar.android.processor.filesystem.persistence.FilesystemRepository;
 import ingvar.android.processor.filesystem.test.pojo.TestObject;
+import ingvar.android.processor.persistence.ListKey;
 import ingvar.android.processor.persistence.Time;
 
 /**
@@ -15,7 +18,7 @@ import ingvar.android.processor.persistence.Time;
  */
 public class FilesystemRepositoryTest extends ApplicationTestCase<Application> {
 
-    private FilesystemRepository<Uri, TestObject> repo;
+    private FilesystemRepository repo;
 
     public FilesystemRepositoryTest() {
         super(Application.class);
@@ -28,6 +31,41 @@ public class FilesystemRepositoryTest extends ApplicationTestCase<Application> {
         repo.persist(uri, expected);
         TestObject actual = repo.obtain(uri, Time.ALWAYS_RETURNED);
         assertEquals(expected, actual);
+    }
+
+    public void testCacheList() {
+        ListKey<Uri, Uri> key = new ListKey<>(Uri.parse("http://example.com"),
+            Uri.parse("http://example.com/testfile1"),
+            Uri.parse("http://example.com/testfile2")
+        );
+
+        List<TestObject> expected = Arrays.asList(
+            new TestObject(1, "Test1", 100.501),
+            new TestObject(2, "Test2", 100.502)
+        );
+
+        repo.persist(key, expected);
+        List<TestObject> actual = repo.obtain(key, Time.ALWAYS_RETURNED);
+        assertEquals(expected, actual);
+    }
+
+    public void testCacheListEmptyMajor() {
+        ListKey<Uri, Uri> key = new ListKey<>(null,
+                Uri.parse("http://example.com/testfile1"),
+                Uri.parse("http://example.com/testfile2")
+        );
+
+        List<TestObject> expected = Arrays.asList(
+                new TestObject(1, "Test1", 100.501),
+                new TestObject(2, "Test2", 100.502)
+        );
+
+        repo.persist(key, expected);
+        List<TestObject> actual = repo.obtain(key, Time.ALWAYS_RETURNED);
+        assertEquals(expected, actual);
+
+        TestObject single = repo.obtain(Uri.parse("http://example.com/testfile1"), Time.ALWAYS_RETURNED);
+        assertEquals(expected.get(0), single);
     }
 
     public void testExpired() throws Exception {
@@ -62,7 +100,7 @@ public class FilesystemRepositoryTest extends ApplicationTestCase<Application> {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        repo = new FilesystemRepository<>(new File(getContext().getCacheDir(), "test-cache"), 460);
+        repo = new FilesystemRepository(new File(getContext().getCacheDir(), "test-cache"), 460);
     }
 
     @Override

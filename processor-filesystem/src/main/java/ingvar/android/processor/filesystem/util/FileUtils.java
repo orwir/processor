@@ -3,7 +3,9 @@ package ingvar.android.processor.filesystem.util;
 import android.content.Context;
 import android.os.Environment;
 
+import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by Igor Zubenko on 2014.09.04.
@@ -24,6 +26,14 @@ public class FileUtils {
     public static boolean isExternalStorageReadable() {
         String state = Environment.getExternalStorageState();
         return Environment.MEDIA_MOUNTED.equals(state) || Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
+    }
+
+    public static void close(Closeable closeable) {
+        try {
+            if(closeable != null) {
+                closeable.close();
+            }
+        } catch (IOException ignored) {}
     }
 
     private FileUtils() {}
