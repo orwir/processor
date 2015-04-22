@@ -6,11 +6,13 @@ import android.graphics.BitmapFactory;
 import android.test.ServiceTestCase;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import ingvar.android.processor.exception.ProcessorException;
 import ingvar.android.processor.memory.test.service.MockMemoryService;
+import ingvar.android.processor.memory.test.task.MemoryListTask;
 import ingvar.android.processor.memory.test.task.MemoryTask;
 import ingvar.android.processor.observation.IObserverManager;
 import ingvar.android.processor.persistence.Time;
@@ -31,6 +33,14 @@ public class ServiceTest extends ServiceTestCase<MockMemoryService> {
         Future<Object> future = getService().execute(request);
 
         assertEquals("Returned result not match", "test_value", future.get());
+    }
+
+    public void testRequestList() throws Exception {
+        MemoryListTask request = new MemoryListTask(10, Time.ALWAYS_RETURNED);
+
+        Future<List<String>> future = getService().execute(request);
+        assertEquals(10, future.get().size());
+        assertEquals(10, getService().<List<String>>obtainFromCache(10, String.class).size());
     }
 
     public void testCache() throws Exception {
@@ -78,7 +88,7 @@ public class ServiceTest extends ServiceTestCase<MockMemoryService> {
         Future<Bitmap> future = getService().execute(new BitmapTask(key));
 
         assertTrue(expected.sameAs(future.get()));
-        assertTrue(expected.sameAs(getService().<String, Bitmap>obtainFromCache(key, Bitmap.class)));
+        assertTrue(expected.sameAs(getService().<Bitmap>obtainFromCache(key, Bitmap.class)));
     }
 
     @Override

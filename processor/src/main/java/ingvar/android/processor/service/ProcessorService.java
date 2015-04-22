@@ -89,11 +89,11 @@ public abstract class ProcessorService extends Service {
         return future;
     }
 
-    public <K, R> R obtainFromCache(K key, Class dataClass, long expiryTime) {
+    public <R> R obtainFromCache(Object key, Class dataClass, long expiryTime) {
         return cacheManager.obtain(key, dataClass, expiryTime);
     }
 
-    public <K, R> R obtainFromCache(K key, Class dataClass) {
+    public <R> R obtainFromCache(Object key, Class dataClass) {
         return obtainFromCache(key, dataClass, Time.ALWAYS_RETURNED);
     }
 

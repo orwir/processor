@@ -22,7 +22,7 @@ public abstract class SingleTask<K, R, S extends ISource> extends AbstractTask<K
      * @param resultClass result class
      * @param sourceType source type
      */
-    public SingleTask(K key, Class<R> resultClass, Class<? extends ISource> sourceType) {
+    public SingleTask(K key, Class resultClass, Class<? extends ISource> sourceType) {
         this(key, resultClass, sourceType, Time.ALWAYS_EXPIRED);
     }
 
@@ -34,7 +34,7 @@ public abstract class SingleTask<K, R, S extends ISource> extends AbstractTask<K
      * @param sourceType source type
      * @param cacheExpirationTime through how many milliseconds result of task will be expired in the cache
      */
-    public SingleTask(K key, Class<R> resultClass, Class<? extends ISource> sourceType, long cacheExpirationTime) {
+    public SingleTask(K key, Class resultClass, Class<? extends ISource> sourceType, long cacheExpirationTime) {
         super(key, resultClass);
         this.sourceType = sourceType;
         this.cacheExpirationTime = cacheExpirationTime;

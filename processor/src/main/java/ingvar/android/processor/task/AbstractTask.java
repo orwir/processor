@@ -10,13 +10,13 @@ import ingvar.android.processor.exception.ProcessorException;
 public abstract class AbstractTask<K, R> implements ITask<K, R> {
 
     private K key;
-    private Class<R> resultClass;
+    private Class resultClass;
     private boolean cancelled;
     private TaskStatus status;
     private boolean mergeable;
     private String uuid; //used if task is not mergeable
 
-    public AbstractTask(K key, Class<R> resultClass) {
+    public AbstractTask(K key, Class resultClass) {
         this.key = key;
         this.resultClass = resultClass;
         this.cancelled = false;
@@ -30,7 +30,7 @@ public abstract class AbstractTask<K, R> implements ITask<K, R> {
     }
 
     @Override
-    public Class<R> getResultClass() {
+    public Class getResultClass() {
         return resultClass;
     }
 

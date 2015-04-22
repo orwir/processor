@@ -19,7 +19,7 @@ public abstract class AggregatedTask<K, R> extends AbstractTask<K, R> {
     private int keepAliveTimeout;
     private Map<ITask, Exception> innerExceptions;
 
-    public AggregatedTask(K key, Class<R> resultClass) {
+    public AggregatedTask(K key, Class resultClass) {
         super(key, resultClass);
         this.tasks = new HashSet<>();
         this.threadsCount = DEFAULT_PARALLEL_THREADS;

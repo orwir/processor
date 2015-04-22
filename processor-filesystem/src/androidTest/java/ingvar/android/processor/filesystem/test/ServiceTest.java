@@ -9,6 +9,9 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.Future;
 
 import ingvar.android.processor.exception.ProcessorException;
@@ -88,6 +91,35 @@ public class ServiceTest extends ServiceTestCase<MockFilesystemService> {
             } finally {
                 source.close(stream);
             }
+        }
+
+    }
+
+    private class RequestAssetBitmapListTask extends SingleTask<String, List<Bitmap>, FilesystemSource> {
+
+        public RequestAssetBitmapListTask(String key, long cacheExpirationTime) {
+            super(key, String.class, FilesystemSource.class, cacheExpirationTime);
+        }
+
+        @Override
+        public List<Bitmap> process(IObserverManager observerManager, FilesystemSource source) {
+            List<Bitmap> result = new ArrayList<>();
+            try {
+                for(String name : source.getAssetManager().list(getTaskKey())) {
+                    InputStream stream = null;
+                    try {
+                        stream = new BufferedInputStream(source.getAssetManager().open(name));
+                        result.add(BitmapFactory.decodeStream(stream));
+                    } catch (IOException e) {
+                        throw new ProcessorException(e);
+                    } finally {
+                        source.close(stream);
+                    }
+                }
+            } catch (IOException e) {
+                return Collections.emptyList();
+            }
+            return result;
         }
 
     }

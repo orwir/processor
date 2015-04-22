@@ -32,7 +32,7 @@ public class SqliteRepository<R> implements IRepository<Key, R> {
 
     @Override
     public R persist(Key key, R data) {
-        getContentResolver().insert(contentUri, converter.convert(data));
+        getContentResolver().insert(key.getUri(), converter.convert(data));
         getContentResolver().notifyChange(contentUri, null);
         return data;
     }
@@ -47,11 +47,31 @@ public class SqliteRepository<R> implements IRepository<Key, R> {
                     key.getSelection(),
                     key.getSelectionArgs(),
                     key.getSortOrder());
-            result = converter.convert(cursor);
+            if(cursor.moveToFirst()) {
+                result = converter.convert(cursor);
+            }
             cursor.close();
         }
         return result;
     }
+
+    /*TODO:
+    public List<R> obtainList(Key key, long expiryTime) {
+        List<R> result = new ArrayList<>();
+        Cursor cursor = getContentResolver().query(
+                key.getUri(),
+                key.getProjection(),
+                key.getSelection(),
+                key.getSelectionArgs(),
+                key.getSortOrder());
+        while (cursor.moveToNext()) {
+            if(isNotExpired(cursor, expiryTime)) {
+                result.add(converter.convert(cursor));
+            }
+        }
+        cursor.close();
+        return result;
+    }*/
 
     @Override
     public long getCreationTime(Key key) {
@@ -64,6 +84,7 @@ public class SqliteRepository<R> implements IRepository<Key, R> {
         if(cursor.moveToFirst()) {
             creationTime = CursorCommon.longv(cursor, ExtendedColumns._CREATION_DATE);
         }
+        cursor.close();
 
         return creationTime;
     }
@@ -94,6 +115,13 @@ public class SqliteRepository<R> implements IRepository<Key, R> {
         return creationTime >= 0
             && (expiryTime == Time.ALWAYS_RETURNED
             || System.currentTimeMillis() - expiryTime <= creationTime);
+    }
+
+    protected boolean isNotExpired(Cursor cursor, long expiryTime) {
+        long creationTime = CursorCommon.longv(cursor, ExtendedColumns._CREATION_DATE);
+        return creationTime >= 0
+                && (expiryTime == Time.ALWAYS_RETURNED
+                || System.currentTimeMillis() - expiryTime <= creationTime);
     }
 
     protected Context getContext() {
