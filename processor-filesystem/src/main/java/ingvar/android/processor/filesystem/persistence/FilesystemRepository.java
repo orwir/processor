@@ -14,14 +14,13 @@ import ingvar.android.processor.exception.PersistenceException;
 import ingvar.android.processor.filesystem.util.DiskLruCache;
 import ingvar.android.processor.persistence.AbstractRepository;
 import ingvar.android.processor.persistence.CompositeKey;
-import ingvar.android.processor.persistence.Time;
 
 import static ingvar.android.processor.util.BytesUtils.toBytes;
 
 /**
  * Created by Igor Zubenko on 2015.03.20.
  */
-public class FilesystemRepository extends AbstractRepository {
+public class FilesystemRepository<K, R> extends AbstractRepository<K, R> {
 
     protected DiskLruCache storage;
     protected MessageDigest md5;
@@ -35,7 +34,7 @@ public class FilesystemRepository extends AbstractRepository {
     }
 
     @Override
-    public <K> long getCreationTime(K key) {
+    public long getCreationTime(Object key) {
         String filename = filenameFromKey(key);
         return storage.getTime(filename);
     }
@@ -61,21 +60,19 @@ public class FilesystemRepository extends AbstractRepository {
     }
 
     @Override
-    protected <K, R> R persistSingle(K key, R data) {
+    protected R persistSingle(K key, R data) {
         String filename = filenameFromKey(key);
         writeFile(filename, data);
         return data;
     }
 
     @Override
-    protected <R> R persistCollection(CompositeKey key, R data) {
-        Collection collection = (Collection) data;
-
-        if(key.getMinors().size() != collection.size()) {
+    protected Collection<R> persistCollection(CompositeKey key, Collection<R> data) {
+        if(key.getMinors().size() != data.size()) {
             throw new PersistenceException("Count of keys and data are mismatched!");
         }
         Iterator ikeys = key.getMinors().iterator();
-        Iterator idata = collection.iterator();
+        Iterator<R> idata = data.iterator();
         while(ikeys.hasNext()) {
             String compositeKey = (String) composeKey(key.getMajor(), ikeys.next());
             writeFile(compositeKey, idata.next());
@@ -84,18 +81,18 @@ public class FilesystemRepository extends AbstractRepository {
     }
 
     @Override
-    protected <K, R> R obtainSingle(K key, long expiryTime) {
+    protected R obtainSingle(K key, long expiryTime) {
         R result = null;
         String filename = filenameFromKey(key);
-        if(storage.contains(filename) && fileNotExpired(filename, expiryTime)) {
+        if(storage.contains(filename) && isNotExpired(storage.getTime(filename), expiryTime)) {
             result = readFile(filename);
         }
         return result;
     }
 
     @Override
-    protected Collection obtainCollection(CompositeKey key, long expiryTime) {
-        Collection result = new ArrayList();
+    protected Collection<R> obtainCollection(CompositeKey key, long expiryTime) {
+        Collection<R> result = new ArrayList();
 
         List<String> filenameFilter = new ArrayList<>();
         for(Object minor : key.getMinors()) {
@@ -106,17 +103,20 @@ public class FilesystemRepository extends AbstractRepository {
 
         for(String filename : storage.getAllKeys()) {
             if(filename.startsWith(filenamePrefix) && (onlyPrefix || filenameFilter.contains(filename))) {
-                if(fileNotExpired(filename, expiryTime)) {
+                if(isNotExpired(storage.getTime(filename), expiryTime)) {
                     result.add(readFile(filename));
                 }
             }
         }
-
-        return result;
+        if(!key.getMinors().isEmpty() && key.getMinors().size() != result.size()) {
+            //If at least one item not found don't return anything
+            result.clear();
+        }
+        return result.isEmpty() ? null : result;
     }
 
     @Override
-    protected <K> void removeSingle(K key) {
+    protected void removeSingle(K key) {
         String filename = filenameFromKey(key);
         storage.remove(filename);
     }
@@ -137,15 +137,15 @@ public class FilesystemRepository extends AbstractRepository {
         }
     }
 
-    protected <R> R readFile(String filename) {
+    protected R readFile(String filename) {
         return storage.get(filename);
     }
 
-    protected void writeFile(String filename, Object data) {
+    protected void writeFile(String filename, R data) {
         storage.put(filename, (Serializable) data);
     }
 
-    protected <K> String filenameFromKey(K key) {
+    protected String filenameFromKey(Object key) {
         //This method used for creating name from composite key
         //that's why handled null and empty.
         if(key == null) {
@@ -174,13 +174,6 @@ public class FilesystemRepository extends AbstractRepository {
         } else {
             return String.valueOf(key.hashCode());
         }
-    }
-
-    protected boolean fileNotExpired(String filename, long expiryTime) {
-        long creationTime = storage.getTime(filename);
-        return creationTime >= 0
-                && (expiryTime == Time.ALWAYS_RETURNED
-                || System.currentTimeMillis() - expiryTime <= creationTime);
     }
 
 }

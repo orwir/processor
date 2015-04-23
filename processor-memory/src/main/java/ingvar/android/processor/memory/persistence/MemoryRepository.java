@@ -89,7 +89,7 @@ public class MemoryRepository implements IRepository {
     }
 
     @Override
-    public <K> long getCreationTime(K key) {
+    public long getCreationTime(Object key) {
         long time = -1;
         Entry entry = storage.get(key);
         if(entry != null) {

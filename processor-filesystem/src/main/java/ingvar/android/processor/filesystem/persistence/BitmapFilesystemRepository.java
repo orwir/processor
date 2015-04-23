@@ -17,7 +17,7 @@ import ingvar.android.processor.filesystem.util.FileUtils;
 /**
  * Created by Igor Zubenko on 2015.03.20.
  */
-public class BitmapFilesystemRepository extends FilesystemRepository {
+public class BitmapFilesystemRepository<K> extends FilesystemRepository<K, Bitmap> {
 
     private static final int DEFAULT_QUALITY = 100;
 
@@ -59,7 +59,7 @@ public class BitmapFilesystemRepository extends FilesystemRepository {
     }
 
     @Override
-    protected <R> R readFile(String filename) {
+    protected Bitmap readFile(String filename) {
         Bitmap result = null;
 
         File file = storage.getFile(filename);
@@ -73,19 +73,17 @@ public class BitmapFilesystemRepository extends FilesystemRepository {
             FileUtils.close(is);
         }
 
-        return (R) result;
+        return result;
     }
 
     @Override
-    protected void writeFile(String filename, Object data) {
-        Bitmap bitmap = (Bitmap) data;
-
+    protected void writeFile(String filename, Bitmap data) {
         BufferedOutputStream out = null;
         try {
             File file = storage.createEmptyFile(filename);
             out = new BufferedOutputStream(new FileOutputStream(file));
 
-            boolean didCompress = bitmap.compress(compressFormat, quality, out);
+            boolean didCompress = data.compress(compressFormat, quality, out);
             if (!didCompress) {
                 throw new PersistenceException(String.format("Could not compress bitmap for path: %s", file.getAbsolutePath()));
             }
