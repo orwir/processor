@@ -100,7 +100,7 @@ public class ProcessorServiceTest extends ServiceTestCase<MockService> {
 
         @Override
         public Integer process(IObserverManager observerManager, MockSource source) {
-            try {Thread.sleep(200);} catch (InterruptedException e) {}
+            try {Thread.sleep(20);} catch (InterruptedException e) {}
             return new Integer(getTaskKey());
         }
 

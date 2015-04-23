@@ -18,15 +18,15 @@ public abstract class AbstractRepository<K, R> implements IRepository {
      *
      * @param key data identifier
      * @param data stored data
-     * @param <METHOD_KEY> identifier class. Possible variants: < K > or CompositeKey.
-     * @param <METHOD_RESULT> data class. Possible variants: < R > or Collection< R >
+     * @param <KEY> identifier class. Possible variants: < K > or CompositeKey.
+     * @param <RESULT> data class. Possible variants: < R > or Collection< R >
      * @return same data
      */
     @Override
-    public <METHOD_KEY, METHOD_RESULT> METHOD_RESULT persist(METHOD_KEY key, METHOD_RESULT data) {
+    public <KEY, RESULT> RESULT persist(KEY key, RESULT data) {
         return (key instanceof CompositeKey)
-            ? (METHOD_RESULT) persistCollection((CompositeKey) key, (Collection<R>) data)
-            : (METHOD_RESULT) persistSingle((K) key, (R) data);
+            ? (RESULT) persistCollection((CompositeKey) key, (Collection<R>) data)
+            : (RESULT) persistSingle((K) key, (R) data);
     }
 
     /**
@@ -34,25 +34,25 @@ public abstract class AbstractRepository<K, R> implements IRepository {
      *
      * @param key identifier
      * @param expiryTime how much time data consider valid in the repository.
-     * @param <METHOD_KEY> identifier class. Possible variants: < K > or CompositeKey.
-     * @param <METHOD_RESULT> data class. Possible variants: < R > or Collection< R >
+     * @param <KEY> identifier class. Possible variants: < K > or CompositeKey.
+     * @param <RESULT> data class. Possible variants: < R > or Collection< R >
      * @return requested data
      */
     @Override
-    public <METHOD_KEY, METHOD_RESULT> METHOD_RESULT obtain(METHOD_KEY key, long expiryTime) {
+    public <KEY, RESULT> RESULT obtain(KEY key, long expiryTime) {
         return (key instanceof CompositeKey)
-            ? (METHOD_RESULT) obtainCollection((CompositeKey) key, expiryTime)
-            : (METHOD_RESULT) obtainSingle((K) key, expiryTime);
+            ? (RESULT) obtainCollection((CompositeKey) key, expiryTime)
+            : (RESULT) obtainSingle((K) key, expiryTime);
     }
 
     /**
      * Remove data from repository.
      *
      * @param key identifier
-     * @param <METHOD_KEY> identifier class. Possible variants: < K > or CompositeKey.
+     * @param <KEY> identifier class. Possible variants: < K > or CompositeKey.
      */
     @Override
-    public <METHOD_KEY> void remove(METHOD_KEY key) {
+    public <KEY> void remove(KEY key) {
         if(key instanceof CompositeKey) {
             removeCollection((CompositeKey) key);
         } else {

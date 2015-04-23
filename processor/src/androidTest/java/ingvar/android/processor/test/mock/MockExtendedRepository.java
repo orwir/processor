@@ -89,7 +89,13 @@ public class MockExtendedRepository<R> extends AbstractRepository<String, R> {
 
     @Override
     protected void removeCollection(CompositeKey key) {
-
+        if(key.getMinors().isEmpty()) {
+            removeSingle((String) key.getMajor());
+        } else {
+            for(Object minor : key.getMinors()) {
+                removeSingle((String) composeKey(key.getMajor(), minor));
+            }
+        }
     }
 
     @Override
@@ -104,7 +110,7 @@ public class MockExtendedRepository<R> extends AbstractRepository<String, R> {
 
     @Override
     public boolean canHandle(Class dataClass) {
-        return this.dataClass.equals(dataClass);
+        return true;
     }
 
     private class Entry<V> {
