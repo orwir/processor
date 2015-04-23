@@ -9,7 +9,7 @@ import ingvar.android.processor.persistence.IRepository;
 /**
  * Created by Igor Zubenko on 2015.03.20.
  */
-public class BitmapMemoryRepository<K> extends MemoryRepository<K, Bitmap> {
+public class BitmapMemoryRepository extends MemoryRepository {
 
     private static class BitmapLruCache<K> extends LruCache<K, Entry<Bitmap>> {
 
@@ -29,12 +29,12 @@ public class BitmapMemoryRepository<K> extends MemoryRepository<K, Bitmap> {
         }
     }
 
-    public BitmapMemoryRepository(int maxSize, IRepository<K, Bitmap> decorated) {
-        super(new BitmapLruCache(maxSize), decorated);
+    public BitmapMemoryRepository(int maxSize, IRepository decorated) {
+        super(new BitmapLruCache<Bitmap>(maxSize), decorated);
     }
 
     public BitmapMemoryRepository(int maxSize) {
-        super(new BitmapLruCache(maxSize));
+        super(new BitmapLruCache<Bitmap>(maxSize));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package ingvar.android.processor.memory.source;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -36,13 +37,18 @@ public class MemorySource implements ISource {
     }
 
     /**
+     * Works correctly only if all objects are serializable
      *
      * @return size in bytes of all objects in the storage
      */
     public int getSize() {
         int size = 0;
         for(Object obj : storage.values()) {
-            size += BytesUtils.toBytes(obj).length;
+            if(obj instanceof Serializable) {
+                size += BytesUtils.toBytes(obj).length;
+            } else {
+                //TODO: not found solution for non-serializable objects
+            }
         }
         return size;
     }

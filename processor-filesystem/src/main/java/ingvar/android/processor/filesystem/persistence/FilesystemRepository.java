@@ -13,7 +13,7 @@ import java.util.List;
 import ingvar.android.processor.exception.PersistenceException;
 import ingvar.android.processor.filesystem.util.DiskLruCache;
 import ingvar.android.processor.persistence.AbstractRepository;
-import ingvar.android.processor.persistence.ListKey;
+import ingvar.android.processor.persistence.CompositeKey;
 import ingvar.android.processor.persistence.Time;
 
 import static ingvar.android.processor.util.BytesUtils.toBytes;
@@ -68,7 +68,7 @@ public class FilesystemRepository extends AbstractRepository {
     }
 
     @Override
-    protected <R> R persistCollection(ListKey key, R data) {
+    protected <R> R persistCollection(CompositeKey key, R data) {
         Collection collection = (Collection) data;
 
         if(key.getMinors().size() != collection.size()) {
@@ -94,8 +94,8 @@ public class FilesystemRepository extends AbstractRepository {
     }
 
     @Override
-    protected List obtainCollection(ListKey key, long expiryTime) {
-        List result = new ArrayList();
+    protected Collection obtainCollection(CompositeKey key, long expiryTime) {
+        Collection result = new ArrayList();
 
         List<String> filenameFilter = new ArrayList<>();
         for(Object minor : key.getMinors()) {
@@ -122,7 +122,7 @@ public class FilesystemRepository extends AbstractRepository {
     }
 
     @Override
-    protected void removeList(ListKey key) {
+    protected void removeCollection(CompositeKey key) {
         List<String> filenameFilter = new ArrayList<>();
         for(Object minor : key.getMinors()) {
             filenameFilter.add((String) composeKey(key.getMajor(), minor));

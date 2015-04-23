@@ -12,16 +12,16 @@ import ingvar.android.processor.persistence.Time;
  */
 public class DecorationTest extends TestCase {
 
-    private MemoryRepository<String, String> decorated;
-    private MemoryRepository<String, String> repo;
+    private MemoryRepository decorated;
+    private MemoryRepository repo;
     private LruCache<String, MemoryRepository.Entry<String>> decoratedLru;
     private LruCache<String, MemoryRepository.Entry<String>> repoLru;
 
     public DecorationTest() {
         decoratedLru = new LruCache<>(3);
-        decorated = new MemoryRepository<>(decoratedLru);
+        decorated = new MemoryRepository(decoratedLru);
         repoLru = new LruCache<>(1);
-        repo = new MemoryRepository<>(repoLru, decorated);
+        repo = new MemoryRepository(repoLru, decorated);
     }
 
     public void testDecoration() {

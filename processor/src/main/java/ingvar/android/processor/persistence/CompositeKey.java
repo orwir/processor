@@ -6,13 +6,12 @@ import java.util.List;
 /**
  * Created by Igor Zubenko on 2015.04.22.
  */
-@SuppressWarnings("unchecked")
-public class ListKey<M, K> {
+public class CompositeKey<M, K> {
 
     private M major;
     private List<K> minors;
 
-    public ListKey(M major, K... minors) {
+    public CompositeKey(M major, K... minors) {
         this.major = major;
         this.minors = Arrays.asList(minors);
     }
@@ -40,8 +39,8 @@ public class ListKey<M, K> {
 
     @Override
     public boolean equals(Object object) {
-        if(object instanceof ListKey) {
-            ListKey<M, K> o = (ListKey) object;
+        if(object instanceof CompositeKey) {
+            CompositeKey<M, K> o = (CompositeKey) object;
             return major.equals(o.major) && minors.equals(o.minors);
         }
         return false;

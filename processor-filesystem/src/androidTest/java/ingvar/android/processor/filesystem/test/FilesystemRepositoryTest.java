@@ -10,7 +10,7 @@ import java.util.List;
 
 import ingvar.android.processor.filesystem.persistence.FilesystemRepository;
 import ingvar.android.processor.filesystem.test.pojo.TestObject;
-import ingvar.android.processor.persistence.ListKey;
+import ingvar.android.processor.persistence.CompositeKey;
 import ingvar.android.processor.persistence.Time;
 
 /**
@@ -34,7 +34,7 @@ public class FilesystemRepositoryTest extends ApplicationTestCase<Application> {
     }
 
     public void testCacheList() {
-        ListKey<Uri, Uri> key = new ListKey<>(Uri.parse("http://example.com"),
+        CompositeKey<Uri, Uri> key = new CompositeKey<>(Uri.parse("http://example.com"),
             Uri.parse("http://example.com/testfile1"),
             Uri.parse("http://example.com/testfile2")
         );
@@ -50,7 +50,7 @@ public class FilesystemRepositoryTest extends ApplicationTestCase<Application> {
     }
 
     public void testCacheListEmptyMajor() {
-        ListKey<Uri, Uri> key = new ListKey<>(null,
+        CompositeKey<Uri, Uri> key = new CompositeKey<>(null,
                 Uri.parse("http://example.com/testfile1"),
                 Uri.parse("http://example.com/testfile2")
         );
