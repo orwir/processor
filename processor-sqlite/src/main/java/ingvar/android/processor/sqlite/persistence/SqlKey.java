@@ -78,4 +78,40 @@ public class SqlKey {
         return this;
     }
 
+    @Override
+    public int hashCode() {
+        int hashCode = 31;
+        if(uri != null) {
+            hashCode *= 31 + uri.hashCode();
+        }
+        if(projection != null) {
+            hashCode *= 31 + projection.hashCode();
+        }
+        if(selection != null) {
+            hashCode *= 31 + selection.hashCode();
+        }
+        //selection args not active
+        if(sortOrder != null) {
+            hashCode *= 31 + sortOrder.hashCode();
+        }
+        return hashCode;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof SqlKey) {
+            SqlKey o = (SqlKey) obj;
+            return isEquals(uri, o.uri)
+                && isEquals(projection, o.projection)
+                && isEquals(selection, o.selection)
+                //selection args not active
+                && isEquals(sortOrder, o.sortOrder);
+        }
+        return false;
+    }
+
+    private boolean isEquals(Object o1, Object o2) {
+        return (o1 == null && o2 == null) || (o1 != null && o1.equals(o2));
+    }
+
 }
