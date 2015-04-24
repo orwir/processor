@@ -3,25 +3,17 @@ package ingvar.android.processor.examples.gallery.view;
 import android.app.ListFragment;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 import ingvar.android.processor.examples.R;
+import ingvar.android.processor.examples.gallery.task.ImagesTask;
 import ingvar.android.processor.examples.gallery.widget.GalleryAdapter;
 import ingvar.android.processor.examples.view.AbstractActivity;
-import ingvar.android.processor.exception.ProcessorException;
-import ingvar.android.processor.filesystem.source.FilesystemSource;
 import ingvar.android.processor.observation.AbstractObserver;
-import ingvar.android.processor.observation.IObserverManager;
-import ingvar.android.processor.persistence.Time;
-import ingvar.android.processor.task.SingleTask;
-import ingvar.android.processor.util.CastUtils;
 import roboguice.inject.ContentView;
 import roboguice.inject.InjectFragment;
 
@@ -57,23 +49,6 @@ public class GalleryActivity extends AbstractActivity {
         if(adapter.isEmpty()) {
             Log.d(TAG, "load images list from assets dir: " + ASSETS_DIR);
             getProcessor().planExecute(new ImagesTask(ASSETS_DIR), new ImagesObserver());
-        }
-    }
-
-    private class ImagesTask extends SingleTask<String, List<String>, FilesystemSource> {
-
-        public ImagesTask(String assetDir) {
-            super(assetDir, CastUtils.<List<String>>cast(List.class), FilesystemSource.class, Time.ALWAYS_RETURNED);
-        }
-
-        @Override
-        public List<String> process(IObserverManager observerManager, FilesystemSource source) {
-            AssetManager assets = source.getAssetManager();
-            try {
-                return Arrays.asList(assets.list(getTaskKey()));
-            } catch (IOException e) {
-                throw new ProcessorException(e);
-            }
         }
     }
 

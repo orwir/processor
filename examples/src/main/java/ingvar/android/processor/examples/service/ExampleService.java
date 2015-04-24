@@ -7,6 +7,8 @@ import ingvar.android.processor.examples.dictionary.persistence.WordConverter;
 import ingvar.android.processor.examples.dictionary.pojo.Meaning;
 import ingvar.android.processor.examples.dictionary.pojo.Word;
 import ingvar.android.processor.examples.weather.network.RetrofitSource;
+import ingvar.android.processor.examples.weather.persistence.WeatherContract;
+import ingvar.android.processor.examples.weather.pojo.Weather;
 import ingvar.android.processor.filesystem.persistence.BitmapFilesystemRepository;
 import ingvar.android.processor.filesystem.source.FilesystemSource;
 import ingvar.android.processor.filesystem.util.FileUtils;
@@ -16,6 +18,7 @@ import ingvar.android.processor.memory.source.MemorySource;
 import ingvar.android.processor.persistence.ICacheManager;
 import ingvar.android.processor.service.ProcessorService;
 import ingvar.android.processor.source.ISourceManager;
+import ingvar.android.processor.sqlite.persistence.SqliteRepository;
 import ingvar.android.processor.sqlite.source.SqliteSource;
 
 /**
@@ -50,9 +53,10 @@ public class ExampleService extends ProcessorService {
         cacheDir = new File(cacheDir, "lru"); //use inner folder for evade possible conflicts.
 
         BitmapFilesystemRepository bitmapFsRepo = new BitmapFilesystemRepository(cacheDir, diskCache);
-        BitmapMemoryRepository<String> bitmapMemoryRepo = new BitmapMemoryRepository<String>(memoryCache, bitmapFsRepo);
+        BitmapMemoryRepository<String> bitmapMemoryRepo = new BitmapMemoryRepository<>(memoryCache, bitmapFsRepo);
 
 
+        cacheManager.addRepository(new SqliteRepository<>(this, WeatherContract.Weather.CONTENT_URI, Weather.class));
         cacheManager.addRepository(bitmapMemoryRepo);
         cacheManager.addRepository(new MemoryRepository(15));
     }

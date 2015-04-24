@@ -2,7 +2,7 @@
     <string name="app_name">Processor examples</string>
 
     <string name="label_gallery">Gallery (filesystem, memory)</string>
-    <string name="label_weather">Weather (network)</string>
+    <string name="label_weather">Weather (network, sqlite)</string>
     <string name="label_dictionary">Dictionary (sqlite)</string>
     <string name="label_temperature">Temperature</string>
     <string name="label_humidity">Humidity</string>

@@ -10,15 +10,15 @@ import ingvar.android.processor.task.SingleTask;
 /**
  * Created by Igor Zubenko on 2015.03.24.
  */
-public class WeatherRequest extends SingleTask<String, Weather, RetrofitSource> {
+public class WeatherRequest extends SingleTask<WeatherKey, Weather, RetrofitSource> {
 
-    public WeatherRequest(String key) {
+    public WeatherRequest(WeatherKey key) {
         super(key, Weather.class, RetrofitSource.class, TimeUnit.HOURS.toMillis(1));
     }
 
     @Override
     public Weather process(IObserverManager observerManager, RetrofitSource source) {
-        return source.getWeatherService().receiveWeather(getTaskKey());
+        return source.getWeatherService().receiveWeather(getTaskKey().getCity());
     }
 
 }

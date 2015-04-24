@@ -29,6 +29,10 @@
             android:authorities="ingvar.android.examples.dictionary.provider"
             android:name=".dictionary.storage.DictionaryProvider"/>
 
+        <provider
+            android:authorities="ingvar.android.examples.weather.provider"
+            android:name=".weather.persistence.WeatherProvider"/>
+
     </application>
 
 </manifest>

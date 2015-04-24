@@ -12,6 +12,7 @@ import android.widget.Toast;
 import ingvar.android.processor.examples.R;
 import ingvar.android.processor.examples.view.AbstractActivity;
 import ingvar.android.processor.examples.weather.pojo.Weather;
+import ingvar.android.processor.examples.weather.task.WeatherKey;
 import ingvar.android.processor.examples.weather.task.WeatherRequest;
 import ingvar.android.processor.observation.ContextObserver;
 import roboguice.inject.ContentView;
@@ -59,7 +60,7 @@ public class WeatherActivity extends AbstractActivity {
         search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                getProcessor().execute(new WeatherRequest(query), new WeatherObserver(WeatherActivity.this));
+                getProcessor().execute(new WeatherRequest(new WeatherKey(query)), new WeatherObserver(WeatherActivity.this));
                 setUIEnabled(false);
                 clearFields();
                 return false;

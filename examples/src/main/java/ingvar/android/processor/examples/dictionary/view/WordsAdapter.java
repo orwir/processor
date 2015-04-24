@@ -17,7 +17,6 @@ import java.util.List;
 
 import ingvar.android.processor.examples.R;
 import ingvar.android.processor.examples.dictionary.pojo.Meaning;
-import ingvar.android.processor.examples.dictionary.pojo.Meanings;
 import ingvar.android.processor.examples.dictionary.pojo.Word;
 import ingvar.android.processor.examples.dictionary.task.CreateMeaningTask;
 import ingvar.android.processor.examples.dictionary.task.CreateWordTask;
@@ -252,7 +251,7 @@ public class WordsAdapter extends RecyclerView.Adapter<WordsAdapter.Holder> {
         }
     }
 
-    private class RequestMeaningsObserver extends ContextObserver<Context, Meanings> {
+    private class RequestMeaningsObserver extends ContextObserver<Context, List<Meaning>> {
 
         private Holder holder;
 
@@ -262,9 +261,10 @@ public class WordsAdapter extends RecyclerView.Adapter<WordsAdapter.Holder> {
         }
 
         @Override
-        public void completed(Meanings result) {
+        public void completed(List<Meaning> result) {
             holder.setMeanings(result);
         }
+
     }
 
 }

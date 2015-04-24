@@ -11,11 +11,11 @@ import android.widget.AdapterView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import java.util.List;
+
 import ingvar.android.processor.examples.R;
-import ingvar.android.processor.examples.dictionary.pojo.Dictionaries;
 import ingvar.android.processor.examples.dictionary.pojo.Dictionary;
 import ingvar.android.processor.examples.dictionary.pojo.Word;
-import ingvar.android.processor.examples.dictionary.pojo.Words;
 import ingvar.android.processor.examples.dictionary.storage.DictionaryContract;
 import ingvar.android.processor.examples.dictionary.task.CreateWordTask;
 import ingvar.android.processor.examples.dictionary.task.DeleteDictionaryTask;
@@ -98,14 +98,14 @@ public class DictionaryActivity extends AbstractActivity implements DictionaryCr
         }
     }
 
-    private class RequestDictionariesObserver extends ContextObserver<DictionaryActivity, Dictionaries> {
+    private class RequestDictionariesObserver extends ContextObserver<DictionaryActivity, List<Dictionary>> {
 
         public RequestDictionariesObserver(DictionaryActivity activity) {
             super(activity);
         }
 
         @Override
-        public void completed(Dictionaries result) {
+        public void completed(List<Dictionary> result) {
             getContext().dictionariesAdapter.swap(result);
         }
 
@@ -161,14 +161,14 @@ public class DictionaryActivity extends AbstractActivity implements DictionaryCr
 
     }
 
-    private class RequestWordsObserver extends ContextObserver<DictionaryActivity, Words> {
+    private class RequestWordsObserver extends ContextObserver<DictionaryActivity, List<Word>> {
 
         public RequestWordsObserver(DictionaryActivity activity) {
             super(activity);
         }
 
         @Override
-        public void completed(Words result) {
+        public void completed(List<Word> result) {
             wordsAdapter.swap(result);
         }
 

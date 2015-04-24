@@ -11,6 +11,7 @@ import java.io.InputStream;
 import ingvar.android.processor.examples.gallery.view.GalleryActivity;
 import ingvar.android.processor.exception.PersistenceException;
 import ingvar.android.processor.filesystem.source.FilesystemSource;
+import ingvar.android.processor.filesystem.util.FileUtils;
 import ingvar.android.processor.observation.IObserverManager;
 import ingvar.android.processor.task.SingleTask;
 
@@ -35,7 +36,7 @@ public class ImageTask extends SingleTask<String, Bitmap, FilesystemSource> {
         } catch (IOException e) {
             throw new PersistenceException(e);
         } finally {
-            source.close(is);
+            FileUtils.close(is);
         }
         return result;
     }

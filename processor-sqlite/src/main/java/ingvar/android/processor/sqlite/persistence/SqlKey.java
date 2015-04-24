@@ -105,4 +105,9 @@ public class SqlKey {
         return false;
     }
 
+    @Override
+    public String toString() {
+        return uri == null ? super.toString() : uri.toString();
+    }
+
 }
