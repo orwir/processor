@@ -18,7 +18,7 @@ import ingvar.android.processor.persistence.Time;
  */
 public class FilesystemRepositoryTest extends ApplicationTestCase<Application> {
 
-    private FilesystemRepository repo;
+    private FilesystemRepository<Uri, TestObject> repo;
 
     public FilesystemRepositoryTest() {
         super(Application.class);
@@ -34,23 +34,27 @@ public class FilesystemRepositoryTest extends ApplicationTestCase<Application> {
     }
 
     public void testCacheList() {
-        CompositeKey<Uri, Uri> key = new CompositeKey<>(Uri.parse("http://example.com"),
+        CompositeKey<Uri> key = new CompositeKey<>(Uri.parse("http://example.com"),
             Uri.parse("http://example.com/testfile1"),
             Uri.parse("http://example.com/testfile2")
         );
 
         List<TestObject> expected = Arrays.asList(
-            new TestObject(1, "Test1", 100.501),
-            new TestObject(2, "Test2", 100.502)
+                new TestObject(1, "Test1", 100.501),
+                new TestObject(2, "Test2", 100.502)
         );
 
         repo.persist(key, expected);
         List<TestObject> actual = repo.obtain(key, Time.ALWAYS_RETURNED);
         assertEquals(expected, actual);
+
+        CompositeKey<Uri> key2 = new CompositeKey<>(Uri.parse("http://example.com"), Uri.parse("http://example.com/testfile1"));
+        List<TestObject> actual2 = repo.obtain(key2, Time.ALWAYS_RETURNED);
+        assertEquals(Arrays.asList(expected.get(0)), actual2);
     }
 
     public void testCacheListEmptyMajor() {
-        CompositeKey<Uri, Uri> key = new CompositeKey<>(null,
+        CompositeKey<Uri> key = new CompositeKey<>(null,
                 Uri.parse("http://example.com/testfile1"),
                 Uri.parse("http://example.com/testfile2")
         );

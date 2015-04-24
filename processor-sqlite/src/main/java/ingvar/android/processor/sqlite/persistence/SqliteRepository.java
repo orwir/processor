@@ -35,35 +35,7 @@ public class SqliteRepository<R> extends AbstractRepository<SqlKey, R> {
     }
 
     @Override
-    public long getCreationTime(Object key) {
-        long creationTime = -1;
-        SqlKey sql = (SqlKey) key;
-
-        Cursor cursor = getContentResolver()
-                .query(sql.getUri(), new String[] {ExtendedColumns._CREATION_DATE},
-                        sql.getSelection(), sql.getSelectionArgs(), sql.getSortOrder());
-
-        if(cursor.moveToFirst()) {
-            creationTime = CursorCommon.longv(cursor, ExtendedColumns._CREATION_DATE);
-        }
-        cursor.close();
-
-        return creationTime;
-    }
-
-    @Override
-    public void removeAll() {
-        getContentResolver().delete(contentUri, null, null);
-        getContentResolver().notifyChange(contentUri, null);
-    }
-
-    @Override
-    public boolean canHandle(Class dataClass) {
-        return this.dataClass.equals(dataClass);
-    }
-
-    @Override
-    protected Object composeKey(Object major, Object minor) {
+    protected <KEY> KEY composeKey(Object major, Object minor) {
         throw new UnsupportedOperationException("Not supported for SqliteRepository.");
     }
 
@@ -75,16 +47,17 @@ public class SqliteRepository<R> extends AbstractRepository<SqlKey, R> {
     }
 
     @Override
-    protected Collection<R> persistCollection(CompositeKey key, Collection<R> data) {
+    protected Collection<R> persistCollection(CompositeKey<SqlKey> key, Collection<R> data) {
         if(key.getMinors().size() > 0) {
             throw new PersistenceException("SqliteRepository doesn't support minor keys. CompositeKey just wrap SqlKey.");
         }
+
         int index = 0;
         ContentValues[] values = new ContentValues[data.size()];
         for(R item : data) {
             values[index++] = converter.convert(item);
         }
-        SqlKey sql = (SqlKey) key.getMajor();
+        SqlKey sql = key.getMajor();
         getContentResolver().bulkInsert(sql.getUri(), values);
         getContentResolver().notifyChange(contentUri, null);
         return data;
@@ -110,13 +83,13 @@ public class SqliteRepository<R> extends AbstractRepository<SqlKey, R> {
     }
 
     @Override
-    protected Collection<R> obtainCollection(CompositeKey key, long expiryTime) {
+    protected Collection<R> obtainCollection(CompositeKey<SqlKey> key, long expiryTime) {
         Collection<R> result = new ArrayList<>();
         if(key.getMinors().size() > 0) {
             throw new PersistenceException("SqliteRepository doesn't support minor keys. CompositeKey just wrap SqlKey.");
         }
 
-        SqlKey sql = (SqlKey) key.getMajor();
+        SqlKey sql = key.getMajor();
         Cursor cursor = getContentResolver().query(
                 sql.getUri(),
                 sql.getProjection(),
@@ -144,11 +117,39 @@ public class SqliteRepository<R> extends AbstractRepository<SqlKey, R> {
     }
 
     @Override
-    protected void removeCollection(CompositeKey key) {
+    protected void removeCollection(CompositeKey<SqlKey> key) {
         if(key.getMinors().size() > 0) {
             throw new PersistenceException("SqliteRepository doesn't support minor keys. CompositeKey just wrap SqlKey.");
         }
-        removeSingle((SqlKey) key.getMajor());
+        removeSingle(key.getMajor());
+    }
+
+    @Override
+    public void removeAll() {
+        getContentResolver().delete(contentUri, null, null);
+        getContentResolver().notifyChange(contentUri, null);
+    }
+
+    @Override
+    public long getCreationTime(Object key) {
+        long creationTime = -1;
+        SqlKey sql = (SqlKey) key;
+
+        Cursor cursor = getContentResolver()
+                .query(sql.getUri(), new String[] {ExtendedColumns._CREATION_DATE},
+                        sql.getSelection(), sql.getSelectionArgs(), sql.getSortOrder());
+
+        if(cursor.moveToFirst()) {
+            creationTime = CursorCommon.longv(cursor, ExtendedColumns._CREATION_DATE);
+        }
+        cursor.close();
+
+        return creationTime;
+    }
+
+    @Override
+    public boolean canHandle(Class dataClass) {
+        return this.dataClass.equals(dataClass);
     }
 
     protected Converter<R> provideConverter() {

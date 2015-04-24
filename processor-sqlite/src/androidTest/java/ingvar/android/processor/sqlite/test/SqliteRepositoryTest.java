@@ -3,7 +3,10 @@ package ingvar.android.processor.sqlite.test;
 import android.net.Uri;
 import android.test.ProviderTestCase2;
 
+import java.util.List;
+
 import ingvar.android.literepo.builder.UriBuilder;
+import ingvar.android.processor.persistence.CompositeKey;
 import ingvar.android.processor.persistence.Time;
 import ingvar.android.processor.sqlite.persistence.SqlKey;
 import ingvar.android.processor.sqlite.persistence.SqliteRepository;
@@ -59,8 +62,8 @@ public class SqliteRepositoryTest extends ProviderTestCase2<TestProvider> {
             .or().eq(TestContract.Test.Col.NAME, "test2")
         .build();
         SqlKey key = new SqlKey(uri, TestContract.Test.PROJECTION);
-        /*List<TestObject> list = repo.obtainList(key, Time.ALWAYS_RETURNED);
-        assertEquals(2, list.size());*/
+        List<TestObject> list = repo.obtain(new CompositeKey<>(key), Time.ALWAYS_RETURNED);
+        assertEquals(2, list.size());
     }
 
     public void testReadExpired() throws Exception {

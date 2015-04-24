@@ -34,28 +34,7 @@ public class FilesystemRepository<K, R> extends AbstractRepository<K, R> {
     }
 
     @Override
-    public long getCreationTime(Object key) {
-        String filename = filenameFromKey(key);
-        return storage.getTime(filename);
-    }
-
-    @Override
-    public void removeAll() {
-        storage.removeAll();
-    }
-
-    @Override
-    public boolean canHandle(Class dataClass) {
-        for(Class i : dataClass.getInterfaces()) {
-            if(i.equals(Serializable.class)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    protected Object composeKey(Object major, Object minor) {
+    protected String composeKey(Object major, Object minor) {
         return filenameFromKey(major) + filenameFromKey(minor);
     }
 
@@ -67,15 +46,16 @@ public class FilesystemRepository<K, R> extends AbstractRepository<K, R> {
     }
 
     @Override
-    protected Collection<R> persistCollection(CompositeKey key, Collection<R> data) {
+    protected Collection<R> persistCollection(CompositeKey<K> key, Collection<R> data) {
         if(key.getMinors().size() != data.size()) {
             throw new PersistenceException("Count of keys and data are mismatched!");
         }
-        Iterator ikeys = key.getMinors().iterator();
-        Iterator<R> idata = data.iterator();
-        while(ikeys.hasNext()) {
-            String compositeKey = (String) composeKey(key.getMajor(), ikeys.next());
-            writeFile(compositeKey, idata.next());
+
+        Iterator<K> iKey = key.getMinors().iterator();
+        Iterator<R> iData = data.iterator();
+        while(iKey.hasNext()) {
+            String filename = composeKey(key.getMajor(), iKey.next());
+            writeFile(filename, iData.next());
         }
         return data;
     }
@@ -91,12 +71,12 @@ public class FilesystemRepository<K, R> extends AbstractRepository<K, R> {
     }
 
     @Override
-    protected Collection<R> obtainCollection(CompositeKey key, long expiryTime) {
-        Collection<R> result = new ArrayList();
+    protected Collection<R> obtainCollection(CompositeKey<K> key, long expiryTime) {
+        Collection<R> result = new ArrayList<>();
 
         List<String> filenameFilter = new ArrayList<>();
-        for(Object minor : key.getMinors()) {
-            filenameFilter.add((String) composeKey(key.getMajor(), minor));
+        for(K minor : key.getMinors()) {
+            filenameFilter.add(composeKey(key.getMajor(), minor));
         }
         String filenamePrefix = filenameFromKey(key.getMajor());
         boolean onlyPrefix = filenameFilter.isEmpty();
@@ -122,10 +102,10 @@ public class FilesystemRepository<K, R> extends AbstractRepository<K, R> {
     }
 
     @Override
-    protected void removeCollection(CompositeKey key) {
+    protected void removeCollection(CompositeKey<K> key) {
         List<String> filenameFilter = new ArrayList<>();
-        for(Object minor : key.getMinors()) {
-            filenameFilter.add((String) composeKey(key.getMajor(), minor));
+        for(K minor : key.getMinors()) {
+            filenameFilter.add(composeKey(key.getMajor(), minor));
         }
         String filenamePrefix = filenameFromKey(key.getMajor());
         boolean onlyPrefix = filenameFilter.isEmpty();
@@ -135,6 +115,27 @@ public class FilesystemRepository<K, R> extends AbstractRepository<K, R> {
                 storage.remove(filename);
             }
         }
+    }
+
+    @Override
+    public void removeAll() {
+        storage.removeAll();
+    }
+
+    @Override
+    public long getCreationTime(Object key) {
+        String filename = filenameFromKey(key);
+        return storage.getTime(filename);
+    }
+
+    @Override
+    public boolean canHandle(Class dataClass) {
+        for(Class i : dataClass.getInterfaces()) {
+            if(i.equals(Serializable.class)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected R readFile(String filename) {
@@ -167,7 +168,6 @@ public class FilesystemRepository<K, R> extends AbstractRepository<K, R> {
                 md5.reset();
                 md5.update(bytes);
                 return new BigInteger(1, md5.digest()).toString();
-
             } catch (Exception e) {
                 return String.valueOf(key.hashCode());
             }

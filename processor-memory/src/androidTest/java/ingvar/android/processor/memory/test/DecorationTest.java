@@ -4,7 +4,11 @@ import android.util.LruCache;
 
 import junit.framework.TestCase;
 
+import java.util.Arrays;
+import java.util.List;
+
 import ingvar.android.processor.memory.persistence.MemoryRepository;
+import ingvar.android.processor.persistence.CompositeKey;
 import ingvar.android.processor.persistence.Time;
 
 /**
@@ -18,9 +22,9 @@ public class DecorationTest extends TestCase {
     private LruCache<String, MemoryRepository.Entry<String>> repoLru;
 
     public DecorationTest() {
-        decoratedLru = new LruCache<>(3);
+        decoratedLru = new LruCache<>(4);
         decorated = new MemoryRepository(decoratedLru);
-        repoLru = new LruCache<>(1);
+        repoLru = new LruCache<>(2);
         repo = new MemoryRepository(repoLru, decorated);
     }
 
@@ -42,11 +46,34 @@ public class DecorationTest extends TestCase {
         assertEquals(1, decoratedLru.size());
 
         repo.persist("test2", "value2");
-        assertEquals(1, repoLru.size());
+        repo.persist("test3", "value3");
+        assertEquals(2, repoLru.size());
         assertEquals("value2", repo.obtain("test2", Time.ALWAYS_RETURNED));
-        assertEquals(2, decoratedLru.size());
+        assertEquals(3, decoratedLru.size());
         assertEquals("value1", repo.obtain("test1", Time.ALWAYS_RETURNED));
         assertEquals("value1", repoLru.get("test1").getValue());
+    }
+
+    public void testCacheList() {
+        CompositeKey key = new CompositeKey<>("group1", "child1", "child2");
+        List<String> data = Arrays.asList("value1", "value2");
+
+        repo.persist(key, data);
+
+        assertEquals(data, repo.obtain(key, Time.ALWAYS_RETURNED));
+        assertEquals(data, decorated.obtain(key, Time.ALWAYS_RETURNED));
+        assertEquals(Arrays.asList("value1"), repo.obtain(new CompositeKey<>("group1", "child1"), Time.ALWAYS_RETURNED));
+    }
+
+    public void testCacheListWithoutParent() {
+        CompositeKey key = new CompositeKey<>(null, "child1", "child2");
+        List<String> data = Arrays.asList("value1", "value2");
+
+        repo.persist(key, data);
+
+        assertEquals(data, repo.obtain(key, Time.ALWAYS_RETURNED));
+        assertEquals(data, decorated.obtain(key, Time.ALWAYS_RETURNED));
+        assertEquals("value1", repo.obtain("child1", Time.ALWAYS_RETURNED));
     }
 
 }

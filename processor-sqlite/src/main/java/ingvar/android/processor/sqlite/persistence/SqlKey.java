@@ -2,6 +2,9 @@ package ingvar.android.processor.sqlite.persistence;
 
 import android.net.Uri;
 
+import static ingvar.android.processor.util.CommonUtils.isEquals;
+import static ingvar.android.processor.util.CommonUtils.objectHashCode;
+
 /**
  * Created by Igor Zubenko on 2015.04.07.
  */
@@ -80,20 +83,12 @@ public class SqlKey {
 
     @Override
     public int hashCode() {
-        int hashCode = 31;
-        if(uri != null) {
-            hashCode *= 31 + uri.hashCode();
-        }
-        if(projection != null) {
-            hashCode *= 31 + projection.hashCode();
-        }
-        if(selection != null) {
-            hashCode *= 31 + selection.hashCode();
-        }
+        int hashCode = 0;
+        hashCode += objectHashCode(uri) * 31;
+        hashCode += objectHashCode(projection) * 31;
+        hashCode += objectHashCode(selection) * 31;
         //selection args not active
-        if(sortOrder != null) {
-            hashCode *= 31 + sortOrder.hashCode();
-        }
+        hashCode += objectHashCode(sortOrder) * 31;
         return hashCode;
     }
 
@@ -108,10 +103,6 @@ public class SqlKey {
                 && isEquals(sortOrder, o.sortOrder);
         }
         return false;
-    }
-
-    private boolean isEquals(Object o1, Object o2) {
-        return (o1 == null && o2 == null) || (o1 != null && o1.equals(o2));
     }
 
 }
