@@ -5,7 +5,9 @@ import java.util.UUID;
 import ingvar.android.processor.exception.ProcessorException;
 
 /**
- * Created by Igor Zubenko on 2015.04.11.
+ * Base implementation of task.
+ *
+ * <br/><br/> Created by Igor Zubenko on 2015.04.11.
  *
  * @param <K> key class
  * @param <R> single result class

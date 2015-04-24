@@ -3,13 +3,15 @@ package ingvar.android.processor.persistence;
 import java.util.Collection;
 
 /**
+ *
  * Base class for repositories what can work with CompositeKey.
  * It allows to persist/obtain collections.
+ *
+ * <br/><br/>Created by Igor Zubenko on 2015.04.22.
  *
  * @param <K> identifier class
  * @param <R> single item class
  *
- * Created by Igor Zubenko on 2015.04.22.
  */
 public abstract class AbstractRepository<K, R> implements IRepository {
 

@@ -5,6 +5,11 @@ package ingvar.android.processor.source;
  */
 public interface ISource {
 
+    /**
+     * Check available source now or not.
+     *
+     * @return true if available, false otherwise
+     */
     boolean isAvailable();
 
 }

@@ -9,8 +9,22 @@ import ingvar.android.processor.task.ITask;
  */
 public interface IWorker {
 
+    /**
+     * Execute task.
+     *
+     * @param task task
+     * @param <R> result class
+     * @return future of execution
+     */
     <R> Future<R> execute(ITask task);
 
+    /**
+     * If task with same key executing return future.
+     *
+     * @param task task
+     * @param <R> result class
+     * @return future of executing task, null otherwise
+     */
     <R> Future<R> getExecuted(ITask task);
     
 }

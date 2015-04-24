@@ -5,7 +5,9 @@ import android.content.Context;
 import java.lang.ref.WeakReference;
 
 /**
- * Created by Igor Zubenko on 2015.03.23.
+ * Source what contains weak reference to {@link Context}
+ *
+ * <br/><br/>Created by Igor Zubenko on 2015.03.23.
  */
 public class ContextSource implements ISource {
 
@@ -15,6 +17,11 @@ public class ContextSource implements ISource {
         this.contextRef = new WeakReference<>(context);
     }
 
+    /**
+     * Get context.
+     *
+     * @return context or null if it is stale
+     */
     public Context getContext() {
         Context context = contextRef.get();
         if(context == null) {

@@ -16,17 +16,19 @@ import ingvar.android.processor.observation.IObserver;
 import ingvar.android.processor.task.ITask;
 
 /**
+ * Wrapper for processing service.
+ * Just provide helper methods.
  *
- * Created by Igor Zubenko on 2015.03.19.
+ * <br/><br/>Created by Igor Zubenko on 2015.03.19.
  */
 public class Processor {
 
     private static final String TAG = Processor.class.getSimpleName();
 
     private Class<? extends ProcessorService> serviceClass;
-    private ProcessorService service;
-    private ServiceConnection connection;
     private Map<ITask, IObserver[]> plannedTasks;
+    private ServiceConnection connection;
+    private ProcessorService service;
 
     public Processor(Class<? extends ProcessorService> serviceClass) {
         this.serviceClass = serviceClass;
@@ -35,13 +37,30 @@ public class Processor {
         this.plannedTasks = new ConcurrentHashMap<>();
     }
 
+    /**
+     * Send task for execution.
+     *
+     * @param task task
+     * @param observers task observers
+     * @param <K> task identifier class
+     * @param <R> task result class
+     * @return {@link Future} of task execution
+     */
     public <K, R> Future<R> execute(ITask<K, R> task, IObserver<R>... observers) {
         if(service == null) {
-            throw new ProcessorException("Service not bind yet");
+            throw new ProcessorException("Service is not bound yet!");
         }
         return service.execute(task, observers);
     }
 
+    /**
+     * If service is bound execute task, otherwise add to queue.
+     *
+     * @param task task
+     * @param observers task observers
+     * @param <K> task identifier class
+     * @param <R> task result class
+     */
     public <K, R> void planExecute(ITask<K, R> task, IObserver<R>... observers) {
         if(isBound()) {
             execute(task, observers);
@@ -50,6 +69,11 @@ public class Processor {
         }
     }
 
+    /**
+     * Bind service to context.
+     *
+     * @param context context
+     */
     public void bind(Context context) {
         Log.d(TAG, String.format("Bind context '%s' to service '%s'", context.getClass().getSimpleName(), serviceClass.getSimpleName()));
 
@@ -59,6 +83,12 @@ public class Processor {
         }
     }
 
+    /**
+     * Unbind service from context.
+     * Remove all planned tasks if exist.
+     *
+     * @param context
+     */
     public void unbind(Context context) {
         Log.d(TAG, String.format("Unbind context '%s' from service '%s'", context.getClass().getSimpleName(), serviceClass.getSimpleName()));
 
@@ -70,8 +100,17 @@ public class Processor {
         service = null;
     }
 
+    /**
+     * Check bound service or not.
+     *
+     * @return true if bound, false otherwise
+     */
     public boolean isBound() {
         return service != null;
+    }
+
+    protected ProcessorService getService() {
+        return service;
     }
 
     private class Connection implements ServiceConnection {

@@ -6,11 +6,13 @@ import java.util.Set;
 import ingvar.android.processor.exception.PersistenceException;
 
 /**
- * Created by Igor Zubenko on 2015.03.19.
+ * Default implementation of cache manager
+ *
+ * <br/><br/>Created by Igor Zubenko on 2015.03.19.
  */
 public class CacheManager implements ICacheManager {
 
-    private final Set<IRepository> repositories;
+    protected final Set<IRepository> repositories;
 
     public CacheManager() {
         repositories = new LinkedHashSet<>();
@@ -22,8 +24,8 @@ public class CacheManager implements ICacheManager {
     }
 
     @Override
-    public void removeRepository(IRepository persister) {
-        repositories.remove(persister);
+    public void removeRepository(IRepository repository) {
+        repositories.remove(repository);
     }
 
     @Override

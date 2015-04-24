@@ -4,7 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by Igor Zubenko on 2015.03.18.
+ * Default implementation of source manager.
+ *
+ * <br/><br/>Created by Igor Zubenko on 2015.03.18.
  */
 public class SourceManager implements ISourceManager {
 

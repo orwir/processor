@@ -14,6 +14,12 @@ import java.io.ObjectOutputStream;
  */
 public class BytesUtils {
 
+    /**
+     * Convert serializable object to bytes.
+     *
+     * @param object object
+     * @return bytes array
+     */
     public static byte[] toBytes(Object object) {
         byte[] result = null;
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -31,6 +37,13 @@ public class BytesUtils {
         return result;
     }
 
+    /**
+     * Convert bytes array to object.
+     *
+     * @param bytes object bytes
+     * @param <T> object class
+     * @return object
+     */
     public static <T> T fromBytes(byte[] bytes) {
         Object result = null;
         ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
@@ -47,6 +60,12 @@ public class BytesUtils {
         return (T) result;
     }
 
+    /**
+     * Write stream to bytes array.
+     *
+     * @param source stream
+     * @return bytes array
+     */
     public static byte[] streamToBytes(InputStream source) {
         ByteArrayOutputStream result = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];

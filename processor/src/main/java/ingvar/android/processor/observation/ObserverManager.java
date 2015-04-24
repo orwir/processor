@@ -12,12 +12,14 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import ingvar.android.processor.task.ITask;
 
 /**
- * Created by Igor Zubenko on 2015.03.18.
+ * Default implementation of observer manager.
+ *
+ * <br/><br/>Created by Igor Zubenko on 2015.03.18.
  */
 public class ObserverManager implements IObserverManager {
 
-    protected Map<ITask, Collection<IObserver>> observers;
-    protected Handler handler;
+    protected final Map<ITask, Collection<IObserver>> observers;
+    protected final Handler handler;
 
     public ObserverManager() {
         this.observers = new ConcurrentHashMap<>();
@@ -97,14 +99,20 @@ public class ObserverManager implements IObserverManager {
         message.sendToTarget();
     }
 
-    private enum Type {
+    /**
+     * Inner info about task status
+     */
+    protected enum Type {
         IN_PROGRESS,
         COMPLETED,
         CANCELLED,
         FAILED;
     }
 
-    private class Wrapper {
+    /**
+     * Wrapper for sending data to Main Thread.
+     */
+    protected class Wrapper {
         private ITask task;
         private Object data;
         private Map extra;
@@ -120,7 +128,10 @@ public class ObserverManager implements IObserverManager {
         }
     }
 
-    private class ObserverCallback implements Handler.Callback {
+    /**
+     * Callback for sending notifications to Main Thread.
+     */
+    protected class ObserverCallback implements Handler.Callback {
 
         @Override
         public boolean handleMessage(Message msg) {

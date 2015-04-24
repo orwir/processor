@@ -1,7 +1,9 @@
 package ingvar.android.processor.exception;
 
 /**
- * Created by Igor Zubenko on 2015.03.19.
+ * Root exception for persistence functionality.
+ *
+ * <br/><br/>Created by Igor Zubenko on 2015.03.19.
  */
 public class PersistenceException extends ProcessorException {
 

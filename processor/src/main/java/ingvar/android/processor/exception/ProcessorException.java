@@ -1,7 +1,9 @@
 package ingvar.android.processor.exception;
 
 /**
- * Created by Igor Zubenko on 2015.03.18.
+ * Root exception for whole framework
+ *
+ * <br/><br/>Created by Igor Zubenko on 2015.03.18.
  */
 public class ProcessorException extends RuntimeException {
 

@@ -3,7 +3,9 @@ package ingvar.android.processor.observation;
 import java.util.Map;
 
 /**
- * Created by Igor Zubenko on 2015.03.23.
+ * Adapter for simplification code concrete realization.
+ *
+ * <br/><br/>Created by Igor Zubenko on 2015.03.23.
  */
 public abstract class AbstractObserver<R> implements IObserver<R> {
 

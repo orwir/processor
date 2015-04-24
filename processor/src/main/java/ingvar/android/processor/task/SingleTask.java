@@ -5,7 +5,9 @@ import ingvar.android.processor.persistence.Time;
 import ingvar.android.processor.source.ISource;
 
 /**
- * Created by Igor Zubenko on 2015.03.18.
+ * Base implementation of single process task.
+ *
+ * <br/><br/>Created by Igor Zubenko on 2015.03.18.
  *
  * @param <K> key class
  * @param <R> single item class

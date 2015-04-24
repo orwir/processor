@@ -26,7 +26,7 @@ public class DefaultWorkerTest extends WorkerTest {
         Future<String> future1 = getWorker().execute(task);
         Future<String> future2 = getWorker().getExecuted(task);
 
-        assertEquals("Executed future not match", future1, future2);
+        assertSame("Executed future not match", future1, future2);
     }
 
 

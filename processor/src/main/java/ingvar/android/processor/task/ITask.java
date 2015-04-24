@@ -49,12 +49,14 @@ public interface ITask<K, R> extends Comparable<ITask<K, R>> {
     TaskStatus getStatus();
 
     /**
-     * Can this tasked merged this prev task with the same task key {@link ITask#getTaskKey()}
+     * Can this task will be merged with prev task with the same task key {@link ITask#getTaskKey()}
+     *
      * @param mergeable
      */
     void setMergeable(boolean mergeable);
 
     /**
+     * Can this task will be merged with prev task with the same task key {@link ITask#getTaskKey()}
      *
      * @return is mergeable
      */

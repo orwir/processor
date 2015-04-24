@@ -27,9 +27,9 @@ import ingvar.android.processor.task.SingleTask;
 import ingvar.android.processor.task.TaskStatus;
 
 /**
- * Default implementation of async worker
+ * Default implementation of async worker.
  *
- * Created by Igor Zubenko on 2015.03.18.
+ * <br/><br/>Created by Igor Zubenko on 2015.03.18.
  */
 public class DefaultWorker implements IWorker {
 
@@ -39,7 +39,7 @@ public class DefaultWorker implements IWorker {
     protected final ICacheManager cacheManager;
     protected final ISourceManager sourceManager;
     protected final IObserverManager observerManager;
-    private final Map<ITask, Future> executingTasks;
+    protected final Map<ITask, Future> executingTasks;
 
     public DefaultWorker(ExecutorService executorService, ICacheManager cacheManager, ISourceManager sourceManager, IObserverManager observerManager) {
         this.executorService = executorService;

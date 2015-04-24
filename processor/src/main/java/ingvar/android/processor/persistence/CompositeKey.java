@@ -9,7 +9,11 @@ import static ingvar.android.processor.util.CommonUtils.isEquals;
 import static ingvar.android.processor.util.CommonUtils.objectHashCode;
 
 /**
- * Created by Igor Zubenko on 2015.04.22.
+ * Key for persisting/obtaining collections of data.
+ *
+ * <br/><br/>Created by Igor Zubenko on 2015.04.22.
+ *
+ * @param <K> keys class
  */
 public class CompositeKey<K> {
 
@@ -24,27 +28,47 @@ public class CompositeKey<K> {
         }
     }
 
+    /**
+     * Get common part for keys.
+     *
+     * @return major key part
+     */
     public K getMajor() {
         return major;
     }
 
+    /**
+     * Set common part for keys.
+     *
+     * @param major major key part
+     */
     public void setMajor(K major) {
         this.major = major;
     }
 
+    /**
+     * Get concrete parts for single items.
+     *
+     * @return minor key parts
+     */
     public List<K> getMinors() {
         return minors;
     }
 
+    /**
+     * Set concrete parts for single items.
+     *
+     * @param minors minor key parts
+     */
     public void setMinors(List<K> minors) {
         this.minors = minors;
     }
 
     @Override
     public int hashCode() {
-        int hashCode = 0;
-        hashCode += objectHashCode(major) * 31;
-        hashCode += objectHashCode(minors) * 31;
+        int hashCode = 17;
+        hashCode *= 31 + objectHashCode(major);
+        hashCode *= 31 + objectHashCode(minors);
         return hashCode;
     }
 
