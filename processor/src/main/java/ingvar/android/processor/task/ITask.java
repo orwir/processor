@@ -1,8 +1,10 @@
 package ingvar.android.processor.task;
 
 /**
- *
  * Created by Igor Zubenko on 2015.03.18.
+ *
+ * @param <K> key class
+ * @param <R> single value class
  */
 public interface ITask<K, R> extends Comparable<ITask<K, R>> {
 
@@ -14,7 +16,7 @@ public interface ITask<K, R> extends Comparable<ITask<K, R>> {
     K getTaskKey();
 
     /**
-     * Return result class.
+     * Return single result item class.
      *
      * @return class that represent the result
      */

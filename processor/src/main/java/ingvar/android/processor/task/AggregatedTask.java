@@ -8,6 +8,9 @@ import java.util.Set;
 
 /**
  * Created by Igor Zubenko on 2015.03.18.
+ *
+ * @param <K> key class
+ * @param <R> single result class
  */
 public abstract class AggregatedTask<K, R> extends AbstractTask<K, R> {
 

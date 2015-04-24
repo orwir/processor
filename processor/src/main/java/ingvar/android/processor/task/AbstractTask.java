@@ -6,17 +6,20 @@ import ingvar.android.processor.exception.ProcessorException;
 
 /**
  * Created by Igor Zubenko on 2015.04.11.
+ *
+ * @param <K> key class
+ * @param <R> single result class
  */
 public abstract class AbstractTask<K, R> implements ITask<K, R> {
 
     private K key;
-    private Class resultClass;
+    private Class<R> resultClass;
     private boolean cancelled;
     private TaskStatus status;
     private boolean mergeable;
     private String uuid; //used if task is not mergeable
 
-    public AbstractTask(K key, Class resultClass) {
+    public AbstractTask(K key, Class<R> resultClass) {
         this.key = key;
         this.resultClass = resultClass;
         this.cancelled = false;
@@ -30,7 +33,7 @@ public abstract class AbstractTask<K, R> implements ITask<K, R> {
     }
 
     @Override
-    public Class getResultClass() {
+    public Class<R> getResultClass() {
         return resultClass;
     }
 

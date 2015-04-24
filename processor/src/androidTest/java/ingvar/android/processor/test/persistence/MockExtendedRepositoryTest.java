@@ -42,17 +42,31 @@ public class MockExtendedRepositoryTest extends TestCase {
     }
 
     public void testCacheCollection() {
-        CompositeKey key = new CompositeKey("parent", "child1", "child2", "child3");
+        CompositeKey<String> key = new CompositeKey<>("parent", "child1", "child2", "child3");
         List<String> values = Arrays.asList("value1", "value2", "value3");
 
         repo.persist(key, values);
 
         List<String> actual = repo.obtain(key, Time.ALWAYS_RETURNED);
         assertEquals(values, actual);
+
+        assertEquals(Arrays.asList("value1"), repo.obtain(new CompositeKey<>("parent", "child1"), Time.ALWAYS_RETURNED));
+    }
+
+    public void testCacheCollectionWithoutParent() {
+        CompositeKey<String> key = new CompositeKey<>(null, "child1", "child2", "child3");
+        List<String> values = Arrays.asList("value1", "value2", "value3");
+
+        repo.persist(key, values);
+
+        List<String> actual = repo.obtain(key, Time.ALWAYS_RETURNED);
+        assertEquals(values, actual);
+
+        assertEquals("value1", repo.obtain("child1", Time.ALWAYS_RETURNED));
     }
 
     public void testCacheCollectionExpired() throws Exception {
-        CompositeKey key = new CompositeKey("parent", "child1", "child2", "child3");
+        CompositeKey key = new CompositeKey<>("parent", "child1", "child2", "child3");
         List<String> values = Arrays.asList("value1", "value2", "value3");
 
         repo.persist(key, values);
