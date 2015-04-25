@@ -18,7 +18,9 @@ import ingvar.android.processor.persistence.AbstractRepository;
 import ingvar.android.processor.persistence.CompositeKey;
 
 /**
- * Created by Igor Zubenko on 2015.04.07.
+ * Repository implementation for saving data to sqlite database.
+ *
+ * <br/><br/>Created by Igor Zubenko on 2015.04.07.
  */
 public class SqliteRepository<R> extends AbstractRepository<SqlKey, R> {
 
@@ -28,10 +30,14 @@ public class SqliteRepository<R> extends AbstractRepository<SqlKey, R> {
     private WeakReference<Context> contextRef;
 
     public SqliteRepository(Context context, Uri contentUri, Class<R> dataClass) {
+        this(context, contentUri, dataClass, null);
+    }
+
+    public SqliteRepository(Context context, Uri contentUri, Class<R> dataClass, Converter<R> converter) {
         this.contextRef = new WeakReference<>(context);
         this.contentUri = contentUri;
         this.dataClass = dataClass;
-        this.converter = provideConverter();
+        this.converter = converter != null ? converter : ConverterFactory.<R>create(dataClass);
     }
 
     @Override
@@ -150,10 +156,6 @@ public class SqliteRepository<R> extends AbstractRepository<SqlKey, R> {
     @Override
     public boolean canHandle(Class dataClass) {
         return this.dataClass.equals(dataClass);
-    }
-
-    protected Converter<R> provideConverter() {
-        return ConverterFactory.create(dataClass);
     }
 
     protected boolean isNotExpired(Cursor cursor, long expiryTime) {

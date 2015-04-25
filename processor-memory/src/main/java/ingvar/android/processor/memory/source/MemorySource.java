@@ -8,9 +8,9 @@ import ingvar.android.processor.source.ISource;
 import ingvar.android.processor.util.BytesUtils;
 
 /**
- * Simple memory source
+ * Simple memory source.
  *
- * Created by Igor Zubenko on 2015.03.23.
+ * <br/><br/>Created by Igor Zubenko on 2015.03.23.
  */
 public class MemorySource implements ISource {
 
@@ -20,10 +20,23 @@ public class MemorySource implements ISource {
         storage = new ConcurrentHashMap<>();
     }
 
+    /**
+     * Put object to source.
+     *
+     * @param key object identifier
+     * @param value object
+     */
     public void put(Object key, Object value) {
         storage.put(key, value);
     }
 
+    /**
+     * Get object from source.
+     *
+     * @param key object identifier
+     * @param <R> object class
+     * @return object
+     */
     public <R> R get(Object key) {
         return (R) storage.get(key);
     }

@@ -6,7 +6,10 @@ import static ingvar.android.processor.util.CommonUtils.isEquals;
 import static ingvar.android.processor.util.CommonUtils.objectHashCode;
 
 /**
- * Created by Igor Zubenko on 2015.04.07.
+ * Identifier for all sql-requests.
+ * Used with {@link SqliteRepository}.
+ *
+ * <br/><br/>Created by Igor Zubenko on 2015.04.07.
  */
 public class SqlKey {
 

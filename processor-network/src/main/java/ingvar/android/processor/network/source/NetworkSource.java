@@ -7,7 +7,9 @@ import android.net.NetworkInfo;
 import ingvar.android.processor.source.ContextSource;
 
 /**
- * Created by Igor Zubenko on 2015.03.24.
+ * Base implementation of network source.
+ *
+ * <br/><br/>Created by Igor Zubenko on 2015.03.24.
  */
 public class NetworkSource extends ContextSource {
 
@@ -21,10 +23,20 @@ public class NetworkSource extends ContextSource {
         return network != null && network.isConnectedOrConnecting();
     }
 
+    /**
+     * Get connectivity manager.
+     *
+     * @return manager
+     */
     public ConnectivityManager getConnectivityManager() {
         return (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
+    /**
+     * Get network info.
+     *
+     * @return network info
+     */
     public NetworkInfo getNetworkInfo() {
         return getConnectivityManager().getActiveNetworkInfo();
     }

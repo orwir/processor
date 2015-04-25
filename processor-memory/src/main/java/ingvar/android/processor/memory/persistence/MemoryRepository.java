@@ -15,14 +15,16 @@ import static ingvar.android.processor.util.CommonUtils.isEquals;
 import static ingvar.android.processor.util.CommonUtils.objectHashCode;
 
 /**
- * Memory LRU-cache.
- * Note: collections saved on one key as is.
- * But in the decorated storage it may be splitted by minor keys.
+ * Simple implementation memory LRU-cache.
  *
- * Created by Igor Zubenko on 2015.03.19.
+ * <br/><br/>Created by Igor Zubenko on 2015.03.19.
  */
 public class MemoryRepository<K, R> extends AbstractRepository<K, R> {
 
+    /**
+     * Wrapper class for persisting objects
+     * @param <V> object class
+     */
     public static class Entry<V> {
         private long creationTime;
         private V value;
@@ -36,10 +38,19 @@ public class MemoryRepository<K, R> extends AbstractRepository<K, R> {
             this(value, System.currentTimeMillis());
         }
 
+        /**
+         * Get time when object persisted to repository
+         *
+         * @return milliseconds
+         */
         public long getCreationTime() {
             return creationTime;
         }
 
+        /**
+         * Get persisted object
+         * @return object
+         */
         public V getValue() {
             return value;
         }
@@ -48,19 +59,33 @@ public class MemoryRepository<K, R> extends AbstractRepository<K, R> {
     private LruCache<Object, Entry> storage;
     private IRepository decorated;
 
+    /**
+     * @param maxSize max repository size
+     */
     public MemoryRepository(int maxSize) {
         this(maxSize, null);
     }
 
+    /**
+     * @param lruCache LRU-cache
+     */
     public MemoryRepository(LruCache<Object, Entry> lruCache) {
         this(lruCache, null);
     }
 
+    /**
+     * @param maxSize max repository size
+     * @param decorated decorated repository
+     */
     public MemoryRepository(int maxSize, IRepository decorated) {
         storage = new LruCache<>(maxSize);
         this.decorated = decorated;
     }
 
+    /**
+     * @param lruCache LRU-cache
+     * @param decorated decorated repository
+     */
     public MemoryRepository(LruCache<Object, Entry> lruCache, IRepository decorated) {
         this.storage = lruCache;
         this.decorated = decorated;

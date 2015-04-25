@@ -7,7 +7,9 @@ import android.util.LruCache;
 import ingvar.android.processor.persistence.IRepository;
 
 /**
- * Created by Igor Zubenko on 2015.03.20.
+ * Simple implementation memory LRU-cache for saving bitmaps.
+ *
+ * <br/><br/>Created by Igor Zubenko on 2015.03.20.
  */
 public class BitmapMemoryRepository<K> extends MemoryRepository<K, Bitmap> {
 

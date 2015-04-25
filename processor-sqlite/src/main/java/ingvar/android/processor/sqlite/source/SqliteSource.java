@@ -11,7 +11,9 @@ import ingvar.android.literepo.conversion.ConverterFactory;
 import ingvar.android.processor.source.ContextSource;
 
 /**
- * Created by Igor Zubenko on 2015.04.07.
+ * Base implementation of sqlite source.
+ *
+ * <br/><br/>Created by Igor Zubenko on 2015.04.07.
  */
 public class SqliteSource extends ContextSource {
 
@@ -22,6 +24,12 @@ public class SqliteSource extends ContextSource {
         this.converters = new ConcurrentHashMap<>();
     }
 
+    /**
+     * Add object converter to source.
+     *
+     * @param dataClass data class.
+     * @param converter
+     */
     public void addConverter(Class dataClass, Converter converter) {
         converters.put(dataClass, converter);
     }
