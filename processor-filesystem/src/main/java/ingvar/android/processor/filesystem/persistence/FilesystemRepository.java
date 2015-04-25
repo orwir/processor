@@ -18,13 +18,20 @@ import ingvar.android.processor.persistence.CompositeKey;
 import static ingvar.android.processor.util.BytesUtils.toBytes;
 
 /**
- * Created by Igor Zubenko on 2015.03.20.
+ * Filesystem repository for caching tasks results.
+ *
+ * <br/><br/>Created by Igor Zubenko on 2015.03.20.
  */
 public class FilesystemRepository<K, R> extends AbstractRepository<K, R> {
 
     protected DiskLruCache storage;
     protected MessageDigest md5;
 
+    /**
+     *
+     * @param directory cache directory
+     * @param maxBytes max size of cache
+     */
     public FilesystemRepository(File directory, int maxBytes) {
         storage = DiskLruCache.open(directory, maxBytes);
         storage.setCommitType(DiskLruCache.CommitType.BY_UPDATES, 10);
@@ -138,14 +145,32 @@ public class FilesystemRepository<K, R> extends AbstractRepository<K, R> {
         return false;
     }
 
+    /**
+     * Read object from file.
+     *
+     * @param filename cache file identifier
+     * @return object
+     */
     protected R readFile(String filename) {
         return storage.get(filename);
     }
 
+    /**
+     * Write object to file.
+     *
+     * @param filename cache file identifier
+     * @param data
+     */
     protected void writeFile(String filename, R data) {
         storage.put(filename, (Serializable) data);
     }
 
+    /**
+     * Create valid filename from identifier.
+     *
+     * @param key identifier
+     * @return valid filename
+     */
     protected String filenameFromKey(Object key) {
         //This method used for creating name from composite key
         //that's why handled null and empty.

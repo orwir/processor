@@ -15,11 +15,13 @@ import ingvar.android.processor.exception.PersistenceException;
 import ingvar.android.processor.filesystem.util.FileUtils;
 
 /**
- * Created by Igor Zubenko on 2015.03.20.
+ * Filesystem repository for caching bitmaps.
+ *
+ * <br/><br/>Created by Igor Zubenko on 2015.03.20.
  */
 public class BitmapFilesystemRepository<K> extends FilesystemRepository<K, Bitmap> {
 
-    private static final int DEFAULT_QUALITY = 100;
+    protected static final int DEFAULT_QUALITY = 100;
 
     private Bitmap.CompressFormat compressFormat = Bitmap.CompressFormat.PNG;
     private BitmapFactory.Options decodingOptions = null;
@@ -34,26 +36,56 @@ public class BitmapFilesystemRepository<K> extends FilesystemRepository<K, Bitma
         return Bitmap.class.equals(dataClass);
     }
 
+    /**
+     * Get decoding options.
+     *
+     * @return decoding options
+     */
     public BitmapFactory.Options getDecodingOptions() {
         return decodingOptions;
     }
 
+    /**
+     * Set decoding options.
+     *
+     * @param decodingOptions decoding options
+     */
     public void setDecodingOptions(BitmapFactory.Options decodingOptions) {
         this.decodingOptions = decodingOptions;
     }
 
+    /**
+     * Get compress format.
+     *
+     * @return compress format
+     */
     public Bitmap.CompressFormat getCompressFormat() {
         return compressFormat;
     }
 
+    /**
+     * Set compress format.
+     *
+     * @param compressFormat compress format
+     */
     public void setCompressFormat(Bitmap.CompressFormat compressFormat) {
         this.compressFormat = compressFormat;
     }
 
+    /**
+     * Get quality.
+     *
+     * @return quality
+     */
     public int getQuality() {
         return quality;
     }
 
+    /**
+     * Set quality.
+     *
+     * @param quality quality
+     */
     public void setQuality(int quality) {
         this.quality = quality;
     }

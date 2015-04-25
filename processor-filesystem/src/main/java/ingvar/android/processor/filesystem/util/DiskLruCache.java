@@ -53,8 +53,8 @@ public class DiskLruCache {
     };
 
     private CommitType commitType;
-    private int updatesBeforeCommit;
-    private int updatesCount;
+    private volatile int updatesBeforeCommit;
+    private volatile int updatesCount;
     private int maxSize;
     private final File root;
     private final File journal;
@@ -63,6 +63,13 @@ public class DiskLruCache {
     private final ExecutorService executor;
 
 
+    /**
+     * Create new cache instance.
+     *
+     * @param directory used to caching files
+     * @param maxBytes max cache size in bytes
+     * @return new instance
+     */
     public static DiskLruCache open(File directory, int maxBytes) {
         return open(directory, maxBytes, false);
     }
@@ -70,9 +77,9 @@ public class DiskLruCache {
     /**
      * Create new disk lru cache instance
      *
-     * @param directory - used to caching files
-     * @param maxBytes - max cache size in bytes
-     * @param useLock - prevent using cache folder to other instances (created with using lock)
+     * @param directory used to caching files
+     * @param maxBytes max cache size in bytes
+     * @param useLock prevent using cache folder to other instances (created with using lock)
      * @return - new instance
      */
     public static DiskLruCache open(File directory, int maxBytes, boolean useLock) {
@@ -141,6 +148,12 @@ public class DiskLruCache {
         }
     }
 
+    /**
+     * Set commit type.
+     *
+     * @param type commit type
+     * @param updatesBeforeCommit commits before save journal to file
+     */
     public void setCommitType(CommitType type, int updatesBeforeCommit) {
         this.commitType = type;
         this.updatesBeforeCommit = updatesBeforeCommit;
@@ -149,8 +162,8 @@ public class DiskLruCache {
 
     /**
      * Get cached file
-     * @param key
-     * @return
+     * @param key filename
+     * @return cached file
      */
     public File getFile(String key) {
         File file = new File(root, key);
@@ -182,7 +195,7 @@ public class DiskLruCache {
      * Get cached serializable object from file
      * @param key
      * @param <T> - object type
-     * @return
+     * @return cached object from file
      */
     public <T> T get(String key) {
         Object result = null;
@@ -202,7 +215,9 @@ public class DiskLruCache {
     }
 
     /**
-     * @param key
+     * Get creation time
+     *
+     * @param key filename
      * @return last modified date if file valid, else -1
      */
     public long getTime(String key) {
@@ -213,14 +228,31 @@ public class DiskLruCache {
         return -1;
     }
 
+    /**
+     * Get all files from cache directory
+     *
+     * @return files
+     */
     public File[] getAll() {
         return root.listFiles(CACHE_FILTER);
     }
 
+    /**
+     * Get all filenames from cache directory
+     *
+     * @return filenames
+     */
     public String[] getAllKeys() {
         return root.list(CACHE_FILTER);
     }
 
+    /**
+     * Save object to file.
+     *
+     * @param key filename
+     * @param data object
+     * @return created file
+     */
     public File put(String key, Serializable data) {
         File file = new File(root, key);
         synchronized (key.intern()) {
@@ -238,6 +270,13 @@ public class DiskLruCache {
         return file;
     }
 
+    /**
+     * Add file from cache directory to lru queue.
+     * Work with {@link DiskLruCache#createEmptyFile(String)}
+     *
+     * @param file file
+     * @return same file
+     */
     public File register(File file) {
         if(!root.getPath().equals(file.getParent())) {
             throw new IllegalArgumentException(String.format("For registering file '%s' must be in the cache dir!", file.getName()));
@@ -247,10 +286,21 @@ public class DiskLruCache {
         return file;
     }
 
+    /**
+     * Check if file with filename exists.
+     *
+     * @param key filename
+     * @return true if exists, false otherwise
+     */
     public boolean contains(String key) {
         return lru.contains(key) && new File(root, key).exists();
     }
 
+    /**
+     * Remove file from cache
+     *
+     * @param key filename
+     */
     public void remove(String key) {
         File file = new File(root, key);
         file.delete();
@@ -258,6 +308,9 @@ public class DiskLruCache {
         commit();
     }
 
+    /**
+     * Remove all files from cache directory
+     */
     public void removeAll() {
         for (File file : getAll()) {
             file.delete();
@@ -266,6 +319,11 @@ public class DiskLruCache {
         commit();
     }
 
+    /**
+     * Get size of cache directory.
+     *
+     * @return directory size
+     */
     public int getSize() {
         int size = 0;
         for(File file : getAll()) {
@@ -274,10 +332,20 @@ public class DiskLruCache {
         return size;
     }
 
+    /**
+     * Get maximum size of cache directory.
+     *
+     * @return max size
+     */
     public int getMaxSize() {
         return maxSize;
     }
 
+    /**
+     * Set new max size for cache directory and adjust cache to new size.
+     *
+     * @param newSize new size
+     */
     public void setMaxSize(int newSize) {
         boolean adjust = newSize < maxSize;
         maxSize = newSize;
@@ -289,7 +357,7 @@ public class DiskLruCache {
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
-        close();
+        close(); //save journal to file
     }
 //----------------------------------------------------------------------------------------------
 
@@ -358,12 +426,15 @@ public class DiskLruCache {
     }
 
     private void writeJournal() throws IOException {
-        Writer writer = new BufferedWriter(new FileWriter(journal), 1024);
-        for (String key : lru) {
-            writer.write(key);
-            writer.write('\n');
+        synchronized (asyncLock) {
+            Writer writer = new BufferedWriter(new FileWriter(journal), 1024);
+            for (String key : lru) {
+                writer.write(key);
+                writer.write('\n');
+            }
+            writer.flush();
+            close(writer);
         }
-        close(writer);
     }
 
     private void deleteUnknowns() {
