@@ -1,0 +1,32 @@
+language: android
+
+android:
+  components:
+    - tools
+    - platform-tools
+    - build-tools-21.1.1
+    - android-21
+    - extra
+    - sys-img-armeabi-v7a-android-15
+    - sys-img-armeabi-v7a-android-21
+
+env:
+  matrix:
+    - ANDROID_TARGET=android-15 ANDROID_ABI=armeabi-v7a
+    - ANDROID_TARGET=android-21 ANDROID_ABI=armeabi-v7a
+
+before_install:
+  - chmod +rx gradlew
+
+before_script:
+  - echo no | android create avd --force -n test -t $ANDROID_TARGET --abi $ANDROID_ABI
+  - emulator -avd test -no-skin -no-audio -no-window &
+  - android-wait-for-emulator
+  - adb shell input keyevent 82 &
+
+after_success:
+  - ./gradlew bintrayUpload
+
+branches:
+  only:
+    - master

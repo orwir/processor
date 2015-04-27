@@ -1,16 +1,33 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+
+description '''\
+Modular android framework for asynchronous task processing.
+Core module.
+'''
+
+ext {
+    vVersionCode = vGlobalVersionCode
+    vVersionName = vGlobalVersionName
+    vTestApplicationId = 'ingvar.android.processor.test'
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+}
 
 android {
+
     compileSdkVersion vCompileSdkVersion
     buildToolsVersion vBuildToolsVersion
 
     defaultConfig {
         minSdkVersion vMinSdkVersion
         targetSdkVersion vTargetSdkVersion
-        versionCode vGlobalVersionCode
-        versionName vGlobalVersionName
+        versionCode vVersionCode
+        versionName vVersionName
 
-        testApplicationId 'ingvar.android.processor.test'
+        testApplicationId vTestApplicationId
         testInstrumentationRunner 'android.test.InstrumentationTestRunner'
         testHandleProfiling true
         testFunctionalTest true
@@ -23,12 +40,65 @@ android {
         }
     }
 
+    lintOptions {
+        abortOnError false
+    }
+
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility vSourceCompatibility
+        targetCompatibility vTargetCompatibility
+    }
+
+}
+
+install {
+    repositories.mavenInstaller {
+        pom {
+            project {
+                packaging 'aar'
+                name project.name
+                description project.description
+                url 'https://github.com/deadly-cat/processor'
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'deadly-cat'
+                        name 'Igor Zubenko'
+                        email 'igor.a.zubenko@gmail.com'
+                    }
+                }
+                scm {
+                    connection 'https://github.com/deadly-cat/processor.git'
+                    developerConnection 'https://github.com/deadly-cat/processor.git'
+                    url 'https://github.com/deadly-cat/processor'
+
+                }
+            }
+        }
     }
 }
 
-dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
 }

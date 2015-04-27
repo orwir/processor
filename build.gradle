@@ -1,11 +1,35 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
+ext {
+    vBuildToolsVersion = '22.0.1'
+    vCompileSdkVersion = 21
+    vMinSdkVersion = 14
+    vTargetSdkVersion = 21
+
+    vGlobalVersionCode = 1
+    vGlobalVersionName = '1.0.0'
+
+    vVersionCode = vGlobalVersionCode
+    vVersionName = vGlobalVersionName
+
+    vSourceCompatibility = JavaVersion.VERSION_1_7
+    vTargetCompatibility = JavaVersion.VERSION_1_7
+
+    //initialized from local.properties
+    vBintrayUser = null
+    vBintrayKey = null
+
+    loadProperties()
+}
+
 buildscript {
     repositories {
         jcenter()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:1.1.2'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.6'
+        classpath 'com.github.dcendents:android-maven-plugin:1.2'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -19,12 +43,51 @@ allprojects {
     }
 }
 
-ext {
-    vCompileSdkVersion = 21
-    vBuildToolsVersion = '22.0.1'
-    vMinSdkVersion = 14
-    vTargetSdkVersion = 21
+final publishedProjects = ['root', 'processor', 'processor-filesystem', 'processor-memory', 'processor-network', 'processor-sqlite']
+configure(allprojects.findAll {publishedProjects.contains(it.name)}) {
 
-    vGlobalVersionCode = 1
-    vGlobalVersionName = '1.0.0'
+    evaluationDependsOn(':' + project.name)
+
+    apply plugin: 'com.jfrog.bintray'
+
+    group = 'ingvar.android.processor'
+    version = project.vVersionName
+
+    bintray {
+        user = vBintrayUser
+        key = vBintrayKey
+        configurations = ['archives']
+        publish = true
+
+        pkg {
+            repo = 'maven'
+            name = project.name
+            desc = project.description
+            websiteUrl = 'https://github.com/deadly-cat/processor'
+            issueTrackerUrl = 'https://github.com/deadly-cat/processor/issues'
+            vcsUrl = 'https://github.com/deadly-cat/processor.git'
+            licenses = ['Apache-2.0']
+            labels = ['service', 'async', 'android']
+            publicDownloadNumbers = true
+        }
+    }
+
+}
+
+//-------------------------------------------------
+//HELPFUL FUNCTIONS
+
+void loadProperties() {
+    File local = file('local.properties')
+    if(local.exists()) {
+        Properties props = new Properties()
+        props.load(new FileInputStream(local))
+
+        ext.vBintrayUser = props['bintray.user']
+        ext.vBintrayKey = props['bintray.key']
+    }
+    if(!ext.vBintrayUser?.trim()) {//get from environment
+        ext.vBintrayUser = System.getenv('bintray_user')
+        ext.vBintrayKey = System.getenv('bintray_key')
+    }
 }
