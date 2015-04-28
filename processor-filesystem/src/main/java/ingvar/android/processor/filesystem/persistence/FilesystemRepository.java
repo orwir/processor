@@ -194,7 +194,7 @@ public class FilesystemRepository<K, R> extends AbstractRepository<K, R> {
                 }
                 md5.reset();
                 md5.update(bytes);
-                return new BigInteger(1, md5.digest()).toString();
+                return new BigInteger(1, md5.digest()).toString(16);
             } catch (Exception e) {
                 return String.valueOf(key.hashCode());
             }

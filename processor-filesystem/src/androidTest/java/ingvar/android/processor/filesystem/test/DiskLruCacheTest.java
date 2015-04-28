@@ -47,7 +47,7 @@ public class DiskLruCacheTest extends ApplicationTestCase<Application> {
         cache.put("key3", _500kb);
 
         //wait async adjusting
-        try {Thread.sleep(20);} catch (InterruptedException e) {}
+        try {Thread.sleep(50);} catch (InterruptedException e) {}
 
         File[] files = cache.getAll();
         assertEquals("Least file must be deleted", 2, files.length);

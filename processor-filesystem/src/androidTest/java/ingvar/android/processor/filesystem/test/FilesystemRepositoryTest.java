@@ -6,6 +6,7 @@ import android.test.ApplicationTestCase;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import ingvar.android.processor.filesystem.persistence.FilesystemRepository;
@@ -46,11 +47,14 @@ public class FilesystemRepositoryTest extends ApplicationTestCase<Application> {
 
         repo.persist(key, expected);
         List<TestObject> actual = repo.obtain(key, Time.ALWAYS_RETURNED);
+
+        Collections.sort(expected);
+        Collections.sort(actual);
         assertEquals(expected, actual);
 
-        CompositeKey<Uri> key2 = new CompositeKey<>(Uri.parse("http://example.com"), Uri.parse("http://example.com/testfile1"));
-        List<TestObject> actual2 = repo.obtain(key2, Time.ALWAYS_RETURNED);
-        assertEquals(Arrays.asList(expected.get(0)), actual2);
+        CompositeKey<Uri> key1 = new CompositeKey<>(Uri.parse("http://example.com"), Uri.parse("http://example.com/testfile1"));
+        List<TestObject> actual1 = repo.obtain(key1, Time.ALWAYS_RETURNED);
+        assertEquals(Arrays.asList(expected.get(0)), actual1);
     }
 
     public void testCacheListEmptyMajor() {
@@ -66,6 +70,9 @@ public class FilesystemRepositoryTest extends ApplicationTestCase<Application> {
 
         repo.persist(key, expected);
         List<TestObject> actual = repo.obtain(key, Time.ALWAYS_RETURNED);
+
+        Collections.sort(expected);
+        Collections.sort(actual);
         assertEquals(expected, actual);
 
         TestObject single = repo.obtain(Uri.parse("http://example.com/testfile1"), Time.ALWAYS_RETURNED);
@@ -97,14 +104,16 @@ public class FilesystemRepositoryTest extends ApplicationTestCase<Application> {
         TestObject actual2 = repo.obtain(uri2, Time.ALWAYS_RETURNED);
         assertEquals(object2, actual2);
 
-        Thread.sleep(20);
+        repo.persist(Uri.parse("content://example.com/test3"), new TestObject(3, "name3", 100.500));
+        repo.persist(Uri.parse("content://example.com/test4"), new TestObject(4, "name4", 100.500));
+        Thread.sleep(50);
         assertNull("Old file was not deleted", repo.obtain(uri1, Time.ALWAYS_RETURNED));
     }
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        repo = new FilesystemRepository(new File(getContext().getCacheDir(), "test-cache"), 460);
+        repo = new FilesystemRepository(new File(getContext().getCacheDir(), "test-cache"), 1000);
     }
 
     @Override

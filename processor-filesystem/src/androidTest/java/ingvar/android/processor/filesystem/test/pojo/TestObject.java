@@ -7,7 +7,7 @@ import java.math.RoundingMode;
 /**
  * Created by Igor Zubenko on 2015.04.21.
  */
-public class TestObject implements Serializable {
+public class TestObject implements Serializable, Comparable<TestObject> {
 
     private Integer id;
     private String name;
@@ -56,6 +56,11 @@ public class TestObject implements Serializable {
                 && price.equals(other.price);
         }
         return false;
+    }
+
+    @Override
+    public int compareTo(TestObject another) {
+        return id.compareTo(another.id);
     }
 
 }
