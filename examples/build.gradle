@@ -1,16 +1,21 @@
 apply plugin: 'com.android.application'
 
+ext {
+    vVersionCode = 1
+    vVersionName = '1.0.0'
+}
+
 android {
+
     compileSdkVersion vCompileSdkVersion
     buildToolsVersion vBuildToolsVersion
 
     defaultConfig {
         minSdkVersion vMinSdkVersion
         targetSdkVersion vTargetSdkVersion
-
+        versionCode vVersionCode
+        versionName vVersionName
         applicationId 'ingvar.android.processor.examples'
-        versionCode 1
-        versionName '1.0.0'
     }
 
     buildTypes {
@@ -18,6 +23,15 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+
+    compileOptions {
+        sourceCompatibility vSourceCompatibility
+        targetCompatibility vTargetCompatibility
+    }
+
+    lintOptions {
+        abortOnError false
     }
 }
 
