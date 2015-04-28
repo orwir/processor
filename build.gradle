@@ -43,7 +43,8 @@ allprojects {
     }
 }
 
-final publishedProjects = ['root', 'processor', 'processor-filesystem', 'processor-memory', 'processor-network', 'processor-sqlite']
+final publishedProjects = ['root', 'processor', 'processor-filesystem', 'processor-memory',
+                           'processor-network', 'processor-sqlite', 'processor-ultimate']
 configure(allprojects.findAll {publishedProjects.contains(it.name)}) {
 
     evaluationDependsOn(':' + project.name)
