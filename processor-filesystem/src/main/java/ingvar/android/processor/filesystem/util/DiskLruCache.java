@@ -193,7 +193,7 @@ public class DiskLruCache {
 
     /**
      * Get cached serializable object from file
-     * @param key
+     * @param key filename
      * @param <T> - object type
      * @return cached object from file
      */

@@ -19,8 +19,10 @@ import static ingvar.android.processor.util.BytesUtils.toBytes;
 
 /**
  * Filesystem repository for caching tasks results.
- *
  * <br/><br/>Created by Igor Zubenko on 2015.03.20.
+ *
+ * @param <K> identifier class
+ * @param <R> result class
  */
 public class FilesystemRepository<K, R> extends AbstractRepository<K, R> {
 
@@ -159,7 +161,7 @@ public class FilesystemRepository<K, R> extends AbstractRepository<K, R> {
      * Write object to file.
      *
      * @param filename cache file identifier
-     * @param data
+     * @param data object
      */
     protected void writeFile(String filename, R data) {
         storage.put(filename, (Serializable) data);
