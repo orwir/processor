@@ -3,12 +3,12 @@
 [![Build Status](https://travis-ci.org/deadly-cat/processor.svg?branch=master)](https://travis-ci.org/deadly-cat/processor)
 [![License](https://raw.githubusercontent.com/novoda/novoda/master/assets/btn_apache_lisence.png)](LICENSE.txt)
 
-//TODO: bintray link
+[ ![Download](https://api.bintray.com/packages/deadly-cat/maven/processor-ultimate/images/download.svg) ](https://bintray.com/deadly-cat/maven/processor-ultimate/_latestVersion)
 
 Modular android framework for async task processing.
 
 Features:
-* Caching results
+* Caching results.
 * Processing multiple tasks as one(but not atomic) with joining results.
 * Same interfaces for working with single process result or collection of results
 * Modules for working with memory, filesystem, sqlite and basis-module for network.
@@ -34,10 +34,10 @@ dependencies {
 }
 ```
 
-Then you need to extend service from ProcessorService and add it to AndroidManifest.xml.
-Module 'ultimate' already has BaseProcessorService which provide Bitmap/Common caches to filesystem decorated by memory. Also included sources for memory and filesystem.
+Then you need to extend service from [ProcessorService](https://github.com/deadly-cat/processor/blob/master/processor/src/main/java/ingvar/android/processor/service/ProcessorService.java) and add it to AndroidManifest.xml.
+Module 'ultimate' already has [BaseProcessorService](https://github.com/deadly-cat/processor/blob/master/processor-ultimate/src/main/java/ingvar/android/processor/ultimate/service/BaseProcessorService.java) which provide Bitmap/Common caches to filesystem decorated by memory. Also included sources for memory and filesystem.
 
-Next you need to instantiate Processor class in your activity.
+Next you need to instantiate [Processor](https://github.com/deadly-cat/processor/blob/master/processor/src/main/java/ingvar/android/processor/service/Processor.java) class in your activity.
 ```java
 Processor processor = new Processor(BaseProcessorService.class);
 ```
@@ -56,9 +56,13 @@ protected void onStop() {
     processor.unbind(this);
 }
 ```
+Note: Unbinding does not stop your tasks and you need to remove observers. If you use [ContextObserver](https://github.com/deadly-cat/processor/blob/master/processor/src/main/java/ingvar/android/processor/observation/ContextObserver.java) and unbound service from same context your observers removed automatically. Otherwise you need to remove observers by yourself.
+```java
+processor.removeObservers(groupName);
+```
 
-For creating task you need to extend SingleTask and override method 'process(IObserverManager observerManager, ISource source)'.
-For example lets try to create task for gaining weather and using retrofit.
+For creating task you need to extend [SingleTask](https://github.com/deadly-cat/processor/blob/master/processor/src/main/java/ingvar/android/processor/task/SingleTask.java) and override method 'SingleTask#process(IObserverManager observerManager, ISource source)'.
+For example lets try to create task for gaining weather. As [network source](https://github.com/deadly-cat/processor/blob/master/examples/src/main/java/ingvar/android/processor/examples/weather/network/RetrofitSource.java) used Retrofit.
 ```java
 public class WeatherRequest extends SingleTask<WeatherKey, Weather, RetrofitSource> {
 	
@@ -73,7 +77,7 @@ public class WeatherRequest extends SingleTask<WeatherKey, Weather, RetrofitSour
 
 }
 ```
-More details about usage Retrofit for network you can find in the [examples](https://github.com/deadly-cat/processor/tree/master/examples/src/main/java/ingvar/android/processor/examples/weather).
+More details about usage Retrofit for network you can find in the [weather example](https://github.com/deadly-cat/processor/tree/master/examples/src/main/java/ingvar/android/processor/examples/weather).
 
 If you need to return collection of objects you also need to use **single object** class in the constructor.
 ```java
@@ -90,8 +94,9 @@ public class WeatherRequest extends SingleTask<WeatherKey, List<Weather>, Retrof
 
 }
 ```
+But you need to use [CompositeKey](https://github.com/deadly-cat/processor/blob/master/processor/src/main/java/ingvar/android/processor/persistence/CompositeKey.java) for these tasks.
 
-For receiving results of task you need to implement IObserver(or AbstractObserver/ContextObserver).
+For receiving results of task you need to implement [IObserver](https://github.com/deadly-cat/processor/blob/master/processor/src/main/java/ingvar/android/processor/observation/IObserver.java)(or AbstractObserver/ContextObserver).
 ```java
 private class WeatherObserver extends ContextObserver<WeatherActivity, Weather> {
 
@@ -114,10 +119,11 @@ processor.execute(task, observer)
 processor.planExecute(task, observer)
 ```
 First directly call service and return Future.
-Second also call service if it bound. But if not task will be added to non-ordered queue and after sevice was bound execute it.
+Second also call service if it bound. But if not task will be added to non-ordered queue and after service will be bind execute it.
 
-AggregatedTask used for execution couple of task as one action.
-For example if you have a list of items and you need to gain price for them and total amount from external service, but service has api only for gaining price for single item you can write something like this:
+[AggregatedTask](https://github.com/deadly-cat/processor/blob/master/processor/src/main/java/ingvar/android/processor/task/AggregatedTask.java) used for execution couple of tasks as one operation(but not atomic).
+
+For example if you have a list of items and you need to gain price for them and total amount from external service, but service has api only for gaining price for a single item you can write something like this:
 ```java
 AggregatedTask sumTask = new SumTask();
 for(Item item : inventory) {
@@ -125,11 +131,11 @@ for(Item item : inventory) {
 }
 processor.execute(sumTask, observer);
 ```
-
 All inner tasks will be executed in different threads and return result to aggregated task. Number of parallel threads is set AggregatedTask#setThreadsCount(int threadsCount). By default the value is 15.
 
-Module sqlite used for work library Literepo.
-For caching results it used special SqlKey which contains information for creation query to DB.
+
+Module sqlite used for work library [Literepo](https://github.com/deadly-cat/literepo).
+For caching results it used special [SqlKey](https://github.com/deadly-cat/processor/blob/master/processor-sqlite/src/main/java/ingvar/android/processor/sqlite/persistence/SqlKey.java) which contains information for creation query to DB.
 Example of usage:
 ```java
 public class WeatherKey extends SqlKey {
@@ -158,4 +164,4 @@ public class WeatherKey extends SqlKey {
 }
 ```
 
-Other examples of usages you can find in the examples module and unit-tests.
+Other examples of usages you can find in the [examples](https://github.com/deadly-cat/processor/tree/master/examples/src/main/java/ingvar/android/processor/examples) module and unit-tests for modules.
