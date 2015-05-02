@@ -29,7 +29,13 @@ allprojects {
 Next add dependency for your module
 ```groovy
 dependencies {
-    compile 'ingvar.android.processor:processor-ultimate:1.0.0'
+    //core part
+    compile 'ingvar.android.processor:processor:1.0.0'
+    //other parts
+    compile 'ingvar.android.processor:processor-memory:1.0.0'
+    compile 'ingvar.android.processor:processor-sqlite:1.0.0'
+    compile 'ingvar.android.processor:processor-network:1.0.0'
+    compile 'ingvar.android.processor:processor-filesystem:1.0.0'
 }
 ```
 

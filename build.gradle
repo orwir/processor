@@ -27,7 +27,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.1.2'
+        classpath 'com.android.tools.build:gradle:1.2.2'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.6'
         classpath 'com.github.dcendents:android-maven-plugin:1.2'
 
@@ -43,9 +43,7 @@ allprojects {
     }
 }
 
-//publish only ultimate version for now.
-/**/
-final publishedProjects = ['root', 'processor-ultimate', 'processor', 'processor-filesystem', 'processor-memory', 'processor-network', 'processor-sqlite']
+final publishedProjects = ['root', 'processor', 'processor-filesystem', 'processor-memory', 'processor-network', 'processor-sqlite']
 configure(allprojects.findAll {publishedProjects.contains(it.name)}) {
 
     evaluationDependsOn(':' + project.name)
@@ -53,7 +51,7 @@ configure(allprojects.findAll {publishedProjects.contains(it.name)}) {
     apply plugin: 'com.jfrog.bintray'
 
     group = 'ingvar.android.processor'
-    version = project.vVersionName
+    version = vVersionName
 
     bintray {
         user = vBintrayUser
@@ -63,8 +61,8 @@ configure(allprojects.findAll {publishedProjects.contains(it.name)}) {
 
         pkg {
             repo = 'maven'
-            name = 'processor-ultimate'
-            desc = 'Modular android framework for asynchronous task processing.\nAll-in-one module.'
+            name = 'processor'
+            desc = 'Modular android framework for asynchronous task processing.'
             websiteUrl = 'https://github.com/deadly-cat/processor'
             issueTrackerUrl = 'https://github.com/deadly-cat/processor/issues'
             vcsUrl = 'https://github.com/deadly-cat/processor.git'

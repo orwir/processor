@@ -1,6 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 
+//TODO: for now I don't understand how to combine all modules in one.
 description '''\
 Modular android framework for asynchronous task processing.
 All-in-one module.
