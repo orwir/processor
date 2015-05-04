@@ -35,12 +35,13 @@ public interface ICacheManager {
      * Save data to appropriate repository.
      *
      * @param key data identifier
-     * @param data data
+     * @param dataClass class of single instance of data
+     * @param data data (may be collection)
      * @param <K> identifier class
      * @param <R> result class
      * @return same data (May be changed. For examples added repository IDs)
      */
-    <K, R> R persist(K key, R data);
+    <K, R> R persist(K key, Class dataClass, R data);
 
     /**
      * Remove data from repository.

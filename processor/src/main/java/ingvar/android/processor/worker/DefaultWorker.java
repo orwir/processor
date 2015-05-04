@@ -199,7 +199,7 @@ public class DefaultWorker implements IWorker {
                     throw exception;
                 }
                 if(result != null && task.getExpirationTime() != Time.ALWAYS_EXPIRED) {
-                    cacheManager.persist(task.getTaskKey(), result);
+                    cacheManager.persist(task.getTaskKey(), task.getResultClass(), result);
                     break flow;
                 }
             } else {

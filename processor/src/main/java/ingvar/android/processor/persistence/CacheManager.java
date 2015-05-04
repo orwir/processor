@@ -35,8 +35,8 @@ public class CacheManager implements ICacheManager {
     }
 
     @Override
-    public <K, R> R persist(K key, R data) {
-        IRepository repository = getAppropriateRepository(data.getClass());
+    public <K, R> R persist(K key, Class dataClass, R data) {
+        IRepository repository = getAppropriateRepository(dataClass);
         repository.persist(key, data);
         return data;
     }
