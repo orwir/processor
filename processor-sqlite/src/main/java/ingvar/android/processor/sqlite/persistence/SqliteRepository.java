@@ -113,7 +113,7 @@ public class SqliteRepository<R> extends AbstractRepository<SqlKey, R> {
             }
         }
         cursor.close();
-        return result;
+        return result.isEmpty() ? null : result;
     }
 
     @Override
