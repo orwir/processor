@@ -20,6 +20,9 @@ public class CompositeKey<K> {
     private K major;
     private List<K> minors;
 
+    public CompositeKey() {}
+
+    @SafeVarargs
     public CompositeKey(K major, K... minors) {
         this.major = major;
         this.minors = Arrays.asList(minors);
