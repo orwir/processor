@@ -4,7 +4,7 @@ import android.content.Context;
 
 import java.lang.ref.WeakReference;
 
-import ingvar.android.processor.exception.ContextStaleException;
+import ingvar.android.processor.exception.ReferenceStaleException;
 
 /**
  * Keeps a weak reference for {@link Context}
@@ -32,12 +32,12 @@ public abstract class ContextObserver<C extends Context, R> extends AbstractObse
     /**
      * Return reference to {@link Context}
      * @return context
-     * @throws ingvar.android.processor.exception.ContextStaleException if context is stale
+     * @throws ReferenceStaleException if context is stale
      */
     protected C getContext() {
         C context = contextRef.get();
         if(context == null) {
-            throw new ContextStaleException("Context is stale!");
+            throw new ReferenceStaleException("Context is stale!");
         }
         return context;
     }
