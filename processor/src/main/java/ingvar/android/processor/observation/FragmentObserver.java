@@ -1,5 +1,6 @@
 package ingvar.android.processor.observation;
 
+import android.app.Activity;
 import android.app.Fragment;
 
 import java.lang.ref.WeakReference;
@@ -38,6 +39,11 @@ public abstract class FragmentObserver<F extends Fragment, R> extends AbstractOb
             throw new ReferenceStaleException("Fragment is stale!");
         }
         return fragment;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <A extends Activity> A getActivity() {
+        return (A) getFragment().getActivity();
     }
 
     protected boolean isFragmentAdded() {
