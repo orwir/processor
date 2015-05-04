@@ -40,7 +40,7 @@ public class ServiceTest extends ServiceTestCase<MockMemoryService> {
 
         Future<List<String>> future = getService().execute(request);
         assertEquals(10, future.get().size());
-        assertEquals(10, getService().<List<String>>obtainFromCache(10, String.class).size());
+        assertEquals(10, this.<List<String>>obtainFromCache(10, String.class).size());
     }
 
     public void testCache() throws Exception {
@@ -49,7 +49,7 @@ public class ServiceTest extends ServiceTestCase<MockMemoryService> {
         //wait until it saved
         future.get();
 
-        Object cached = getService().obtainFromCache("test2", Object.class, Time.ALWAYS_RETURNED);
+        Object cached = obtainFromCache("test2", Object.class, Time.ALWAYS_RETURNED);
         assertEquals("Returned result not match", "test2_value", cached);
     }
 
@@ -58,7 +58,7 @@ public class ServiceTest extends ServiceTestCase<MockMemoryService> {
         Future result = getService().execute(task);
 
         assertEquals("test_ae_value", result.get());
-        assertNull(getService().obtainFromCache("test_ae", Object.class));
+        assertNull(obtainFromCache("test_ae", Object.class));
     }
 
     public void testAlwaysReturned() throws Exception {
@@ -67,8 +67,8 @@ public class ServiceTest extends ServiceTestCase<MockMemoryService> {
         Future result = getService().execute(task);
 
         assertEquals("test_ar_value", result.get());
-        assertEquals("test_ar_value", getService().obtainFromCache(key, Object.class));
-        assertNull(getService().obtainFromCache(key, Object.class, Time.ALWAYS_EXPIRED));
+        assertEquals("test_ar_value", obtainFromCache(key, Object.class));
+        assertNull(obtainFromCache(key, Object.class, Time.ALWAYS_EXPIRED));
     }
 
     public void testExpired() throws Exception {
@@ -77,9 +77,9 @@ public class ServiceTest extends ServiceTestCase<MockMemoryService> {
         Future result = getService().execute(task);
 
         assertEquals("test_e_value", result.get());
-        assertEquals("test_e_value", getService().obtainFromCache(key, Object.class));
+        assertEquals("test_e_value", obtainFromCache(key, Object.class));
         Thread.sleep(150);
-        assertNull(getService().obtainFromCache(key, Object.class, 100));
+        assertNull(obtainFromCache(key, Object.class, 100));
     }
 
     public void testBitmap() throws Exception {
@@ -88,7 +88,7 @@ public class ServiceTest extends ServiceTestCase<MockMemoryService> {
         Future<Bitmap> future = getService().execute(new BitmapTask(key));
 
         assertTrue(expected.sameAs(future.get()));
-        assertTrue(expected.sameAs(getService().<Bitmap>obtainFromCache(key, Bitmap.class)));
+        assertTrue(expected.sameAs(this.<Bitmap>obtainFromCache(key, Bitmap.class)));
     }
 
     @Override
@@ -104,6 +104,14 @@ public class ServiceTest extends ServiceTestCase<MockMemoryService> {
             getService().removeObservers(getContext());
             getService().clearCache();
         }
+    }
+
+    private <T> T obtainFromCache(Object key, Class dataClass, long cacheExpirationTime) {
+        return getService().getCacheManager().obtain(key, dataClass, cacheExpirationTime);
+    }
+
+    private <T> T obtainFromCache(Object key, Class dataClass) {
+        return obtainFromCache(key, dataClass, Time.ALWAYS_RETURNED);
     }
 
     private class BitmapTask extends SingleTask<String, Bitmap, ContextSource> {

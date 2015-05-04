@@ -61,7 +61,7 @@ public class ProcessorServiceTest extends ServiceTestCase<MockService> {
         ITask<Integer, Integer> task = new DummyTask(2048, Time.ALWAYS_RETURNED);
 
         Future<Integer> result = getService().execute(task);
-        assertEquals(result.get(), getService().obtainFromCache(2048, Integer.class, Time.ALWAYS_RETURNED));
+        assertEquals(result.get(), obtainFromCache(2048, Integer.class, Time.ALWAYS_RETURNED));
     }
 
     public void testRemoveObserversByGroup() {
@@ -86,6 +86,14 @@ public class ProcessorServiceTest extends ServiceTestCase<MockService> {
             getService().removeObservers(getContext());
             getService().clearCache();
         }
+    }
+
+    private <T> T obtainFromCache(Object key, Class dataClass, long cacheExpirationTime) {
+        return getService().getCacheManager().obtain(key, dataClass, cacheExpirationTime);
+    }
+
+    private <T> T obtainFromCache(Object key, Class dataClass) {
+        return obtainFromCache(key, dataClass, Time.ALWAYS_RETURNED);
     }
 
     private class DummyTask extends SingleTask<Integer, Integer, MockSource> {
