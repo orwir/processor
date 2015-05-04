@@ -5,7 +5,13 @@ package ingvar.android.processor.persistence;
  */
 public class Time {
 
+    /**
+     * Never save and obtain result to cache.
+     */
     public static long ALWAYS_EXPIRED = -1;
+    /**
+     * Always return result from cache if exists.
+     */
     public static long ALWAYS_RETURNED = 0;
 
     private Time() {}

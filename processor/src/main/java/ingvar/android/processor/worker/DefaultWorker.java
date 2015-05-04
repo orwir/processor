@@ -71,9 +71,10 @@ public class DefaultWorker implements IWorker {
     protected <R> R process(ITask task) {
         task.setStatus(TaskStatus.STARTED);
         notifyProgress(task, IObserver.MIN_PROGRESS);
-        checkCancellation(task);
 
         try {
+            checkCancellation(task);
+
             R result;
             if (task instanceof AggregatedTask) {
                 result = processAggregatedTask((AggregatedTask) task);
@@ -92,7 +93,7 @@ public class DefaultWorker implements IWorker {
 
         } catch (TaskCancelledException e) {
             notifyCancelled(task);
-            return null;
+            throw e;
 
         } catch (RuntimeException e) {
             Log.e(TAG, e.getMessage(), e);

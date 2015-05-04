@@ -114,6 +114,16 @@ public abstract class ProcessorService extends Service {
     }
 
     /**
+     * Remove registered observers from context.
+     * Used with {@link ingvar.android.processor.observation.ContextObserver}
+     *
+     * @param context context
+     */
+    public void removeObservers(Context context) {
+        observerManager.removeGroup(context.getClass().getName());
+    }
+
+    /**
      * Obtain task result from cache.
      * Note: synchronous method.
      *
@@ -141,29 +151,6 @@ public abstract class ProcessorService extends Service {
     }
 
     /**
-     * Remove data from cache.
-     * Note: synchronous method.
-     *
-     * @param dataClass data class
-     * @param key data identifier
-     * @param <K> identifier class
-     */
-    public <K> void removeFromCache(Class dataClass, K key) {
-        cacheManager.remove(dataClass, key);
-    }
-
-    /**
-     * Remove all data by data class.
-     *
-     * Note: synchronous method.
-     *
-     * @param dataClass data class.
-     */
-    public void removeFromCache(Class dataClass) {
-        cacheManager.remove(dataClass);
-    }
-
-    /**
      * Remove all data from all repositories.
      *
      * Note: synchronous method.
@@ -173,40 +160,21 @@ public abstract class ProcessorService extends Service {
     }
 
     /**
-     * Remove registered observers by group
+     * Cache manager for caching task results.
      *
-     * @param group group of observers
+     * @return cache manager
      */
-    public void removeObservers(String group) {
-        observerManager.removeGroup(group);
+    public ICacheManager getCacheManager() {
+        return cacheManager;
     }
 
     /**
-     * Remove registered observers from context.
-     * Used with {@link ingvar.android.processor.observation.ContextObserver}
+     * Observer manager for notifications.
      *
-     * @param context context
+     * @return observer manager
      */
-    public void removeObservers(Context context) {
-        observerManager.removeGroup(context.getClass().getName());
-    }
-
-    /**
-     * Get count of parallel threads.
-     *
-     * @return number of threads
-     */
-    public int getThreadCount() {
-        return DEFAULT_PARALLEL_THREADS;
-    }
-
-    /**
-     * Alive time of each thread.
-     *
-     * @return alive time
-     */
-    public int getAliveTime() {
-        return DEFAULT_KEEP_ALIVE_TIME_SECONDS;
+    public IObserverManager getObserverManager() {
+        return observerManager;
     }
 
     /**
@@ -226,6 +194,24 @@ public abstract class ProcessorService extends Service {
     protected abstract void provideRepositories(ICacheManager cacheManager);
 
     /**
+     * Get count of parallel threads.
+     *
+     * @return number of threads
+     */
+    protected int getThreadCount() {
+        return DEFAULT_PARALLEL_THREADS;
+    }
+
+    /**
+     * Alive time of each thread.
+     *
+     * @return alive time
+     */
+    protected int getAliveTime() {
+        return DEFAULT_KEEP_ALIVE_TIME_SECONDS;
+    }
+
+    /**
      * Executor for running threads.
      *
      * @return executor
@@ -235,30 +221,12 @@ public abstract class ProcessorService extends Service {
     }
 
     /**
-     * Cache manager for caching task results.
-     *
-     * @return cache manager
-     */
-    protected ICacheManager getCacheManager() {
-        return cacheManager;
-    }
-
-    /**
      * Source manager for getting sources to tasks.
      *
      * @return source manager
      */
     protected ISourceManager getSourceManager() {
         return sourceManager;
-    }
-
-    /**
-     * Observer manager for notifications.
-     *
-     * @return observer manager
-     */
-    protected IObserverManager getObserverManager() {
-        return observerManager;
     }
 
     /**

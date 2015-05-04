@@ -21,14 +21,14 @@ import ingvar.android.processor.task.ITask;
  *
  * <br/><br/>Created by Igor Zubenko on 2015.03.19.
  */
-public class Processor {
+public class Processor<S extends ProcessorService> {
 
     private static final String TAG = Processor.class.getSimpleName();
 
     private Class<? extends ProcessorService> serviceClass;
     private Map<ITask, IObserver[]> plannedTasks;
     private ServiceConnection connection;
-    private ProcessorService service;
+    private S service;
 
     public Processor(Class<? extends ProcessorService> serviceClass) {
         this.serviceClass = serviceClass;
@@ -109,7 +109,12 @@ public class Processor {
         return service != null;
     }
 
-    protected ProcessorService getService() {
+    /**
+     * Get service.
+     *
+     * @return service or null if not bound
+     */
+    public S getService() {
         return service;
     }
 
@@ -119,7 +124,7 @@ public class Processor {
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.d(TAG, String.format("Service '%s' connected.", name));
 
-            Processor.this.service = ((ProcessorService.ProcessorBinder) service).getService();
+            Processor.this.service = (S) ((ProcessorService.ProcessorBinder) service).getService();
 
             if(plannedTasks.size() > 0) {
                 Log.d(TAG, "Execute planned tasks. Total: " + Integer.toString(plannedTasks.size()));
