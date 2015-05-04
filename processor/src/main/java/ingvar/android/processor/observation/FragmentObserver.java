@@ -40,4 +40,8 @@ public abstract class FragmentObserver<F extends Fragment, R> extends AbstractOb
         return fragment;
     }
 
+    protected boolean isFragmentAdded() {
+        return getFragment().isAdded();
+    }
+
 }
