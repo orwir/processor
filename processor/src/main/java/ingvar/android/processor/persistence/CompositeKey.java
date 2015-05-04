@@ -1,6 +1,7 @@
 package ingvar.android.processor.persistence;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import ingvar.android.processor.exception.PersistenceException;
@@ -20,7 +21,10 @@ public class CompositeKey<K> {
     private K major;
     private List<K> minors;
 
-    public CompositeKey() {}
+    public CompositeKey() {
+        major = null;
+        minors = Collections.emptyList();
+    }
 
     @SafeVarargs
     public CompositeKey(K major, K... minors) {
