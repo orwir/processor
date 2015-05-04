@@ -45,11 +45,11 @@ public interface ICacheManager {
     /**
      * Remove data from repository.
      *
-     * @param dataClass data identifier
      * @param key identifier
+     * @param dataClass data identifier
      * @param <K> identifier class
      */
-    <K> void remove(Class dataClass, K key);
+    <K> void remove(K key, Class dataClass);
 
     /**
      * Remove all saved data by class.

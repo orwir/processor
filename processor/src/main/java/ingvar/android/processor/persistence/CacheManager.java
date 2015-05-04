@@ -42,7 +42,7 @@ public class CacheManager implements ICacheManager {
     }
 
     @Override
-    public <K> void remove(Class dataClass, K key) {
+    public <K> void remove(K key, Class dataClass) {
         IRepository repository = getAppropriateRepository(dataClass);
         repository.remove(key);
     }

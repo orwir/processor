@@ -18,7 +18,6 @@ import ingvar.android.processor.observation.IObserverManager;
 import ingvar.android.processor.observation.ObserverManager;
 import ingvar.android.processor.persistence.CacheManager;
 import ingvar.android.processor.persistence.ICacheManager;
-import ingvar.android.processor.persistence.Time;
 import ingvar.android.processor.source.ISourceManager;
 import ingvar.android.processor.source.SourceManager;
 import ingvar.android.processor.task.ITask;
@@ -121,33 +120,6 @@ public abstract class ProcessorService extends Service {
      */
     public void removeObservers(Context context) {
         observerManager.removeGroup(context.getClass().getName());
-    }
-
-    /**
-     * Obtain task result from cache.
-     * Note: synchronous method.
-     *
-     * @param key result identifier
-     * @param dataClass single result item class
-     * @param expiryTime how much time data consider valid in the repository
-     * @param <R> returned result class
-     * @return cached result if exists and did not expired, null otherwise
-     */
-    public <R> R obtainFromCache(Object key, Class dataClass, long expiryTime) {
-        return cacheManager.obtain(key, dataClass, expiryTime);
-    }
-
-    /**
-     * Obtain task result from cache if exists.
-     * Note: synchronous method.
-     *
-     * @param key result identifier
-     * @param dataClass single result item class
-     * @param <R> returned result class
-     * @return cached result if exists, null otherwise
-     */
-    public <R> R obtainFromCache(Object key, Class dataClass) {
-        return obtainFromCache(key, dataClass, Time.ALWAYS_RETURNED);
     }
 
     /**

@@ -13,6 +13,7 @@ import java.util.concurrent.Future;
 
 import ingvar.android.processor.exception.ProcessorException;
 import ingvar.android.processor.observation.IObserver;
+import ingvar.android.processor.persistence.Time;
 import ingvar.android.processor.task.ITask;
 
 /**
@@ -67,6 +68,60 @@ public class Processor<S extends ProcessorService> {
         } else {
             plannedTasks.put(task, observers);
         }
+    }
+
+    /**
+     * Remove registered observers from task.
+     *
+     * @param task task
+     */
+    public void removeObservers(ITask task) {
+        service.getObserverManager().remove(task);
+    }
+
+    /**
+     * Obtain task result from cache.
+     *
+     * @param key result identifier
+     * @param dataClass single result item class
+     * @param expiryTime how much time data consider valid in the repository
+     * @param <R> returned result class
+     * @return cached result if exists and did not expired, null otherwise
+     */
+    public <R> R obtainFromCache(Object key, Class dataClass, long expiryTime) {
+        return service.getCacheManager().obtain(key, dataClass, expiryTime);
+    }
+
+    /**
+     * Obtain task result from cache if exists.
+     *
+     * @param key result identifier
+     * @param dataClass single result item class
+     * @param <R> returned result class
+     * @return cached result if exists, null otherwise
+     */
+    public <R> R obtainFromCache(Object key, Class dataClass) {
+        return obtainFromCache(key, dataClass, Time.ALWAYS_RETURNED);
+    }
+
+    public void removeFromCache(Object key, Class dataClass) {
+        service.getCacheManager().remove(key, dataClass);
+    }
+
+    /**
+     * Remove all data by class.
+     *
+     * @param dataClass data class
+     */
+    public void clearCache(Class dataClass) {
+        service.getCacheManager().remove(dataClass);
+    }
+
+    /**
+     * Remove all data from cache.
+     */
+    public void clearCache() {
+        service.clearCache();
     }
 
     /**
