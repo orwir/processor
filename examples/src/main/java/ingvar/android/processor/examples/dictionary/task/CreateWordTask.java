@@ -35,10 +35,12 @@ public class CreateWordTask extends SingleTask<Word, Word, SqliteSource> {
         resolver.insert(DictionaryContract.Words.CONTENT_URI, values);
 
         Uri uri = new UriBuilder()
-            .authority(DictionaryContract.AUTHORITY)
-            .table(DictionaryContract.Words.TABLE_NAME)
+        .authority(DictionaryContract.AUTHORITY)
+        .table(DictionaryContract.Words.TABLE_NAME)
+        .query()
             .eq(DictionaryContract.Words.Col.DICTIONARY_ID, getTaskKey().getDictionary().getId())
             .eq(DictionaryContract.Words.Col.VALUE, getTaskKey().getValue())
+        .end()
         .build();
         Cursor cursor = resolver.query(uri, DictionaryContract.Words.PROJECTION, null, null, null);
         if(cursor.moveToFirst()) {

@@ -35,10 +35,12 @@ public class RequestMeaningsTask extends SingleTask<Word, List<Meaning>, SqliteS
         converter.setWord(getTaskKey());
 
         Uri uri = new UriBuilder()
-            .authority(DictionaryContract.AUTHORITY)
-            .table(DictionaryContract.Meanings.TABLE_NAME)
+        .authority(DictionaryContract.AUTHORITY)
+        .table(DictionaryContract.Meanings.TABLE_NAME)
+        .query()
             .eq(DictionaryContract.Meanings.Col.DICTIONARY_ID, getTaskKey().getDictionary().getId())
             .eq(DictionaryContract.Meanings.Col.WORD_ID, getTaskKey().getId())
+        .end()
         .build();
         Cursor cursor = resolver.query(uri, DictionaryContract.Meanings.PROJECTION, null, null, null);
         while(cursor.moveToNext()) {

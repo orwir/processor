@@ -34,11 +34,13 @@ public class CreateMeaningTask extends SingleTask<Meaning, Meaning, SqliteSource
         resolver.insert(DictionaryContract.Meanings.CONTENT_URI, values);
 
         Uri uri = new UriBuilder()
-            .authority(DictionaryContract.AUTHORITY)
-            .table(DictionaryContract.Meanings.TABLE_NAME)
+        .authority(DictionaryContract.AUTHORITY)
+        .table(DictionaryContract.Meanings.TABLE_NAME)
+        .query()
             .eq(DictionaryContract.Meanings.Col.DICTIONARY_ID, getTaskKey().getWord().getDictionary().getId())
             .eq(DictionaryContract.Meanings.Col.WORD_ID, getTaskKey().getWord().getId())
             .eq(DictionaryContract.Meanings.Col.VALUE, getTaskKey().getValue())
+        .end()
         .build();
         Cursor cursor = resolver.query(uri, DictionaryContract.Meanings.PROJECTION, null, null, null);
         if(cursor.moveToFirst()) {

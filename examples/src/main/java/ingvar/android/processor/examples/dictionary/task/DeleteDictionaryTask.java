@@ -21,10 +21,10 @@ public class DeleteDictionaryTask extends SingleTask<String, String, SqliteSourc
     @Override
     public String process(IObserverManager observerManager, SqliteSource source) {
         Uri uri = new UriBuilder()
-                .authority(DictionaryContract.AUTHORITY)
-                .table(DictionaryContract.Dictionaries.TABLE_NAME)
-                .eq(DictionaryContract.Dictionaries.Col.NAME, getTaskKey())
-                .build();
+        .authority(DictionaryContract.AUTHORITY)
+        .table(DictionaryContract.Dictionaries.TABLE_NAME)
+        .query().eq(DictionaryContract.Dictionaries.Col.NAME, getTaskKey()).end()
+        .build();
         source.getContentResolver().delete(uri, null, null);
         return getTaskKey();
     }

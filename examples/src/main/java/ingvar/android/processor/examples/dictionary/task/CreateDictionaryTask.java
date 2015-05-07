@@ -28,10 +28,10 @@ public class CreateDictionaryTask extends SingleTask<String, Dictionary, SqliteS
         source.getContentResolver().insert(DictionaryContract.Dictionaries.CONTENT_URI, values);
 
         Uri query = new UriBuilder()
-                .authority(DictionaryContract.AUTHORITY)
-                .table(DictionaryContract.Dictionaries.TABLE_NAME)
-                .eq(DictionaryContract.Dictionaries.Col.NAME, getTaskKey())
-                .build();
+        .authority(DictionaryContract.AUTHORITY)
+        .table(DictionaryContract.Dictionaries.TABLE_NAME)
+        .query().eq(DictionaryContract.Dictionaries.Col.NAME, getTaskKey()).end()
+        .build();
 
         Cursor cursor = source.getContentResolver().query(query, DictionaryContract.Dictionaries.PROJECTION, null, null, null);
         cursor.moveToFirst();

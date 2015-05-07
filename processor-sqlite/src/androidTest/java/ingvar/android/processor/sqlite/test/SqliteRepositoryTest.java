@@ -32,7 +32,7 @@ public class SqliteRepositoryTest extends ProviderTestCase2<TestProvider> {
         Uri uri = new UriBuilder()
             .authority(TestContract.AUTHORITY)
             .table(TestContract.Test.TABLE_NAME)
-            .eq(TestContract.Test.Col.NAME, "TestCreate")
+            .query().eq(TestContract.Test.Col.NAME, "TestCreate").end()
         .build();
         TestObject actual = repo.obtain(new SqlKey(uri, TestContract.Test.PROJECTION), Time.ALWAYS_RETURNED);
 
@@ -46,7 +46,7 @@ public class SqliteRepositoryTest extends ProviderTestCase2<TestProvider> {
         Uri uri = new UriBuilder()
             .authority(TestContract.AUTHORITY)
             .table(TestContract.Test.TABLE_NAME)
-            .eq(TestContract.Test.Col.NAME, "test1")
+            .query().eq(TestContract.Test.Col.NAME, "test1").end()
         .build();
         SqlKey key = new SqlKey(uri, TestContract.Test.PROJECTION);
         TestObject object = repo.obtain(key, Time.ALWAYS_RETURNED);
@@ -58,8 +58,10 @@ public class SqliteRepositoryTest extends ProviderTestCase2<TestProvider> {
         Uri uri = new UriBuilder()
             .authority(TestContract.AUTHORITY)
             .table(TestContract.Test.TABLE_NAME)
-            .eq(TestContract.Test.Col.NAME, "test1")
-            .or().eq(TestContract.Test.Col.NAME, "test2")
+            .query()
+                .eq(TestContract.Test.Col.NAME, "test1")
+                .or().eq(TestContract.Test.Col.NAME, "test2")
+            .end()
         .build();
         SqlKey key = new SqlKey(uri, TestContract.Test.PROJECTION);
         List<TestObject> list = repo.obtain(new CompositeKey<>(key), Time.ALWAYS_RETURNED);
@@ -70,7 +72,7 @@ public class SqliteRepositoryTest extends ProviderTestCase2<TestProvider> {
         Uri uri = new UriBuilder()
                 .authority(TestContract.AUTHORITY)
                 .table(TestContract.Test.TABLE_NAME)
-                .eq(TestContract.Test.Col.NAME, "test1")
+                .query().eq(TestContract.Test.Col.NAME, "test1").end()
                 .build();
         SqlKey key = new SqlKey(uri, TestContract.Test.PROJECTION);
         Thread.sleep(80);
@@ -83,7 +85,7 @@ public class SqliteRepositoryTest extends ProviderTestCase2<TestProvider> {
         Uri getUri = new UriBuilder()
             .authority(TestContract.AUTHORITY)
             .table(TestContract.Test.TABLE_NAME)
-            .eq(TestContract.Test.Col.NAME, "test1")
+            .query().eq(TestContract.Test.Col.NAME, "test1").end()
         .build();
         SqlKey getKey = new SqlKey(getUri, TestContract.Test.PROJECTION);
 
@@ -94,7 +96,7 @@ public class SqliteRepositoryTest extends ProviderTestCase2<TestProvider> {
         Uri updUri = new UriBuilder()
             .authority(TestContract.AUTHORITY)
             .table(TestContract.Test.TABLE_NAME)
-            .eq(TestContract.Test.Col._ID, expected.getId())
+            .query().eq(TestContract.Test.Col._ID, expected.getId()).end()
         .build();
         repo.persist(new SqlKey(updUri), expected);
 
@@ -110,7 +112,7 @@ public class SqliteRepositoryTest extends ProviderTestCase2<TestProvider> {
         Uri uri = new UriBuilder()
                 .authority(TestContract.AUTHORITY)
                 .table(TestContract.Test.TABLE_NAME)
-                .eq(TestContract.Test.Col.NAME, "TestCreate")
+                .query().eq(TestContract.Test.Col.NAME, "TestCreate").end()
                 .build();
         SqlKey key = new SqlKey(uri, TestContract.Test.PROJECTION);
         repo.remove(key);

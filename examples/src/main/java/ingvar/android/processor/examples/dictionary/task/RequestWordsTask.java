@@ -35,9 +35,9 @@ public class RequestWordsTask extends SingleTask<Dictionary, List<Word>, SqliteS
         converter.setDictionary(getTaskKey());
 
         Uri uri = new UriBuilder()
-            .authority(DictionaryContract.AUTHORITY)
-            .table(DictionaryContract.Words.TABLE_NAME)
-            .eq(DictionaryContract.Words.Col.DICTIONARY_ID, getTaskKey().getId())
+        .authority(DictionaryContract.AUTHORITY)
+        .table(DictionaryContract.Words.TABLE_NAME)
+        .query().eq(DictionaryContract.Words.Col.DICTIONARY_ID, getTaskKey().getId()).end()
         .build();
         Cursor cursor = resolver.query(uri, DictionaryContract.Words.PROJECTION, null, null, DictionaryContract.Words.SORT);
         while(cursor.moveToNext()) {

@@ -16,9 +16,9 @@ public class WeatherKey extends SqlKey {
     public WeatherKey(String city) {
         this.city = city;
         Uri uri = new UriBuilder()
-            .authority(WeatherContract.AUTHORITY)
-            .table(WeatherContract.Weather.TABLE_NAME)
-            .eq(WeatherContract.Weather.Col.NAME, city)
+        .authority(WeatherContract.AUTHORITY)
+        .table(WeatherContract.Weather.TABLE_NAME)
+        .query().eq(WeatherContract.Weather.Col.NAME, city).end()
         .build();
         setUri(uri);
         setProjection(WeatherContract.Weather.PROJECTION);
