@@ -29,7 +29,7 @@ allprojects {
 Next add dependency for your module
 ```groovy
 dependencies {
-    versionProcessorLibrary = '1.0.1' //check latest above
+    versionProcessorLibrary = '1.1.0' //check latest above
 
     //core part
     compile "ingvar.android.processor:processor:$versionProcessorLibrary"
@@ -154,7 +154,7 @@ public class WeatherKey extends SqlKey {
         Uri uri = new UriBuilder()
             .authority(WeatherContract.AUTHORITY)
             .table(WeatherContract.Weather.TABLE_NAME)
-            .eq(WeatherContract.Weather.Col.NAME, city)
+            .query().eq(WeatherContract.Weather.Col.NAME, city).end()
         .build();
         setUri(uri);
         setProjection(WeatherContract.Weather.PROJECTION);
