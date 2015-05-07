@@ -23,7 +23,7 @@ public class DeleteWordTask extends SingleTask<Word, String, SqliteSource> {
         Uri uri = new UriBuilder()
         .authority(DictionaryContract.AUTHORITY)
         .table(DictionaryContract.Words.TABLE_NAME)
-        .query().eq(DictionaryContract.Words.Col._ID, getTaskKey().getId()).end()
+        .where().eq(DictionaryContract.Words.Col._ID, getTaskKey().getId()).end()
         .build();
         source.getContentResolver().delete(uri, null, null);
 

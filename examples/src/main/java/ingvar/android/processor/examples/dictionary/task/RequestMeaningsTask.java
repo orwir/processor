@@ -37,7 +37,7 @@ public class RequestMeaningsTask extends SingleTask<Word, List<Meaning>, SqliteS
         Uri uri = new UriBuilder()
         .authority(DictionaryContract.AUTHORITY)
         .table(DictionaryContract.Meanings.TABLE_NAME)
-        .query()
+        .where()
             .eq(DictionaryContract.Meanings.Col.DICTIONARY_ID, getTaskKey().getDictionary().getId())
             .eq(DictionaryContract.Meanings.Col.WORD_ID, getTaskKey().getId())
         .end()

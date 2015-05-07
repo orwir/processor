@@ -37,7 +37,7 @@ public class CreateWordTask extends SingleTask<Word, Word, SqliteSource> {
         Uri uri = new UriBuilder()
         .authority(DictionaryContract.AUTHORITY)
         .table(DictionaryContract.Words.TABLE_NAME)
-        .query()
+        .where()
             .eq(DictionaryContract.Words.Col.DICTIONARY_ID, getTaskKey().getDictionary().getId())
             .eq(DictionaryContract.Words.Col.VALUE, getTaskKey().getValue())
         .end()

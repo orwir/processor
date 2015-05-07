@@ -23,7 +23,7 @@ public class DeleteDictionaryTask extends SingleTask<String, String, SqliteSourc
         Uri uri = new UriBuilder()
         .authority(DictionaryContract.AUTHORITY)
         .table(DictionaryContract.Dictionaries.TABLE_NAME)
-        .query().eq(DictionaryContract.Dictionaries.Col.NAME, getTaskKey()).end()
+        .where().eq(DictionaryContract.Dictionaries.Col.NAME, getTaskKey()).end()
         .build();
         source.getContentResolver().delete(uri, null, null);
         return getTaskKey();

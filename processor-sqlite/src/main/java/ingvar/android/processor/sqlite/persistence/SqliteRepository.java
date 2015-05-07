@@ -72,19 +72,17 @@ public class SqliteRepository<R> extends AbstractRepository<SqlKey, R> {
     @Override
     protected R obtainSingle(SqlKey key, long expiryTime) {
         R result = null;
-        if(isNotExpired(getCreationTime(key), expiryTime)) {
-            Cursor cursor = getContentResolver().query(
-                    key.getUri(),
-                    key.getProjection(),
-                    key.getSelection(),
-                    key.getSelectionArgs(),
-                    key.getSortOrder()
-            );
-            if(cursor.moveToFirst()) {
-                result = converter.convert(cursor);
-            }
-            cursor.close();
+        Cursor cursor = getContentResolver().query(
+                key.getUri(),
+                key.getProjection(),
+                key.getSelection(),
+                key.getSelectionArgs(),
+                key.getSortOrder()
+        );
+        if(cursor.moveToFirst() && isNotExpired(cursor, key.getColumnCreationDate(), expiryTime)) {
+            result = converter.convert(cursor);
         }
+        cursor.close();
         return result;
     }
 
@@ -104,7 +102,7 @@ public class SqliteRepository<R> extends AbstractRepository<SqlKey, R> {
                 sql.getSortOrder()
         );
         while (cursor.moveToNext()) {
-            if(isNotExpired(cursor, expiryTime)) {
+            if(isNotExpired(cursor, sql.getColumnCreationDate(), expiryTime)) {
                 result.add(converter.convert(cursor));
             } else {
                 //if one of items is expired return empty collection
@@ -136,17 +134,28 @@ public class SqliteRepository<R> extends AbstractRepository<SqlKey, R> {
         getContentResolver().notifyChange(contentUri, null);
     }
 
+    /**
+     * Return creation time of single object in the repository.
+     * As creation date column will be used {@link SqlKey#getColumnCreationDate()} if not null,
+     * otherwise {@link ExtendedColumns#_CREATION_DATE}.
+     *
+     * @param key object identifier
+     * @return creation time
+     */
     @Override
     public long getCreationTime(Object key) {
         long creationTime = -1;
         SqlKey sql = (SqlKey) key;
-
+        String colCreationDate = sql.getColumnCreationDate();
+        if(colCreationDate == null || colCreationDate.isEmpty()) {
+            colCreationDate = ExtendedColumns._CREATION_DATE;
+        }
         Cursor cursor = getContentResolver()
-                .query(sql.getUri(), new String[] {ExtendedColumns._CREATION_DATE},
+                .query(sql.getUri(), new String[] {colCreationDate},
                         sql.getSelection(), sql.getSelectionArgs(), sql.getSortOrder());
 
         if(cursor.moveToFirst()) {
-            creationTime = CursorCommon.longv(cursor, ExtendedColumns._CREATION_DATE);
+            creationTime = CursorCommon.longv(cursor, colCreationDate);
         }
         cursor.close();
 
@@ -158,8 +167,11 @@ public class SqliteRepository<R> extends AbstractRepository<SqlKey, R> {
         return this.dataClass.equals(dataClass);
     }
 
-    protected boolean isNotExpired(Cursor cursor, long expiryTime) {
-        long creationTime = CursorCommon.longv(cursor, ExtendedColumns._CREATION_DATE);
+    protected boolean isNotExpired(Cursor cursor, String colCreationDate, long expiryTime) {
+        if(colCreationDate == null || colCreationDate.isEmpty()) {
+            colCreationDate = ExtendedColumns._CREATION_DATE;
+        }
+        long creationTime = CursorCommon.longv(cursor, colCreationDate);
         return isNotExpired(creationTime, expiryTime);
     }
 

@@ -18,6 +18,7 @@ public class SqlKey {
     private String selection;
     private String[] selectionArgs;
     private String sortOrder;
+    private String columnCreationDate;
 
     public SqlKey() {
         this(null, null, null, null, null);
@@ -31,6 +32,15 @@ public class SqlKey {
         this(uri, projection, null, null, null);
     }
 
+    /**
+     * Create new sql key.
+     *
+     * @param uri uri to content provider
+     * @param projection projection of columns
+     * @param selection query selection
+     * @param selectionArgs query selection args
+     * @param sortOrder sort order
+     */
     public SqlKey(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         this.uri = uri;
         this.projection = projection;
@@ -39,48 +49,123 @@ public class SqlKey {
         this.sortOrder = sortOrder;
     }
 
+    /**
+     * Get uri for content provider.
+     *
+     * @return uri
+     */
     public Uri getUri() {
         return uri;
     }
 
+    /**
+     * Set uri to convent provider.
+     *
+     * @param uri uri
+     * @return key
+     */
     public SqlKey setUri(Uri uri) {
         this.uri = uri;
         return this;
     }
 
+    /**
+     * Get projection of columns.
+     *
+     * @return projection
+     */
     public String[] getProjection() {
         return projection;
     }
 
+    /**
+     * Set projection of columns.
+     *
+     * @param projection projection
+     * @return key
+     */
     public SqlKey setProjection(String[] projection) {
         this.projection = projection;
         return this;
     }
 
+    /**
+     * Get where statement of query.
+     *
+     * @return selection
+     */
     public String getSelection() {
         return selection;
     }
 
+    /**
+     * Set where statement of query.
+     *
+     * @param selection selection
+     * @return key
+     */
     public SqlKey setSelection(String selection) {
         this.selection = selection;
         return this;
     }
 
+    /**
+     * Get args of query.
+     *
+     * @return args
+     */
     public String[] getSelectionArgs() {
         return selectionArgs;
     }
 
+    /**
+     * Set selection args for query.
+     *
+     * @param selectionArgs args
+     * @return key
+     */
     public SqlKey setSelectionArgs(String[] selectionArgs) {
         this.selectionArgs = selectionArgs;
         return this;
     }
 
+    /**
+     * Get sort order.
+     *
+     * @return sort order
+     */
     public String getSortOrder() {
         return sortOrder;
     }
 
+    /**
+     * Set sort order.
+     *
+     * @param sortOrder sort order
+     * @return key
+     */
     public SqlKey setSortOrder(String sortOrder) {
         this.sortOrder = sortOrder;
+        return this;
+    }
+
+    /**
+     * Get column that will be used by {@link SqliteRepository} for checking creation date.
+     *
+     * @return creation date column
+     */
+    public String getColumnCreationDate() {
+        return columnCreationDate;
+    }
+
+    /**
+     * Set column that will be used by {@link SqliteRepository} for checking creation date.
+     *
+     * @param columnCreationDate creation date column
+     * @return key
+     */
+    public SqlKey setColumnCreationDate(String columnCreationDate) {
+        this.columnCreationDate = columnCreationDate;
         return this;
     }
 

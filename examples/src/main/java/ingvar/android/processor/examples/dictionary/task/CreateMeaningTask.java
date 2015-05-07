@@ -36,7 +36,7 @@ public class CreateMeaningTask extends SingleTask<Meaning, Meaning, SqliteSource
         Uri uri = new UriBuilder()
         .authority(DictionaryContract.AUTHORITY)
         .table(DictionaryContract.Meanings.TABLE_NAME)
-        .query()
+        .where()
             .eq(DictionaryContract.Meanings.Col.DICTIONARY_ID, getTaskKey().getWord().getDictionary().getId())
             .eq(DictionaryContract.Meanings.Col.WORD_ID, getTaskKey().getWord().getId())
             .eq(DictionaryContract.Meanings.Col.VALUE, getTaskKey().getValue())
