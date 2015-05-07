@@ -33,6 +33,17 @@ public abstract class SingleTask<K, R, S extends ISource> extends AbstractTask<K
     }
 
     /**
+     *
+     * @param key task key
+     * @param resultClass result class
+     * @param sourceType source type
+     * @param refresh if true as expiration time will be used 1 millis, otherwise {@link Time#ALWAYS_RETURNED}
+     */
+    public SingleTask(K key, Class resultClass, Class<? extends ISource> sourceType, boolean refresh) {
+        this(key, resultClass, sourceType, refresh ? 1 : Time.ALWAYS_RETURNED);
+    }
+
+    /**
      * Note: if you set cacheExpirationTime as Time.ALWAYS_EXPIRED result of task will not cached.
      *
      * @param key task key
