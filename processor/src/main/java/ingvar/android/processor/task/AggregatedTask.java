@@ -8,13 +8,15 @@ import java.util.Set;
 
 /**
  * Task which contains other tasks. Used for process several task as one and join their results.
+ * Aggregated task does not cached, but inner tasks may be cached.
  *
  * <br/><br/>Created by Igor Zubenko on 2015.03.18.
  *
- * @param <K> key class
- * @param <R> single result class
+ * @param <K> aggregated task key class
+ * @param <G> aggregated result class
+ * @param <I> inner task result class
  */
-public abstract class AggregatedTask<K, R> extends AbstractTask<K, R> {
+public abstract class AggregatedTask<K, G, I> extends AbstractTask<K, G> {
 
     /**
      * Default count of parallel threads for executing tasks which contains in the {@link AggregatedTask}
@@ -25,11 +27,20 @@ public abstract class AggregatedTask<K, R> extends AbstractTask<K, R> {
      */
     protected static final int DEFAULT_AGGREGATE_KEEP_ALIVE_TIME_SECONDS = 5 * 60;
 
-    private Set<ITask<K, R>> tasks;
+    private Set<ITask> tasks;
     private int threadsCount;
     private int keepAliveTimeout;
     private Map<ITask, Exception> innerExceptions;
 
+    public AggregatedTask(Class resultClass) {
+        this(null, resultClass);
+    }
+
+    /**
+     *
+     * @param key does not used in the inner processes, but may be used for you.
+     * @param resultClass cumulative result class
+     */
     public AggregatedTask(K key, Class resultClass) {
         super(key, resultClass);
         this.tasks = new HashSet<>();
@@ -44,21 +55,21 @@ public abstract class AggregatedTask<K, R> extends AbstractTask<K, R> {
      * @param completed completed task
      * @param result task result
      */
-    public abstract void onTaskComplete(ITask<K, R> completed, R result);
+    public abstract void onTaskComplete(ITask completed, I result);
 
     /**
      * Return cumulative result of tasks.
      *
      * @return result
      */
-    public abstract R getCumulativeResult();
+    public abstract G getCumulativeResult();
 
     /**
      * Add task.
      *
      * @param task task
      */
-    public void addTask(ITask<K, R> task) {
+    public void addTask(ITask task) {
         tasks.add(task);
     }
 
@@ -67,7 +78,7 @@ public abstract class AggregatedTask<K, R> extends AbstractTask<K, R> {
      *
      * @param task task
      */
-    public void removeTask(ITask<K, R> task) {
+    public void removeTask(ITask task) {
         tasks.remove(task);
         innerExceptions.remove(task);
     }
@@ -77,7 +88,7 @@ public abstract class AggregatedTask<K, R> extends AbstractTask<K, R> {
      *
      * @return tasks
      */
-    public Set<ITask<K, R>> getTasks() {
+    public Set<ITask> getTasks() {
         return Collections.unmodifiableSet(tasks);
     }
 

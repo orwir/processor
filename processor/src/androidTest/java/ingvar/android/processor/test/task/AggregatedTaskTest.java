@@ -17,7 +17,7 @@ import ingvar.android.processor.test.mock.MockSource;
 public class AggregatedTaskTest extends WorkerTest {
 
     public void testSuccess() throws Exception {
-        AggregatedTask<String, Integer> sum = new SumTask("sum = 10");
+        SumTask sum = new SumTask("sum = 10");
         String value = "1";
         for(int i = 0; i < 10; i++) {
             sum.addTask(new CalculationTask(value));
@@ -29,7 +29,7 @@ public class AggregatedTaskTest extends WorkerTest {
     }
 
     public void testCancel() throws Exception {
-        AggregatedTask<String, Integer> sum = new SumTask("sum = 10");
+        SumTask sum = new SumTask("sum = 10");
         String value = "1";
         for(int i = 0; i < 10; i++) {
             sum.addTask(new CalculationTask(value));
@@ -48,7 +48,7 @@ public class AggregatedTaskTest extends WorkerTest {
     }
 
     public void testInnerException() throws Exception {
-        AggregatedTask<String, Integer> sum = new SumTask("sum = 10");
+        SumTask sum = new SumTask("sum = 10");
         String value = "abc";
         for(int i = 0; i < 10; i++) {
             sum.addTask(new CalculationTask(value));
@@ -61,7 +61,7 @@ public class AggregatedTaskTest extends WorkerTest {
         assertEquals("Exceptions count not match", sum.getTasks().size(), sum.getTasksExceptions().size());
     }
 
-    private class SumTask extends AggregatedTask<String, Integer> {
+    private class SumTask extends AggregatedTask<String, Integer, Integer> {
 
         private Integer sum;
 
@@ -71,7 +71,7 @@ public class AggregatedTaskTest extends WorkerTest {
         }
 
         @Override
-        public void onTaskComplete(ITask<String, Integer> completed, Integer result) {
+        public void onTaskComplete(ITask completed, Integer result) {
             sum += result;
         }
 
