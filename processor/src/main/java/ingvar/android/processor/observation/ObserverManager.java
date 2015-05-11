@@ -15,7 +15,6 @@ import ingvar.android.processor.util.LW;
 
 /**
  * Default implementation of observer manager.
- * Logged under VERBOSE level.
  *
  * <br/><br/>Created by Igor Zubenko on 2015.03.18.
  */

@@ -55,7 +55,7 @@ public class DefaultWorker implements IWorker {
             @Override
             public R call() throws Exception {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-                LW.d(TAG, "Started task %s", task);
+                LW.d(TAG, "Process task %s", task);
                 return process(task);
             }
         };
@@ -91,7 +91,7 @@ public class DefaultWorker implements IWorker {
             checkCancellation(task);
             notifyProgress(task, IObserver.MAX_PROGRESS);
             notifyCompleted(task, result);
-            LW.d(TAG, "Completed task %s", task);
+            LW.v(TAG, "Completed task %s", task);
             return result;
 
         } catch (TaskCancelledException e) {
@@ -126,7 +126,7 @@ public class DefaultWorker implements IWorker {
                     checkCancellation(aggregatedTask);
                     android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
-                    LW.v(TAG, "Process inner task %s from %s", innerTask, aggregatedTask);
+                    LW.v(TAG, "Process inner task %s from AT %s", innerTask, aggregatedTask);
                     Object innerResult = null;
                     try {
                         innerResult = process(innerTask);
@@ -240,21 +240,25 @@ public class DefaultWorker implements IWorker {
         progress = Math.max(IObserver.MIN_PROGRESS, progress);
         progress = Math.min(IObserver.MAX_PROGRESS, progress);
         observerManager.notifyProgress(task, progress, null);
+        LW.v(TAG, "Notify progress %.2f of task %s", progress, task);
     }
 
     protected <R> void notifyCompleted(ITask task, R result) {
         task.setStatus(TaskStatus.COMPLETED);
         observerManager.notifyCompleted(task, result);
+        LW.v(TAG, "Notify completed task %s", task);
     }
 
     protected void notifyCancelled(ITask task) {
         task.setStatus(TaskStatus.CANCELLED);
         observerManager.notifyCancelled(task);
+        LW.v(TAG, "Notify cancelled task %s", task);
     }
 
     protected void notifyFailed(ITask task, Exception e) {
         task.setStatus(TaskStatus.FAILED);
         observerManager.notifyFailed(task, e);
+        LW.v(TAG, "Notify failed '%s' task %s", e.getMessage(), task);
     }
 
     protected void checkCancellation(ITask task) {

@@ -104,7 +104,7 @@ public abstract class ProcessorService extends Service {
         Future<R> future = worker.getExecuted(task);
         if(future == null || !task.isMergeable()) {
             future = worker.execute(task);
-            LW.d(TAG, "Execute task %s", task);
+            LW.v(TAG, "Execute task %s", task);
         } else {
             LW.d(TAG, "Merged task %s", task);
         }
