@@ -100,7 +100,7 @@ public abstract class AbstractTask<K, R> implements ITask<K, R> {
 
     @Override
     public String toString() {
-        return String.format("{'key': '%s', 'result': '%s'}", getTaskKey(), getResultClass().getSimpleName());
+        return String.format("[class: %s, key: %s]", getResultClass().getSimpleName(), getTaskKey());
     }
 
 }

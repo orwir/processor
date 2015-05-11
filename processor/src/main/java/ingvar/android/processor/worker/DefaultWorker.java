@@ -55,7 +55,7 @@ public class DefaultWorker implements IWorker {
             @Override
             public R call() throws Exception {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-                LW.d(TAG, "Started execution task %s", task);
+                LW.d(TAG, "Started task %s", task);
                 return process(task);
             }
         };
@@ -91,16 +91,16 @@ public class DefaultWorker implements IWorker {
             checkCancellation(task);
             notifyProgress(task, IObserver.MAX_PROGRESS);
             notifyCompleted(task, result);
-            LW.d(TAG, "task %s was processed", task);
+            LW.d(TAG, "Completed task %s", task);
             return result;
 
         } catch (TaskCancelledException e) {
-            LW.d(TAG, "task %s was cancelled", task);
+            LW.d(TAG, "Cancelled task %s", task);
             notifyCancelled(task);
             throw e;
 
         } catch (RuntimeException e) {
-            LW.e(TAG, "task %s was failed", e, task);
+            LW.e(TAG, "Failed task %s", e, task);
             notifyFailed(task, e);
             throw e;
 
@@ -111,7 +111,7 @@ public class DefaultWorker implements IWorker {
 
     @SuppressWarnings("unchecked")
     protected <R> R processAggregatedTask(final AggregatedTask aggregatedTask) {
-        LW.v(TAG, "process aggregated task %s, inners: %d", aggregatedTask, aggregatedTask.getTasks().size());
+        LW.v(TAG, "Process aggregated task %s, inners: %d", aggregatedTask, aggregatedTask.getTasks().size());
 
         final ExecutorService innerExecutor = Executors.newFixedThreadPool(aggregatedTask.getThreadsCount());
 
@@ -182,7 +182,7 @@ public class DefaultWorker implements IWorker {
                 checkCancellation(task);
                 result = cacheManager.obtain(task.getTaskKey(), task.getResultClass(), task.getExpirationTime());
                 if (result != null) {
-                    LW.v(TAG, "Task %s result was got from cache", task);
+                    LW.v(TAG, "Task result got from cache %s", task);
                     break flow;
                 }
             }

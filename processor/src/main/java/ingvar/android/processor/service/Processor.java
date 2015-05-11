@@ -68,7 +68,7 @@ public class Processor<S extends ProcessorService> {
             execute(task, observers);
         } else {
             plannedTasks.put(task, observers);
-            LW.d(TAG, "Added task %s to queue", task);
+            LW.d(TAG, "Queued task %s", task);
         }
     }
 
@@ -132,7 +132,7 @@ public class Processor<S extends ProcessorService> {
      * @param context context
      */
     public void bind(Context context) {
-        LW.d(TAG, "Bind context '%s' to service '%s'", context.getClass().getSimpleName(), serviceClass.getSimpleName());
+        LW.d(TAG, "Bind service '%s' to context '%s'", serviceClass.getSimpleName(), context.getClass().getSimpleName());
 
         Intent intent = new Intent(context, serviceClass);
         if(!context.bindService(intent, connection, Context.BIND_AUTO_CREATE)) {
@@ -147,7 +147,7 @@ public class Processor<S extends ProcessorService> {
      * @param context
      */
     public void unbind(Context context) {
-        LW.d(TAG, "Unbind context '%s' from service '%s'", context.getClass().getSimpleName(), serviceClass.getSimpleName());
+        LW.d(TAG, "Unbind service '%s' from context '%s'", serviceClass.getSimpleName(), context.getClass().getSimpleName());
 
         if(service != null) {
             service.removeObservers(context);

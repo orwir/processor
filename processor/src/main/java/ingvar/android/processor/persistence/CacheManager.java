@@ -35,7 +35,7 @@ public class CacheManager implements ICacheManager {
     @Override
     public <K, R> R obtain(K key, Class dataClass, long expiryTime) {
         IRepository repository = getAppropriateRepository(dataClass);
-        LW.d(TAG, "Obtained data from repository {'key': '%s', 'class': '%s', 'expiryTime': '%s'}", key, dataClass.getSimpleName(), expiryTime);
+        LW.d(TAG, "Obtained data: class %s, key %s, expiryTime %d", dataClass.getSimpleName(), key, expiryTime);
         return repository.obtain(key, expiryTime);
     }
 
@@ -43,7 +43,7 @@ public class CacheManager implements ICacheManager {
     public <K, R> R persist(K key, Class dataClass, R data) {
         IRepository repository = getAppropriateRepository(dataClass);
         repository.persist(key, data);
-        LW.d(TAG, "Persisted data to repository {'key': '%s', 'class': '%s'}", key, dataClass.getSimpleName());
+        LW.d(TAG, "Persisted data: class %s, key %s", dataClass.getSimpleName(), key);
         return data;
     }
 
@@ -51,14 +51,14 @@ public class CacheManager implements ICacheManager {
     public <K> void remove(K key, Class dataClass) {
         IRepository repository = getAppropriateRepository(dataClass);
         repository.remove(key);
-        LW.d(TAG, "Removed data from repository {'key': '%s', 'class': '%s'}", key, dataClass.getSimpleName());
+        LW.d(TAG, "Removed data: class %s, key %s", dataClass.getSimpleName(), key);
     }
 
     @Override
     public void remove(Class dataClass) {
         IRepository repository = getAppropriateRepository(dataClass);
         repository.removeAll();
-        LW.d(TAG, "Removed all data from repository by class '%s'", dataClass.getSimpleName());
+        LW.d(TAG, "Removed data: class %s", dataClass.getSimpleName());
     }
 
     @Override
