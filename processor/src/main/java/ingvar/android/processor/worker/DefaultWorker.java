@@ -1,7 +1,5 @@
 package ingvar.android.processor.worker;
 
-import android.util.Log;
-
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -25,6 +23,7 @@ import ingvar.android.processor.task.AggregatedTask;
 import ingvar.android.processor.task.ITask;
 import ingvar.android.processor.task.SingleTask;
 import ingvar.android.processor.task.TaskStatus;
+import ingvar.android.processor.util.LW;
 
 /**
  * Default implementation of async worker.
@@ -33,7 +32,7 @@ import ingvar.android.processor.task.TaskStatus;
  */
 public class DefaultWorker implements IWorker {
 
-    private static final String TAG = DefaultWorker.class.getSimpleName();
+    public static final String TAG = DefaultWorker.class.getSimpleName();
 
     protected final ExecutorService executorService;
     protected final ICacheManager cacheManager;
@@ -50,11 +49,13 @@ public class DefaultWorker implements IWorker {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <R> Future<R> execute(final ITask task) {
         Callable callable = new Callable() {
             @Override
             public R call() throws Exception {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                LW.d(TAG, "Started execution task %s", task);
                 return process(task);
             }
         };
@@ -64,6 +65,7 @@ public class DefaultWorker implements IWorker {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <R> Future<R> getExecuted(ITask request) {
         return executingTasks.get(request);
     }
@@ -89,14 +91,16 @@ public class DefaultWorker implements IWorker {
             checkCancellation(task);
             notifyProgress(task, IObserver.MAX_PROGRESS);
             notifyCompleted(task, result);
+            LW.d(TAG, "task %s was processed", task);
             return result;
 
         } catch (TaskCancelledException e) {
+            LW.d(TAG, "task %s was cancelled", task);
             notifyCancelled(task);
             throw e;
 
         } catch (RuntimeException e) {
-            Log.e(TAG, e.getMessage(), e);
+            LW.e(TAG, "task %s was failed", e, task);
             notifyFailed(task, e);
             throw e;
 
@@ -105,7 +109,10 @@ public class DefaultWorker implements IWorker {
         }
     }
 
+    @SuppressWarnings("unchecked")
     protected <R> R processAggregatedTask(final AggregatedTask aggregatedTask) {
+        LW.v(TAG, "process aggregated task %s, inners: %d", aggregatedTask, aggregatedTask.getTasks().size());
+
         final ExecutorService innerExecutor = Executors.newFixedThreadPool(aggregatedTask.getThreadsCount());
 
         final AtomicInteger completed = new AtomicInteger(0);
@@ -119,6 +126,7 @@ public class DefaultWorker implements IWorker {
                     checkCancellation(aggregatedTask);
                     android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
+                    LW.v(TAG, "Process inner task %s from %s", innerTask, aggregatedTask);
                     Object innerResult = null;
                     try {
                         innerResult = process(innerTask);
@@ -158,7 +166,10 @@ public class DefaultWorker implements IWorker {
         return (R) aggregatedTask.getCumulativeResult();
     }
 
+    @SuppressWarnings("unchecked")
     protected <R> R processSingleTask(SingleTask task) {
+        LW.v(TAG, "Process single task %s", task);
+
         R result = null;
 
         flow: do { //for interrupting flow (loop executed only once)
@@ -171,6 +182,7 @@ public class DefaultWorker implements IWorker {
                 checkCancellation(task);
                 result = cacheManager.obtain(task.getTaskKey(), task.getResultClass(), task.getExpirationTime());
                 if (result != null) {
+                    LW.v(TAG, "Task %s result was got from cache", task);
                     break flow;
                 }
             }
@@ -189,6 +201,7 @@ public class DefaultWorker implements IWorker {
                 do {
                     checkCancellation(task);
                     try {
+                        LW.v(TAG, "Try(%d) to process task %s", (task.getRetryCount() - tries), task);
                         result = (R) task.process(observerManager, source);
                         exception = null;
                     } catch (RuntimeException e) {

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.util.Log;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,16 +14,18 @@ import ingvar.android.processor.exception.ProcessorException;
 import ingvar.android.processor.observation.IObserver;
 import ingvar.android.processor.persistence.Time;
 import ingvar.android.processor.task.ITask;
+import ingvar.android.processor.util.LW;
 
 /**
  * Wrapper for processing service.
  * Just provide helper methods.
+ * Logged under DEBUG level.
  *
  * <br/><br/>Created by Igor Zubenko on 2015.03.19.
  */
 public class Processor<S extends ProcessorService> {
 
-    private static final String TAG = Processor.class.getSimpleName();
+    public static final String TAG = Processor.class.getSimpleName();
 
     private Class<? extends ProcessorService> serviceClass;
     private Map<ITask, IObserver[]> plannedTasks;
@@ -67,6 +68,7 @@ public class Processor<S extends ProcessorService> {
             execute(task, observers);
         } else {
             plannedTasks.put(task, observers);
+            LW.d(TAG, "Added task %s to queue", task);
         }
     }
 
@@ -130,7 +132,7 @@ public class Processor<S extends ProcessorService> {
      * @param context context
      */
     public void bind(Context context) {
-        Log.d(TAG, String.format("Bind context '%s' to service '%s'", context.getClass().getSimpleName(), serviceClass.getSimpleName()));
+        LW.d(TAG, "Bind context '%s' to service '%s'", context.getClass().getSimpleName(), serviceClass.getSimpleName());
 
         Intent intent = new Intent(context, serviceClass);
         if(!context.bindService(intent, connection, Context.BIND_AUTO_CREATE)) {
@@ -145,7 +147,7 @@ public class Processor<S extends ProcessorService> {
      * @param context
      */
     public void unbind(Context context) {
-        Log.d(TAG, String.format("Unbind context '%s' from service '%s'", context.getClass().getSimpleName(), serviceClass.getSimpleName()));
+        LW.d(TAG, "Unbind context '%s' from service '%s'", context.getClass().getSimpleName(), serviceClass.getSimpleName());
 
         if(service != null) {
             service.removeObservers(context);
@@ -176,13 +178,14 @@ public class Processor<S extends ProcessorService> {
     private class Connection implements ServiceConnection {
 
         @Override
+        @SuppressWarnings("unchecked")
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.d(TAG, String.format("Service '%s' connected.", name));
+            LW.d(TAG, "Service '%s' connected.", name);
 
             Processor.this.service = (S) ((ProcessorService.ProcessorBinder) service).getService();
 
             if(plannedTasks.size() > 0) {
-                Log.d(TAG, "Execute planned tasks. Total: " + Integer.toString(plannedTasks.size()));
+                LW.d(TAG, "Execute planned tasks. Total: " + Integer.toString(plannedTasks.size()));
 
                 for (Map.Entry<ITask, IObserver[]> entry : plannedTasks.entrySet()) {
                     Processor.this.service.execute(entry.getKey(), entry.getValue());
@@ -193,7 +196,7 @@ public class Processor<S extends ProcessorService> {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            Log.d(TAG, String.format("Service '%s' disconnected.", name));
+            LW.d(TAG, "Service '%s' disconnected.", name);
             plannedTasks.clear();
             Processor.this.service = null;
         }

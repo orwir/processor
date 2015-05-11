@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public class SourceManager implements ISourceManager {
 
-    private Map<Class<ISource>, ISource> sources;
+    private Map<Class<? extends ISource>, ISource> sources;
 
     public SourceManager() {
         sources = new HashMap<>();
@@ -22,7 +22,7 @@ public class SourceManager implements ISourceManager {
     }
 
     @Override
-    public void addSource(Class key, ISource source) {
+    public void addSource(Class<? extends ISource> key, ISource source) {
         sources.put(key, source);
     }
 

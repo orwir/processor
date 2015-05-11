@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
-import android.util.Log;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -21,6 +20,7 @@ import ingvar.android.processor.persistence.ICacheManager;
 import ingvar.android.processor.source.ISourceManager;
 import ingvar.android.processor.source.SourceManager;
 import ingvar.android.processor.task.ITask;
+import ingvar.android.processor.util.LW;
 import ingvar.android.processor.worker.DefaultWorker;
 import ingvar.android.processor.worker.IWorker;
 
@@ -34,6 +34,8 @@ import ingvar.android.processor.worker.IWorker;
  */
 public abstract class ProcessorService extends Service {
 
+    public static final String TAG = ProcessorService.class.getSimpleName();
+
     /**
      * Default min count of parallel threads.
      */
@@ -46,8 +48,6 @@ public abstract class ProcessorService extends Service {
      * Default alive time of every task.
      */
     protected static final int DEFAULT_KEEP_ALIVE_TIME_SECONDS = 5 * 60;
-
-    private static final String TAG = ProcessorService.class.getSimpleName();
 
     public class ProcessorBinder extends Binder {
 
@@ -104,9 +104,9 @@ public abstract class ProcessorService extends Service {
         Future<R> future = worker.getExecuted(task);
         if(future == null || !task.isMergeable()) {
             future = worker.execute(task);
-            Log.d(TAG, "Executed new task with key '" + task.getTaskKey() + "'");
+            LW.d(TAG, "Sent to execute new task %s", task);
         } else {
-            Log.d(TAG, "Returned future from previous task with the same key '" + task.getTaskKey() + "'");
+            LW.d(TAG, "Merged with previous task %s", task);
         }
 
         return future;
