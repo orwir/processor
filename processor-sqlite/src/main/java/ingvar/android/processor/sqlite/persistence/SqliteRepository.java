@@ -47,7 +47,7 @@ public class SqliteRepository<R> extends AbstractRepository<SqlKey, R> {
 
     @Override
     protected R persistSingle(SqlKey key, R data) {
-        getContentResolver().insert(key.getUri(), converter.convert(data));
+        getContentResolver().insert(contentUri, converter.convert(data));
         getContentResolver().notifyChange(contentUri, null);
         return data;
     }
@@ -63,8 +63,7 @@ public class SqliteRepository<R> extends AbstractRepository<SqlKey, R> {
         for(R item : data) {
             values[index++] = converter.convert(item);
         }
-        SqlKey sql = key.getMajor();
-        getContentResolver().bulkInsert(sql.getUri(), values);
+        getContentResolver().bulkInsert(contentUri, values);
         getContentResolver().notifyChange(contentUri, null);
         return data;
     }
@@ -116,7 +115,7 @@ public class SqliteRepository<R> extends AbstractRepository<SqlKey, R> {
 
     @Override
     protected void removeSingle(SqlKey key) {
-        getContentResolver().delete(key.getUri(), key.getSelection(), key.getSelectionArgs());
+        getContentResolver().delete(contentUri, key.getSelection(), key.getSelectionArgs());
         getContentResolver().notifyChange(contentUri, null);
     }
 
