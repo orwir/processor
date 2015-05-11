@@ -6,7 +6,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Created by Igor Zubenko on 2015.05.11.
+ * Log wrapper.
+ *
+ * <br/><br/>Created by Igor Zubenko on 2015.05.11.
  */
 public class LW {
 
@@ -63,11 +65,15 @@ public class LW {
 
     public static boolean isLoggable(String tag, int level) {
         Integer lvl = LEVEL.get(tag);
-        return level <= (lvl == null ? Log.DEBUG : lvl);
+        return level >= (lvl == null ? Log.DEBUG : lvl);
     }
 
     public static void setLevel(String tag, int level) {
         LEVEL.put(tag, level);
+    }
+
+    public static void resetLevels() {
+        LEVEL.clear();
     }
 
     private LW() {}
