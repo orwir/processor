@@ -185,7 +185,7 @@ public class Processor<S extends ProcessorService> {
             Processor.this.service = (S) ((ProcessorService.ProcessorBinder) service).getService();
 
             if(plannedTasks.size() > 0) {
-                LW.d(TAG, "Execute planned %d tasks.", Integer.toString(plannedTasks.size()));
+                LW.d(TAG, "Execute planned %d tasks.", plannedTasks.size());
 
                 for (Map.Entry<ITask, IObserver[]> entry : plannedTasks.entrySet()) {
                     Processor.this.service.execute(entry.getKey(), entry.getValue());
