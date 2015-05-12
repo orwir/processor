@@ -1,7 +1,7 @@
 # processor
 
-[![Build Status](https://travis-ci.org/deadly-cat/processor.svg?branch=master)](https://travis-ci.org/deadly-cat/processor)
 [![License](https://raw.githubusercontent.com/novoda/novoda/master/assets/btn_apache_lisence.png)](LICENSE.txt)
+[![Build Status](https://travis-ci.org/deadly-cat/processor.svg?branch=master)](https://travis-ci.org/deadly-cat/processor)
 [![Download](https://api.bintray.com/packages/deadly-cat/maven/processor/images/download.svg) ](https://bintray.com/deadly-cat/maven/processor/_latestVersion)
 
 Modular android framework for async task processing.
