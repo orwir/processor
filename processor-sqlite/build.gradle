@@ -11,7 +11,7 @@ ext {
     vVersionName = vGlobalVersionName
     vTestApplicationId = 'ingvar.android.processor.memory.test'
 
-    versionLiterepoLibrary = '2.3.2'
+    versionLiterepoLibrary = '2.3.3'
 }
 
 dependencies {
