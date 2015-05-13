@@ -19,7 +19,7 @@ import ingvar.android.processor.task.SingleTask;
 public class CreateMeaningTask extends SingleTask<Meaning, Meaning, SqliteSource> {
 
     public CreateMeaningTask(Meaning key) {
-        super(key, Meaning.class, SqliteSource.class);
+        super(key, SqliteSource.class);
     }
 
     @Override

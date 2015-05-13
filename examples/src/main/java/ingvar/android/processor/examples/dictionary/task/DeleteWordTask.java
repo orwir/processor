@@ -15,7 +15,7 @@ import ingvar.android.processor.task.SingleTask;
 public class DeleteWordTask extends SingleTask<Word, String, SqliteSource> {
 
     public DeleteWordTask(Word key) {
-        super(key, String.class, SqliteSource.class);
+        super(key, SqliteSource.class);
     }
 
     @Override

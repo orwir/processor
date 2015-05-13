@@ -1,5 +1,9 @@
 package ingvar.android.processor.util;
 
+import java.lang.ref.WeakReference;
+
+import ingvar.android.processor.exception.ReferenceStaleException;
+
 /**
  * Created by Igor Zubenko on 2015.04.24.
  */
@@ -24,6 +28,14 @@ public class CommonUtils {
      */
     public static int objectHashCode(Object object) {
         return object == null ? 0 : object.hashCode();
+    }
+
+    public static  <T> T getReference(WeakReference<T> weak) {
+        T reference = weak.get();
+        if(reference == null) {
+            throw new ReferenceStaleException("Reference is stale!");
+        }
+        return reference;
     }
 
 }

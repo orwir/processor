@@ -4,6 +4,8 @@ import android.content.Context;
 
 import java.lang.ref.WeakReference;
 
+import ingvar.android.processor.util.CommonUtils;
+
 /**
  * Source what contains weak reference to {@link Context}
  *
@@ -23,11 +25,7 @@ public class ContextSource implements ISource {
      * @return context or null if it is stale
      */
     public Context getContext() {
-        Context context = contextRef.get();
-        if(context == null) {
-            throw new IllegalStateException("Context is stale");
-        }
-        return context;
+        return CommonUtils.getReference(contextRef);
     }
 
     @Override

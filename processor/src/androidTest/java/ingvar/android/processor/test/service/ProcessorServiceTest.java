@@ -99,7 +99,7 @@ public class ProcessorServiceTest extends ServiceTestCase<MockService> {
     private class DummyTask extends SingleTask<Integer, Integer, MockSource> {
 
         public DummyTask(Integer key) {
-            super(key, Integer.class, MockSource.class);
+            super(key, MockSource.class);
         }
 
         public DummyTask(Integer key, long exipirationTime) {

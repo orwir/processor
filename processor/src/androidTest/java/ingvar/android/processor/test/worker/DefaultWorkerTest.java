@@ -35,7 +35,7 @@ public class DefaultWorkerTest extends WorkerTest {
         private long timeout;
 
         public DummyTask(String key, long timeout) {
-            super(key, String.class, MockSource.class);
+            super(key, MockSource.class);
             this.timeout = timeout;
         }
 

@@ -59,7 +59,7 @@ public class SingleTaskTest extends WorkerTest {
     private class Task extends SingleTask<TestType, TestType, MockSource> {
 
         public Task(TestType type) {
-            super(type, TestType.class, MockSource.class);
+            super(type, MockSource.class);
         }
 
         @Override

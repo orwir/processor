@@ -66,7 +66,7 @@ public class ServiceTest extends ServiceTestCase<MockFilesystemService> {
     private class RequestFileTask extends SingleTask<File, TestObject, FilesystemSource> {
 
         public RequestFileTask(File key) {
-            super(key, TestObject.class, FilesystemSource.class);
+            super(key, FilesystemSource.class);
         }
 
         @Override
@@ -78,7 +78,7 @@ public class ServiceTest extends ServiceTestCase<MockFilesystemService> {
     private class RequestAssetBitmapTask extends SingleTask<String, Bitmap, FilesystemSource> {
 
         public RequestAssetBitmapTask(String key) {
-            super(key, Bitmap.class, FilesystemSource.class);
+            super(key, FilesystemSource.class);
         }
 
         @Override

@@ -16,11 +16,11 @@ public interface ITask<K, R> extends Comparable<ITask<K, R>> {
     K getTaskKey();
 
     /**
-     * Return single result item class.
+     * Return class used for getting appropriate cache-repository.
      *
-     * @return class that represent the result
+     * @return class that represent the single object result
      */
-    Class<R> getResultClass();
+    Class getCacheClass();
 
     /**
      * Notify worker what this task is cancelled.
@@ -51,7 +51,7 @@ public interface ITask<K, R> extends Comparable<ITask<K, R>> {
     /**
      * Can this task will be merged with prev task with the same task key {@link ITask#getTaskKey()}
      *
-     * @param mergeable
+     * @param mergeable is mergeable or not
      */
     void setMergeable(boolean mergeable);
 

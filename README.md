@@ -29,7 +29,7 @@ allprojects {
 Next add dependency for your module
 ```groovy
 dependencies {
-    versionProcessorLibrary = '1.2.0' //check latest above
+    versionProcessorLibrary = '1.5.0' //check latest above
 
     //core part
     compile "ingvar.android.processor:processor:$versionProcessorLibrary"

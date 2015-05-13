@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Task which contains other tasks. Used for process several task as one and join their results.
+ * Not cached task which contains other tasks. Used for process several task as one and join their results.
  * Aggregated task does not cached, but inner tasks may be cached.
  *
  * <br/><br/>Created by Igor Zubenko on 2015.03.18.
@@ -32,17 +32,16 @@ public abstract class AggregatedTask<K, G, I> extends AbstractTask<K, G> {
     private int keepAliveTimeout;
     private Map<ITask, Exception> innerExceptions;
 
-    public AggregatedTask(Class resultClass) {
-        this(null, resultClass);
+    public AggregatedTask() {
+        this(null);
     }
 
     /**
      *
      * @param key does not used in the inner processes, but may be used for you.
-     * @param resultClass cumulative result class
      */
-    public AggregatedTask(K key, Class resultClass) {
-        super(key, resultClass);
+    public AggregatedTask(K key) {
+        super(key, null);
         this.tasks = new HashSet<>();
         this.threadsCount = DEFAULT_PARALLEL_THREADS;
         this.keepAliveTimeout = DEFAULT_AGGREGATE_KEEP_ALIVE_TIME_SECONDS;

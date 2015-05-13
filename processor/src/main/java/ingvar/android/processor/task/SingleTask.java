@@ -10,7 +10,7 @@ import ingvar.android.processor.source.ISource;
  * <br/><br/>Created by Igor Zubenko on 2015.03.18.
  *
  * @param <K> key class
- * @param <R> single item class
+ * @param <R> result class
  * @param <S> source class
  */
 public abstract class SingleTask<K, R, S extends ISource> extends AbstractTask<K, R> {
@@ -21,38 +21,46 @@ public abstract class SingleTask<K, R, S extends ISource> extends AbstractTask<K
 
     /**
      * Task without cashing results.
-     * cacheExpirationTime is set as Time.ALWAYS_EXPIRED.
-     * Note: result will not cached.
+     * {@link SingleTask#cacheExpirationTime} will be set as {@link Time#ALWAYS_EXPIRED}.
      *
-     * @param key task key
-     * @param resultClass result class
      * @param sourceType source type
      */
-    public SingleTask(K key, Class resultClass, Class<? extends ISource> sourceType) {
-        this(key, resultClass, sourceType, Time.ALWAYS_EXPIRED);
+    public SingleTask(Class<? extends ISource> sourceType) {
+        this(null, null, sourceType, Time.ALWAYS_EXPIRED);
+    }
+
+    /**
+     * Task without cashing results.
+     * {@link SingleTask#cacheExpirationTime} will be set as {@link Time#ALWAYS_EXPIRED}.
+     *
+     * @param key task identifier
+     * @param sourceType source type
+     */
+    public SingleTask(K key, Class<? extends ISource> sourceType) {
+        this(key, null, sourceType, Time.ALWAYS_EXPIRED);
     }
 
     /**
      *
-     * @param key task key
-     * @param resultClass result class
+     * @param key task identifier
+     * @param cacheClass class used for getting appropriate cache-repository.
      * @param sourceType source type
      * @param refresh if true as expiration time will be used 1 millis, otherwise {@link Time#ALWAYS_RETURNED}
      */
-    public SingleTask(K key, Class resultClass, Class<? extends ISource> sourceType, boolean refresh) {
-        this(key, resultClass, sourceType, refresh ? 1 : Time.ALWAYS_RETURNED);
+    public SingleTask(K key, Class cacheClass, Class<? extends ISource> sourceType, boolean refresh) {
+        this(key, cacheClass, sourceType, refresh ? 1 : Time.ALWAYS_RETURNED);
     }
 
     /**
-     * Note: if you set cacheExpirationTime as Time.ALWAYS_EXPIRED result of task will not cached.
+     * Note: if you set cacheExpirationTime as {@link Time#ALWAYS_EXPIRED} result of the task will not be cached.
      *
      * @param key task key
-     * @param resultClass result class
+     * @param cacheClass class used for getting appropriate cache-repository.
      * @param sourceType source type
      * @param cacheExpirationTime through how many milliseconds result of task will be expired in the cache
      */
-    public SingleTask(K key, Class resultClass, Class<? extends ISource> sourceType, long cacheExpirationTime) {
-        super(key, resultClass);
+    public SingleTask(K key, Class cacheClass, Class<? extends ISource> sourceType, long cacheExpirationTime) {
+        super(key, cacheClass);
         this.sourceType = sourceType;
         this.cacheExpirationTime = cacheExpirationTime;
         this.retryCount = 1; // 0 and 1 is same

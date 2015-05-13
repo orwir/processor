@@ -3,6 +3,7 @@ package ingvar.android.processor.task;
 import java.util.UUID;
 
 import ingvar.android.processor.exception.ProcessorException;
+import ingvar.android.processor.util.CommonUtils;
 
 /**
  * Base implementation of task.
@@ -10,23 +11,31 @@ import ingvar.android.processor.exception.ProcessorException;
  * <br/><br/> Created by Igor Zubenko on 2015.04.11.
  *
  * @param <K> key class
- * @param <R> single result class
+ * @param <R> result class
  */
 public abstract class AbstractTask<K, R> implements ITask<K, R> {
 
     private K key;
-    private Class<R> resultClass;
+    private Class cacheClass;
     private boolean cancelled;
     private TaskStatus status;
     private boolean mergeable;
     private String uuid; //used if task is not mergeable
 
-    public AbstractTask(K key, Class<R> resultClass) {
+    public AbstractTask() {
+        this(null, Void.class);
+    }
+
+    /**
+     * @param key task identifier
+     * @param cacheClass class used for getting appropriate cache-repository. If null will be used {@link Void}.
+     */
+    public AbstractTask(K key, Class cacheClass) {
         this.key = key;
-        this.resultClass = resultClass;
+        this.cacheClass = cacheClass == null ? Void.class : cacheClass;
         this.cancelled = false;
         this.status = TaskStatus.PENDING;
-        setMergeable(true);
+        setMergeable(key != null);
     }
 
     @Override
@@ -35,8 +44,8 @@ public abstract class AbstractTask<K, R> implements ITask<K, R> {
     }
 
     @Override
-    public Class<R> getResultClass() {
-        return resultClass;
+    public Class getCacheClass() {
+        return cacheClass;
     }
 
     @Override
@@ -61,6 +70,9 @@ public abstract class AbstractTask<K, R> implements ITask<K, R> {
 
     @Override
     public void setMergeable(boolean mergeable) {
+        if(mergeable && key == null) {
+            throw new ProcessorException("You can't set mergeable as true if you haven't key");
+        }
         if(!TaskStatus.PENDING.equals(status)) {
             throw new ProcessorException("Mergeable flag can be changed only in the pending task!");
         }
@@ -75,10 +87,10 @@ public abstract class AbstractTask<K, R> implements ITask<K, R> {
 
     @Override
     public int hashCode() {
-        int hashCode = 42;
-        hashCode += 42 * getTaskKey().hashCode();
-        hashCode += 42 * getResultClass().hashCode();
-        hashCode += 42 * uuid.hashCode();
+        int hashCode = 31;
+        hashCode += 31 * CommonUtils.objectHashCode(getTaskKey());
+        hashCode += 31 * CommonUtils.objectHashCode(getCacheClass());
+        hashCode += 31 * uuid.hashCode();
         return hashCode;
     }
 
@@ -86,9 +98,9 @@ public abstract class AbstractTask<K, R> implements ITask<K, R> {
     public boolean equals(Object obj) {
         if(obj instanceof AbstractTask) {
             AbstractTask o = (AbstractTask) obj;
-            return getTaskKey().equals(o.getTaskKey())
-                    && getResultClass().equals(o.getResultClass())
-                    && uuid.equals(o.uuid);
+            return CommonUtils.isEquals(uuid, o.uuid)
+                && CommonUtils.isEquals(getTaskKey(), o.getTaskKey())
+                && CommonUtils.isEquals(getCacheClass(), o.getCacheClass());
         }
         return false;
     }
@@ -100,7 +112,7 @@ public abstract class AbstractTask<K, R> implements ITask<K, R> {
 
     @Override
     public String toString() {
-        return String.format("[class: %s, key: %s]", getResultClass().getSimpleName(), getTaskKey());
+        return String.format("[class: %s, key: %s, uuid: %s]", getCacheClass().getSimpleName(), getTaskKey(), uuid);
     }
 
 }

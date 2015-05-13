@@ -66,7 +66,7 @@ public class AggregatedTaskTest extends WorkerTest {
         private Integer sum;
 
         public SumTask(String key) {
-            super(key, Integer.class);
+            super(key);
             sum = 0;
         }
 
@@ -85,7 +85,7 @@ public class AggregatedTaskTest extends WorkerTest {
     private class CalculationTask extends SingleTask<String, Integer, MockSource> {
 
         public CalculationTask(String key) {
-            super(key, Integer.class, MockSource.class);
+            super(key, MockSource.class);
             setMergeable(false);
         }
 

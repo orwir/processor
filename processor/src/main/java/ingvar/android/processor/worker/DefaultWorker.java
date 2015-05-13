@@ -176,11 +176,11 @@ public class DefaultWorker implements IWorker {
             //start of flow ------------------------------------------------------------------------
 
             //try to get data from cache
-            if (task.getExpirationTime() != Time.ALWAYS_EXPIRED) {
+            if (canCache(task)) {
                 task.setStatus(TaskStatus.LOADING_FROM_CACHE);
 
                 checkCancellation(task);
-                result = cacheManager.obtain(task.getTaskKey(), task.getResultClass(), task.getExpirationTime());
+                result = cacheManager.obtain(task.getTaskKey(), task.getCacheClass(), task.getExpirationTime());
                 if (result != null) {
                     LW.v(TAG, "Task result got from cache %s", task);
                     break flow;
@@ -211,8 +211,8 @@ public class DefaultWorker implements IWorker {
                 if(exception != null) {
                     throw exception;
                 }
-                if(result != null && task.getExpirationTime() != Time.ALWAYS_EXPIRED) {
-                    cacheManager.persist(task.getTaskKey(), task.getResultClass(), result);
+                if(result != null && canCache(task)) {
+                    cacheManager.persist(task.getTaskKey(), task.getCacheClass(), result);
                     break flow;
                 }
             } else {
@@ -231,7 +231,7 @@ public class DefaultWorker implements IWorker {
         task.setStatus(TaskStatus.LOADING_FROM_CACHE);
 
         checkCancellation(task);
-        result = cacheManager.obtain(task.getTaskKey(), task.getResultClass(), Time.ALWAYS_RETURNED);
+        result = cacheManager.obtain(task.getTaskKey(), task.getCacheClass(), Time.ALWAYS_RETURNED);
         return result;
     }
 
@@ -265,6 +265,12 @@ public class DefaultWorker implements IWorker {
         if(task.isCancelled()) {
             throw new TaskCancelledException(String.format("Task '%s' was cancelled!", task.getTaskKey().toString()));
         }
+    }
+
+    protected boolean canCache(SingleTask task) {
+        return Time.ALWAYS_EXPIRED != task.getExpirationTime()
+            && !Void.class.equals(task.getCacheClass())
+            && task.getTaskKey() != null;
     }
 
 }

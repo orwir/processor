@@ -6,6 +6,7 @@ import android.app.Fragment;
 import java.lang.ref.WeakReference;
 
 import ingvar.android.processor.exception.ReferenceStaleException;
+import ingvar.android.processor.util.CommonUtils;
 
 /**
  * Created by Igor Zubenko on 2015.05.04.
@@ -34,11 +35,7 @@ public abstract class FragmentObserver<F extends Fragment, R> extends AbstractOb
      * @throws ReferenceStaleException if context is stale
      */
     protected F getFragment() {
-        F fragment = fragmentRef.get();
-        if(fragment == null) {
-            throw new ReferenceStaleException("Fragment is stale!");
-        }
-        return fragment;
+        return CommonUtils.getReference(fragmentRef);
     }
 
     @SuppressWarnings("unchecked")

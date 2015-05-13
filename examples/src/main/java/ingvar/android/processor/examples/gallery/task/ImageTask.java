@@ -21,7 +21,7 @@ import ingvar.android.processor.task.SingleTask;
 public class ImageTask extends SingleTask<String, Bitmap, FilesystemSource> {
 
     public ImageTask(String imageName) {
-        super(imageName, Bitmap.class, FilesystemSource.class);
+        super(imageName, FilesystemSource.class);
     }
 
     @Override

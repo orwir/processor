@@ -17,7 +17,7 @@ import ingvar.android.processor.task.SingleTask;
 public class ImagesTask extends SingleTask<String, List<String>, FilesystemSource> {
 
     public ImagesTask(String assetDir) {
-        super(assetDir, String.class, FilesystemSource.class);
+        super(assetDir, FilesystemSource.class);
     }
 
     @Override
