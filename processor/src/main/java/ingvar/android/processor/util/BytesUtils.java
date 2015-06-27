@@ -8,6 +8,10 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by Igor Zubenko on 2015.03.20.
@@ -78,6 +82,49 @@ public class BytesUtils {
             throw new RuntimeException(e);
         }
         return result.toByteArray();
+    }
+
+    /**
+     * Copy fields from parent object to new child object.
+     *
+     * @param parent parent object
+     * @param childClass child class
+     * @param <T> child class
+     * @return filled child object
+     */
+    public static <T> T shallowCopy(Object parent, Class<T> childClass) {
+        try {
+            return shallowCopy(parent, childClass.newInstance());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Copy fields from parent object to child object.
+     *
+     * @param parent parent object
+     * @param child child object
+     * @param <T> child class
+     * @return filled child object
+     */
+    public static <T> T shallowCopy(Object parent, T child) {
+        try {
+            List<Field> fields = new ArrayList<>();
+            Class clazz = parent.getClass();
+            do {
+                fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
+            } while (!(clazz = clazz.getSuperclass()).equals(Object.class));
+
+            for (Field field : fields) {
+                field.setAccessible(true);
+                field.set(child, field.get(parent));
+            }
+
+            return child;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

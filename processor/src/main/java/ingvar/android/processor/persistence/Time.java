@@ -14,5 +14,10 @@ public class Time {
      */
     public static long ALWAYS_RETURNED = 0;
 
+    /**
+     * Update and save to cache.
+     */
+    public static long EXPIRED = 1;
+
     private Time() {}
 }

@@ -1,6 +1,8 @@
 package ingvar.android.processor.util;
 
 import java.lang.ref.WeakReference;
+import java.util.Collection;
+import java.util.Map;
 
 import ingvar.android.processor.exception.ReferenceStaleException;
 
@@ -28,6 +30,23 @@ public class CommonUtils {
      */
     public static int objectHashCode(Object object) {
         return object == null ? 0 : object.hashCode();
+    }
+
+    public static boolean isNull(Object value) {
+        if(value instanceof String) {
+            return ((String) value).isEmpty();
+        }
+        else if(value instanceof Collection) {
+            return ((Collection) value).isEmpty();
+        }
+        else if(value instanceof Map) {
+            return ((Map) value).isEmpty();
+        }
+        return value == null;
+    }
+
+    public static boolean isNotNull(Object value) {
+        return !isNull(value);
     }
 
     public static  <T> T getReference(WeakReference<T> weak) {

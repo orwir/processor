@@ -1,6 +1,8 @@
 package ingvar.android.processor.ultimate.service;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import ingvar.android.processor.filesystem.persistence.BitmapFilesystemRepository;
 import ingvar.android.processor.filesystem.persistence.FilesystemRepository;
@@ -11,7 +13,9 @@ import ingvar.android.processor.memory.persistence.MemoryRepository;
 import ingvar.android.processor.memory.source.MemorySource;
 import ingvar.android.processor.persistence.ICacheManager;
 import ingvar.android.processor.service.ProcessorService;
+import ingvar.android.processor.source.ContextSource;
 import ingvar.android.processor.source.ISourceManager;
+import ingvar.android.processor.util.LW;
 
 /**
  * Created by Igor Zubenko on 2015.04.28.
@@ -19,13 +23,25 @@ import ingvar.android.processor.source.ISourceManager;
 public class BaseProcessorService extends ProcessorService {
 
     protected static final int DEFAULT_BITMAP_MEMORY_CACHE_SIZE     = 40 * 1024 * 1024;
-    protected static final int DEFAULT_BITMAP_FILESYSTEM_CACHE_SIZE = 25 * 1024 * 1024;
+    protected static final int DEFAULT_BITMAP_FILESYSTEM_CACHE_SIZE = 20 * 1024 * 1024;
 
-    protected static final int DEFAULT_MEMORY_CACHE_SIZE            = 30 * 1024 * 1024;
-    protected static final int DEFAULT_FILESYSTEM_CACHE_SIZE        = 20 * 1024 * 1024;
+    protected static final int DEFAULT_MEMORY_CACHE_SIZE            = 25 * 1024 * 1024;
+    protected static final int DEFAULT_FILESYSTEM_CACHE_SIZE        = 10 * 1024 * 1024;
+
+    protected static final int INNER_BITMAP_FILESYSTEM_CACHE_SIZE   = 5 * 1024 * 1024;
+    protected static final int INNER_FILESYSTEM_CACHE_SIZE          = 2 * 1024 * 1024;
+
+    private boolean isExternal;
+    private List<File> cacheDirs;
+
+    public BaseProcessorService() {
+        cacheDirs = new ArrayList<>(5);
+        isExternal = true;
+    }
 
     @Override
     protected void provideSources(ISourceManager sourceManager) {
+        sourceManager.addSource(ContextSource.class, new ContextSource(this));
         sourceManager.addSource(MemorySource.class, new MemorySource());
         sourceManager.addSource(FilesystemSource.class, new FilesystemSource(this));
     }
@@ -33,7 +49,7 @@ public class BaseProcessorService extends ProcessorService {
     @Override
     protected void provideRepositories(ICacheManager cacheManager) {
         //BITMAP CACHE
-        File dirBitmap = getCacheDir("lru-bitmap");
+        File dirBitmap = createCacheDir("lru-bitmap");
         int dirBitmapSize = getBitmapFilesystemCacheSize();
         int memoryBitmapSize = getMaxMemoryCacheSize(getBitmapMemoryCacheSize());
 
@@ -42,7 +58,7 @@ public class BaseProcessorService extends ProcessorService {
         cacheManager.addRepository(bitmapMemoryRepo);
 
         //COMMON CACHE
-        File dirCommon = getCacheDir("lru-common");
+        File dirCommon = createCacheDir("lru-common");
         int dirCommonSize = getFilesystemCacheSize();
         int memoryCommonSize = getMaxMemoryCacheSize(getMemoryCacheSize());
 
@@ -52,23 +68,47 @@ public class BaseProcessorService extends ProcessorService {
     }
 
     /**
-     * Get cache dir.
+     * Return cache dirs what used by repositories.
+     *
+     * @return cache dirs
+     */
+    public List<File> getCacheDirs() {
+        return cacheDirs;
+    }
+
+    /**
+     * Notify service about cache dir used by repository.
+     * @param file cache dir
+     */
+    protected void addCacheDir(File file) {
+        cacheDirs.add(file);
+    }
+
+    /**
+     * Create cache dir.
      * Used external cache dir if available.
      *
      * @param dirname lru-cache dir name or null.
      * @return new cache dir from app cache or root cache dir if dirname is null.
      */
-    protected File getCacheDir(String dirname) {
-        File cache;
+    protected File createCacheDir(String dirname) {
+        File cache = null;
         if(FileUtils.isExternalStorageWritable()) {
             cache = getExternalCacheDir();
-        } else {
+        }
+        if(cache == null) {
             cache = getCacheDir();
+            isExternal = false;
+            LW.w(TAG, "For caching will be used internal storage!");
         }
         if(dirname != null && !dirname.isEmpty()) {
             cache = new File(cache, dirname);
-            cache.mkdirs();
+            if(cache.mkdirs()) {
+                LW.d(TAG, "Created cache dir %s", cache.getAbsolutePath());
+            }
         }
+        addCacheDir(cache);
+
         return cache;
     }
 
@@ -99,7 +139,7 @@ public class BaseProcessorService extends ProcessorService {
      * @return cache size in bytes.
      */
     protected int getFilesystemCacheSize() {
-        return DEFAULT_FILESYSTEM_CACHE_SIZE;
+        return isExternal ? DEFAULT_FILESYSTEM_CACHE_SIZE : INNER_FILESYSTEM_CACHE_SIZE;
     }
 
     /**
@@ -117,7 +157,7 @@ public class BaseProcessorService extends ProcessorService {
      * @return bitmap cache size in bytes
      */
     protected int getBitmapFilesystemCacheSize() {
-        return DEFAULT_BITMAP_FILESYSTEM_CACHE_SIZE;
+        return isExternal ? DEFAULT_BITMAP_FILESYSTEM_CACHE_SIZE : INNER_BITMAP_FILESYSTEM_CACHE_SIZE;
     }
 
 }
