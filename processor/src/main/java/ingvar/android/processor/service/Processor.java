@@ -133,8 +133,8 @@ public class Processor<S extends ProcessorService> {
      */
     public void bind(Context context) {
         LW.d(TAG, "Bind service '%s' to context '%s'", serviceClass.getSimpleName(), context.getClass().getSimpleName());
-
         Intent intent = new Intent(context, serviceClass);
+        context.startService(intent); //keep service alive after context unbound.
         if(!context.bindService(intent, connection, Context.BIND_AUTO_CREATE)) {
             throw new ProcessorException("Connection is not made. Maybe you forgot add your service to AndroidManifest.xml?");
         }

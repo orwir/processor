@@ -48,7 +48,7 @@ public abstract class SingleTask<K, R, S extends ISource> extends AbstractTask<K
      * @param refresh if true as expiration time will be used 1 millis, otherwise {@link Time#ALWAYS_RETURNED}
      */
     public SingleTask(K key, Class cacheClass, Class<? extends ISource> sourceType, boolean refresh) {
-        this(key, cacheClass, sourceType, refresh ? 1 : Time.ALWAYS_RETURNED);
+        this(key, cacheClass, sourceType, refresh ? Time.EXPIRED : Time.ALWAYS_RETURNED);
     }
 
     /**
