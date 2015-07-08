@@ -7,8 +7,11 @@ import android.os.Binder;
 import android.os.IBinder;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -58,6 +61,7 @@ public abstract class ProcessorService extends Service {
     }
 
     private ExecutorService executorService;
+    private ScheduledExecutorService scheduledService;
     private ICacheManager cacheManager;
     private ISourceManager sourceManager;
     private IObserverManager observerManager;
@@ -78,10 +82,11 @@ public abstract class ProcessorService extends Service {
         super.onCreate();
 
         executorService = createExecutorService();
+        scheduledService = createScheduledService();
         cacheManager = createCacheManager();
         sourceManager = createSourceManager();
         observerManager = createObserverManager();
-        worker = createWorker(executorService, cacheManager, sourceManager, observerManager);
+        worker = createWorker();
 
         provideRepositories(cacheManager);
         provideSources(sourceManager);
@@ -109,6 +114,57 @@ public abstract class ProcessorService extends Service {
             LW.d(TAG, "Merged task %s", task);
         }
 
+        return future;
+    }
+
+    /**
+     * Schedule task for single execution.
+     *
+     * @param task task
+     * @param delay the time from now to delay execution (millis)
+     * @param observers task observers
+     * @param <K> task identifier class
+     * @param <R> task result class
+     * @return {@link ScheduledFuture} of task execution
+     */
+    public <K, R> ScheduledFuture<R> schedule(ITask<K, R> task, long delay, IObserver<R>... observers) {
+        for(IObserver observer : observers) {
+            observerManager.add(task, observer);
+        }
+
+        ScheduledFuture future = worker.getScheduled(task);
+        if(future == null || !task.isMergeable()) {
+            future = worker.schedule(task, delay);
+            LW.v(TAG, "Schedule task %s", task);
+        } else {
+            LW.d(TAG, "Merged task %s", task);
+        }
+        return future;
+    }
+
+    /**
+     * Schedule task for multiple executions.
+     *
+     * @param task task
+     * @param initialDelay the time to delay first execution
+     * @param delay the delay between the termination of one execution and the commencement of the next.
+     * @param observers task observers
+     * @param <K> task identifier class
+     * @param <R> task result class
+     * @return {@link ScheduledFuture} of task execution
+     */
+    public <K, R> ScheduledFuture<R> schedule(ITask<K, R> task, long initialDelay, long delay, IObserver<R>... observers) {
+        for(IObserver observer : observers) {
+            observerManager.add(task, observer);
+        }
+
+        ScheduledFuture future = worker.getScheduled(task);
+        if(future == null || !task.isMergeable()) {
+            future = worker.schedule(task, initialDelay, delay);
+            LW.v(TAG, "Schedule task %s", task);
+        } else {
+            LW.d(TAG, "Merged task %s", task);
+        }
         return future;
     }
 
@@ -193,6 +249,15 @@ public abstract class ProcessorService extends Service {
     }
 
     /**
+     * Executor for scheduling tasks
+     *
+     * @return executor
+     */
+    protected ScheduledExecutorService getScheduledService() {
+        return scheduledService;
+    }
+
+    /**
      * Source manager for getting sources to tasks.
      *
      * @return source manager
@@ -226,6 +291,15 @@ public abstract class ProcessorService extends Service {
     }
 
     /**
+     * Create scheduled service.
+     *
+     * @return new scheduled execution service
+     */
+    protected ScheduledExecutorService createScheduledService() {
+        return Executors.newScheduledThreadPool(DEFAULT_MIN_PARALLEL_THREADS);
+    }
+
+    /**
      * Create cache manager
      *
      * @return new cache manager
@@ -254,14 +328,16 @@ public abstract class ProcessorService extends Service {
     /**
      * Create worker
      *
-     * @param executorService executor service
-     * @param cacheManager cache manager
-     * @param sourceManager source manager
-     * @param observerManager observer manager
      * @return new worker
      */
-    protected IWorker createWorker(ExecutorService executorService, ICacheManager cacheManager, ISourceManager sourceManager, IObserverManager observerManager) {
-        return new DefaultWorker(executorService, cacheManager, sourceManager, observerManager);
+    protected IWorker createWorker() {
+        return new DefaultWorker.Builder()
+            .setExecutorService(getExecutorService())
+            .setScheduledService(getScheduledService())
+            .setCacheManager(getCacheManager())
+            .setSourceManager(getSourceManager())
+            .setObserverManager(getObserverManager())
+        .build();
     }
 
 }

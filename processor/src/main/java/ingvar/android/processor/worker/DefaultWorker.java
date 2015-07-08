@@ -7,6 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -34,40 +36,127 @@ public class DefaultWorker implements IWorker {
 
     public static final String TAG = DefaultWorker.class.getSimpleName();
 
-    protected final ExecutorService executorService;
-    protected final ICacheManager cacheManager;
-    protected final ISourceManager sourceManager;
-    protected final IObserverManager observerManager;
-    protected final Map<ITask, Future> executingTasks;
+    public static class Builder {
+        private ExecutorService executorService;
+        private ScheduledExecutorService scheduledService;
+        private ICacheManager cacheManager;
+        private ISourceManager sourceManager;
+        private IObserverManager observerManager;
 
-    public DefaultWorker(ExecutorService executorService, ICacheManager cacheManager, ISourceManager sourceManager, IObserverManager observerManager) {
-        this.executorService = executorService;
-        this.cacheManager = cacheManager;
-        this.sourceManager = sourceManager;
-        this.observerManager = observerManager;
+        public Builder setExecutorService(ExecutorService executorService) {
+            this.executorService = executorService;
+            return this;
+        }
+
+        public Builder setScheduledService(ScheduledExecutorService scheduledService) {
+            this.scheduledService = scheduledService;
+            return this;
+        }
+
+        public Builder setCacheManager(ICacheManager cacheManager) {
+            this.cacheManager = cacheManager;
+            return this;
+        }
+
+        public Builder setSourceManager(ISourceManager sourceManager) {
+            this.sourceManager = sourceManager;
+            return this;
+        }
+
+        public Builder setObserverManager(IObserverManager observerManager) {
+            this.observerManager = observerManager;
+            return this;
+        }
+
+        public DefaultWorker build() {
+            if(executorService == null || scheduledService == null || cacheManager == null
+            || sourceManager == null || observerManager == null) {
+                throw new IllegalStateException("Can't create worker! Not all fields are filled!");
+            }
+
+            DefaultWorker worker = new DefaultWorker();
+            worker.executorService = executorService;
+            worker.scheduledService = scheduledService;
+            worker.cacheManager = cacheManager;
+            worker.sourceManager = sourceManager;
+            worker.observerManager = observerManager;
+            return worker;
+        }
+
+    }
+
+    private ExecutorService executorService;
+    private ScheduledExecutorService scheduledService;
+    private ICacheManager cacheManager;
+    private ISourceManager sourceManager;
+    private IObserverManager observerManager;
+    protected final Map<ITask, Future> executingTasks;
+    protected final Map<ITask, ScheduledFuture> scheduledTasks;
+
+    public DefaultWorker() {
         this.executingTasks = new ConcurrentHashMap<>();
+        this.scheduledTasks = new ConcurrentHashMap<>();
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <R> Future<R> execute(final ITask task) {
-        Callable callable = new Callable() {
-            @Override
-            public R call() throws Exception {
-                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-                LW.d(TAG, "Process task %s", task);
-                return process(task);
-            }
-        };
-        Future<R> future = executorService.submit(callable);
+    public <R> Future<R> execute(ITask task) {
+        Future<R> future = executorService.submit(createCallableForExecution(task));
         executingTasks.put(task, future);
         return future;
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <R> Future<R> getExecuted(ITask request) {
-        return executingTasks.get(request);
+    public <R> Future<R> getExecuted(ITask task) {
+        return executingTasks.get(task);
+    }
+
+    @Override
+    public ScheduledFuture schedule(ITask task, long delay) {
+        ScheduledFuture future = scheduledService.schedule(createCallableForExecution(task), delay, TimeUnit.MILLISECONDS);
+        scheduledTasks.put(task, future);
+        return future;
+    }
+
+    @Override
+    public ScheduledFuture schedule(final ITask task, long initialDelay, long delay) {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                LW.d(TAG, "Process task %s", task);
+                process(task);
+            }
+        };
+        ScheduledFuture future = scheduledService.scheduleWithFixedDelay(runnable, initialDelay, delay, TimeUnit.MILLISECONDS);
+        scheduledTasks.put(task, future);
+        return future;
+    }
+
+    @Override
+    public ScheduledFuture getScheduled(ITask task) {
+        return scheduledTasks.get(task);
+    }
+
+    public ExecutorService getExecutorService() {
+        return executorService;
+    }
+
+    public ScheduledExecutorService getScheduledService() {
+        return scheduledService;
+    }
+
+    public ICacheManager getCacheManager() {
+        return cacheManager;
+    }
+
+    public ISourceManager getSourceManager() {
+        return sourceManager;
+    }
+
+    public IObserverManager getObserverManager() {
+        return observerManager;
     }
 
     protected <R> R process(ITask task) {
@@ -271,6 +360,17 @@ public class DefaultWorker implements IWorker {
         return Time.ALWAYS_EXPIRED != task.getExpirationTime()
             && !Void.class.equals(task.getCacheClass())
             && task.getTaskKey() != null;
+    }
+
+    protected <R> Callable createCallableForExecution(final ITask task) {
+        return new Callable() {
+            @Override
+            public R call() throws Exception {
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                LW.d(TAG, "Process task %s", task);
+                return process(task);
+            }
+        };
     }
 
 }
