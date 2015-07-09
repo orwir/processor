@@ -9,6 +9,7 @@ import android.os.IBinder;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledFuture;
 
 import ingvar.android.processor.exception.ProcessorException;
 import ingvar.android.processor.observation.IObserver;
@@ -70,6 +71,41 @@ public class Processor<S extends ProcessorService> {
             plannedTasks.put(task, observers);
             LW.d(TAG, "Queued task %s", task);
         }
+    }
+
+    /**
+     * Schedule task for single execution.
+     *
+     * @param task task
+     * @param delay the time from now to delay execution (millis)
+     * @param observers task observers
+     * @param <K> task identifier class
+     * @param <R> task result class
+     * @return {@link ScheduledFuture} of task execution
+     */
+    public <K, R> ScheduledFuture<R> schedule(ITask<K, R> task, long delay, IObserver<R>... observers) {
+        if(!isBound()) {
+            throw new ProcessorException("Service is not bound yet!");
+        }
+        return service.schedule(task, delay, observers);
+    }
+
+    /**
+     * Schedule task for multiple executions.
+     *
+     * @param task task
+     * @param initialDelay the time to delay first execution
+     * @param delay the delay between the termination of one execution and the commencement of the next.
+     * @param observers task observers
+     * @param <K> task identifier class
+     * @param <R> task result class
+     * @return {@link ScheduledFuture} of task execution
+     */
+    public <K, R> ScheduledFuture<R> schedule(ITask<K, R> task, long initialDelay, long delay, IObserver<R>... observers) {
+        if(!isBound()) {
+            throw new ProcessorException("Service is not bound yet!");
+        }
+        return service.schedule(task, initialDelay, delay, observers);
     }
 
     /**

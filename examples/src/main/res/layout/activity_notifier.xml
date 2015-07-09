@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/square_spacing"
+            style="@android:style/TextAppearance.DeviceDefault.Medium"
+            android:text="@string/label_show_after_sec"/>
+
+        <EditText android:id="@+id/notifier_sec"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:hint="10"
+            android:minEms="2"/>
+
+    </LinearLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/square_spacing"
+        android:minEms="@integer/button_width"
+        android:text="@string/label_schedule"
+        android:onClick="schedule"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minEms="@integer/button_width"
+        android:text="@string/label_cancel"
+        android:onClick="cancel"/>
+
+</LinearLayout>

@@ -6,6 +6,7 @@ import android.widget.Toast;
 import ingvar.android.processor.examples.R;
 import ingvar.android.processor.examples.dictionary.view.DictionaryActivity;
 import ingvar.android.processor.examples.gallery.view.GalleryActivity;
+import ingvar.android.processor.examples.notifier.view.NotifierActivity;
 import ingvar.android.processor.examples.weather.view.WeatherActivity;
 import roboguice.inject.ContentView;
 
@@ -27,6 +28,9 @@ public class MainActivity extends AbstractActivity {
                 break;
             case R.id.button_dictionary:
                 DictionaryActivity.startActivity(this);
+                break;
+            case R.id.button_notifier:
+                NotifierActivity.startActivity(this);
                 break;
             default:
                 Toast.makeText(this, R.string.message_unknown_example, Toast.LENGTH_LONG).show();

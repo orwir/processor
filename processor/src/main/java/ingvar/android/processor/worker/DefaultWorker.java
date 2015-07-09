@@ -352,6 +352,10 @@ public class DefaultWorker implements IWorker {
 
     protected void checkCancellation(ITask task) {
         if(task.isCancelled()) {
+            ScheduledFuture scheduledFuture = scheduledTasks.remove(task);
+            if(scheduledFuture != null) {
+                scheduledFuture.cancel(true);
+            }
             throw new TaskCancelledException(String.format("Task '%s' was cancelled!", task.getTaskKey().toString()));
         }
     }
