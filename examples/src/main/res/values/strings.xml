@@ -5,6 +5,7 @@
     <string name="label_weather">Weather (network, sqlite)</string>
     <string name="label_dictionary">Dictionary (sqlite)</string>
     <string name="label_notifier">Notifier (scheduling)</string>
+    <string name="label_observation">Observation</string>
     <string name="label_temperature">Temperature</string>
     <string name="label_humidity">Humidity</string>
     <string name="label_pressure">Pressure</string>
@@ -27,6 +28,9 @@
     <string name="label_show_after_sec">Show notification after (sec):</string>
     <string name="label_schedule">Schedule</string>
     <string name="label_dummy_notification">Dummy Notification</string>
+    <string name="label_completed">Completed</string>
+    <string name="label_cancelled">Cancelled</string>
+    <string name="label_failed">Failed</string>
 
     <string name="message_unknown_example">You are trying to open unknown example!</string>
     <string name="message_request_was_cancelled">Request was cancelled.</string>
@@ -36,5 +40,9 @@
     <string name="message_task_scheduled">Task scheduled. Will be executed after %d sec</string>
     <string name="message_cancel_previous_task">Cancel prev task before start new</string>
     <string name="message_hello_i_am_notification">Hello! I am dummy notification.</string>
+    <string name="message_task_completed">Task was completed</string>
+    <string name="message_task_cancelled">Task was cancelled</string>
+    <string name="message_task_failed">Task was failed</string>
+    <string name="message_task_progress">Task in progress: %.0f%%</string>
 
 </resources>

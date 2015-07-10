@@ -132,14 +132,18 @@ public class DefaultWorker implements IWorker {
     @Override
     public Execution getExecuted(AbstractTask task) {
         Execution execution = executingTasks.get(task);
-        task.setExecution(execution);
+        if(execution != null) {
+            task.setExecution(execution);
+        }
         return execution;
     }
 
     @Override
     public ScheduledExecution getScheduled(AbstractTask task) {
         ScheduledExecution execution = scheduledTasks.get(task);
-        task.setExecution(execution);
+        if(execution != null) {
+            task.setExecution(execution);
+        }
         return execution;
     }
 

@@ -38,6 +38,9 @@ public class Execution {
 
     void setFuture(Future future) {
         this.future = future;
+        if(cancelled) {
+            cancel();
+        }
     }
 
     void setStatus(TaskStatus status) {

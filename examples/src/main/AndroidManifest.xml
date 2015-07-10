@@ -26,6 +26,9 @@
         <activity android:name=".notifier.view.NotifierActivity"
                   android:label="@string/label_notifier"/>
 
+        <activity android:name=".observation.view.ObservationActivity"
+                  android:label="@string/label_observation"/>
+
         <service android:name=".service.ExampleService"/>
 
         <provider
