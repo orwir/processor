@@ -1,8 +1,7 @@
 package ingvar.android.processor.test.worker;
 
-import java.util.concurrent.Future;
-
 import ingvar.android.processor.observation.IObserverManager;
+import ingvar.android.processor.task.Execution;
 import ingvar.android.processor.task.SingleTask;
 import ingvar.android.processor.test.WorkerTest;
 import ingvar.android.processor.test.mock.MockSource;
@@ -15,16 +14,16 @@ public class DefaultWorkerTest extends WorkerTest {
     public void testExecute() throws Exception {
         SingleTask task = new DummyTask("test", 0);
 
-        Future<String> result = getWorker().execute(task);
+        Execution result = getWorker().execute(task);
 
-        assertEquals("Result incorrect", task.getTaskKey(), result.get());
+        assertEquals("Result incorrect", task.getTaskKey(), result.getFuture().get());
     }
 
     public void testGetExecuted() throws Exception {
         SingleTask task = new DummyTask("test", 300);
 
-        Future<String> future1 = getWorker().execute(task);
-        Future<String> future2 = getWorker().getExecuted(task);
+        Execution future1 = getWorker().execute(task);
+        Execution future2 = getWorker().getExecuted(task);
 
         assertSame("Executed future not match", future1, future2);
     }

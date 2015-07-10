@@ -1,12 +1,12 @@
 package ingvar.android.processor.test.task;
 
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import ingvar.android.processor.exception.ProcessorException;
 import ingvar.android.processor.exception.TaskCancelledException;
 import ingvar.android.processor.observation.IObserverManager;
-import ingvar.android.processor.task.ITask;
+import ingvar.android.processor.task.AbstractTask;
+import ingvar.android.processor.task.Execution;
 import ingvar.android.processor.task.SingleTask;
 import ingvar.android.processor.test.WorkerTest;
 import ingvar.android.processor.test.mock.MockSource;
@@ -17,18 +17,18 @@ import ingvar.android.processor.test.mock.MockSource;
 public class SingleTaskTest extends WorkerTest {
 
     public void testSuccess() throws Exception {
-        ITask task = new Task(TestType.SUCCESS);
-        Future<TestType> result = getWorker().execute(task);
+        AbstractTask task = new Task(TestType.SUCCESS);
+        Execution result = getWorker().execute(task);
 
-        assertEquals("Task process was not successful", task.getTaskKey(), result.get());
+        assertEquals("Task process was not successful", task.getTaskKey(), result.getFuture().get());
     }
 
     public void testCancel() throws Exception {
-        ITask task = new Task(TestType.CANCEL);
-        Future<TestType> result = getWorker().execute(task);
+        AbstractTask task = new Task(TestType.CANCEL);
+        Execution result = getWorker().execute(task);
         task.cancel();
         try {
-            result.get();
+            result.getFuture().get();
             assertFalse("Task was not cancelled!", true);
         } catch (ExecutionException e) {
             if(!(e.getCause() instanceof TaskCancelledException)) {
@@ -38,11 +38,11 @@ public class SingleTaskTest extends WorkerTest {
     }
 
     public void testException() throws Exception {
-        ITask task = new Task(TestType.EXCEPTION);
-        Future<TestType> result = getWorker().execute(task);
+        AbstractTask task = new Task(TestType.EXCEPTION);
+        Execution result = getWorker().execute(task);
 
         try {
-            result.get();
+            result.getFuture().get();
             assertFalse("Task was not throw exception!", true);
         } catch (ExecutionException e) {
             if(e.getCause() instanceof ProcessorException) {

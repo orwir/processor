@@ -38,22 +38,9 @@ public interface ITask<K, R> extends Comparable<ITask<K, R>> {
 
     /**
      *
-     * @param status new status
-     */
-    void setStatus(TaskStatus status);
-
-    /**
-     *
      * @return current status
      */
     TaskStatus getStatus();
-
-    /**
-     * Can this task will be merged with prev task with the same task key {@link ITask#getTaskKey()}
-     *
-     * @param mergeable is mergeable or not
-     */
-    void setMergeable(boolean mergeable);
 
     /**
      * Can this task will be merged with prev task with the same task key {@link ITask#getTaskKey()}

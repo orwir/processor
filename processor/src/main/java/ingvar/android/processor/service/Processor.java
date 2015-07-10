@@ -14,7 +14,10 @@ import java.util.concurrent.ScheduledFuture;
 import ingvar.android.processor.exception.ProcessorException;
 import ingvar.android.processor.observation.IObserver;
 import ingvar.android.processor.persistence.Time;
+import ingvar.android.processor.task.AbstractTask;
+import ingvar.android.processor.task.Execution;
 import ingvar.android.processor.task.ITask;
+import ingvar.android.processor.task.ScheduledExecution;
 import ingvar.android.processor.util.LW;
 
 /**
@@ -29,7 +32,7 @@ public class Processor<S extends ProcessorService> {
     public static final String TAG = Processor.class.getSimpleName();
 
     private Class<? extends ProcessorService> serviceClass;
-    private Map<ITask, IObserver[]> plannedTasks;
+    private Map<AbstractTask, IObserver[]> plannedTasks;
     private ServiceConnection connection;
     private S service;
 
@@ -45,11 +48,9 @@ public class Processor<S extends ProcessorService> {
      *
      * @param task task
      * @param observers task observers
-     * @param <K> task identifier class
-     * @param <R> task result class
      * @return {@link Future} of task execution
      */
-    public <K, R> Future<R> execute(ITask<K, R> task, IObserver<R>... observers) {
+    public Execution execute(AbstractTask task, IObserver... observers) {
         if(service == null) {
             throw new ProcessorException("Service is not bound yet!");
         }
@@ -61,10 +62,8 @@ public class Processor<S extends ProcessorService> {
      *
      * @param task task
      * @param observers task observers
-     * @param <K> task identifier class
-     * @param <R> task result class
      */
-    public <K, R> void planExecute(ITask<K, R> task, IObserver<R>... observers) {
+    public void planExecute(AbstractTask task, IObserver... observers) {
         if(isBound()) {
             execute(task, observers);
         } else {
@@ -75,15 +74,14 @@ public class Processor<S extends ProcessorService> {
 
     /**
      * Schedule task for single execution.
+     * If task with same key & cache class already exists it will be cancelled and their observers will be removed.
      *
      * @param task task
      * @param delay the time from now to delay execution (millis)
      * @param observers task observers
-     * @param <K> task identifier class
-     * @param <R> task result class
      * @return {@link ScheduledFuture} of task execution
      */
-    public <K, R> ScheduledFuture<R> schedule(ITask<K, R> task, long delay, IObserver<R>... observers) {
+    public ScheduledExecution schedule(AbstractTask task, long delay, IObserver... observers) {
         if(!isBound()) {
             throw new ProcessorException("Service is not bound yet!");
         }
@@ -92,16 +90,15 @@ public class Processor<S extends ProcessorService> {
 
     /**
      * Schedule task for multiple executions.
+     * If task with same key & cache class already exists it will be cancelled and their observers will be removed.
      *
      * @param task task
      * @param initialDelay the time to delay first execution
      * @param delay the delay between the termination of one execution and the commencement of the next.
      * @param observers task observers
-     * @param <K> task identifier class
-     * @param <R> task result class
      * @return {@link ScheduledFuture} of task execution
      */
-    public <K, R> ScheduledFuture<R> schedule(ITask<K, R> task, long initialDelay, long delay, IObserver<R>... observers) {
+    public ScheduledExecution schedule(AbstractTask task, long initialDelay, long delay, IObserver... observers) {
         if(!isBound()) {
             throw new ProcessorException("Service is not bound yet!");
         }
@@ -223,7 +220,7 @@ public class Processor<S extends ProcessorService> {
             if(plannedTasks.size() > 0) {
                 LW.d(TAG, "Execute planned %d tasks.", plannedTasks.size());
 
-                for (Map.Entry<ITask, IObserver[]> entry : plannedTasks.entrySet()) {
+                for (Map.Entry<AbstractTask, IObserver[]> entry : plannedTasks.entrySet()) {
                     Processor.this.service.execute(entry.getKey(), entry.getValue());
                 }
                 plannedTasks.clear();

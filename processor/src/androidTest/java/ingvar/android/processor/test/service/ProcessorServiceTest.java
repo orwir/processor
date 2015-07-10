@@ -4,12 +4,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.test.ServiceTestCase;
 
-import java.util.concurrent.Future;
-
 import ingvar.android.processor.observation.ContextObserver;
 import ingvar.android.processor.observation.IObserverManager;
 import ingvar.android.processor.persistence.Time;
-import ingvar.android.processor.task.ITask;
+import ingvar.android.processor.task.AbstractTask;
+import ingvar.android.processor.task.Execution;
 import ingvar.android.processor.task.SingleTask;
 import ingvar.android.processor.test.mock.MockService;
 import ingvar.android.processor.test.mock.MockSource;
@@ -24,48 +23,48 @@ public class ProcessorServiceTest extends ServiceTestCase<MockService> {
     }
 
     public void testExecute() throws Exception {
-        ITask<Integer, Integer> task = new DummyTask(2048);
+        AbstractTask<Integer, Integer> task = new DummyTask(2048);
 
-        Future<Integer> result = getService().execute(task, new DummyObserver(getContext()));
+        Execution result = getService().execute(task, new DummyObserver(getContext()));
 
         assertEquals(1, getService().getObserverManager().getObservers(task).size());
-        assertEquals(Integer.valueOf(2048), result.get());
+        assertEquals(Integer.valueOf(2048), result.getFuture().get());
     }
 
     public void testExecuteMergeable() throws Exception {
-        ITask<Integer, Integer> task1 = new DummyTask(2048);
-        ITask<Integer, Integer> task2 = new DummyTask(2048);
+        AbstractTask<Integer, Integer> task1 = new DummyTask(2048);
+        AbstractTask<Integer, Integer> task2 = new DummyTask(2048);
 
-        Future<Integer> result1 = getService().execute(task1, new DummyObserver(getContext()));
-        Future<Integer> result2 = getService().execute(task2, new DummyObserver(getContext()));
+        Execution result1 = getService().execute(task1, new DummyObserver(getContext()));
+        Execution result2 = getService().execute(task2, new DummyObserver(getContext()));
 
         assertEquals(1, getService().getObserverManager().getObservers().size());
         assertEquals(2, getService().getObserverManager().getObservers(task1).size());
         assertEquals(2, getService().getObserverManager().getObservers(task2).size());
-        assertTrue(result1.get() == result2.get());
+        assertTrue(result1.getFuture().get() == result2.getFuture().get());
     }
 
     public void testExecuteNonMergeable() throws Exception {
-        ITask<Integer, Integer> task1 = new DummyTask(2048);
-        ITask<Integer, Integer> task2 = new DummyTask(2048);
+        AbstractTask<Integer, Integer> task1 = new DummyTask(2048);
+        AbstractTask<Integer, Integer> task2 = new DummyTask(2048);
         task2.setMergeable(false);
 
-        Future<Integer> result1 = getService().execute(task1, new DummyObserver(getContext()));
-        Future<Integer> result2 = getService().execute(task2, new DummyObserver(getContext()));
+        Execution result1 = getService().execute(task1, new DummyObserver(getContext()));
+        Execution result2 = getService().execute(task2, new DummyObserver(getContext()));
 
         assertEquals(2, getService().getObserverManager().getObservers().size());
-        assertFalse(result1.get() == result2.get());
+        assertFalse(result1.getFuture().get() == result2.getFuture().get());
     }
 
     public void testObtainFromCache() throws Exception {
-        ITask<Integer, Integer> task = new DummyTask(2048, Time.ALWAYS_RETURNED);
+        AbstractTask<Integer, Integer> task = new DummyTask(2048, Time.ALWAYS_RETURNED);
 
-        Future<Integer> result = getService().execute(task);
-        assertEquals(result.get(), obtainFromCache(2048, Integer.class, Time.ALWAYS_RETURNED));
+        Execution result = getService().execute(task);
+        assertEquals(result.getFuture().get(), obtainFromCache(2048, Integer.class, Time.ALWAYS_RETURNED));
     }
 
     public void testRemoveObserversByGroup() {
-        ITask<Integer, Integer> task = new DummyTask(2048);
+        AbstractTask<Integer, Integer> task = new DummyTask(2048);
         getService().execute(task, new DummyObserver(getContext()));
 
         assertEquals(1, getService().getObserverManager().getObservers().size());

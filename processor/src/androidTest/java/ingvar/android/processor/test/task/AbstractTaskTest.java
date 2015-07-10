@@ -14,7 +14,7 @@ public class AbstractTaskTest extends TestCase {
         ITask task = new DummyTask("task1", String.class);
         ITask result = new DummyTask("task1", Integer.class);
         ITask key = new DummyTask("task3", String.class);
-        ITask mergeable = new DummyTask("task1", String.class);
+        AbstractTask mergeable = new DummyTask("task1", String.class);
         mergeable.setMergeable(false);
 
 

@@ -34,8 +34,8 @@ public class ObserverManagerTest extends TestCase {
     }
 
     public void testAddNonMergeable() {
-        ITask task1 = new DummyTask("task1", String.class);
-        ITask task2 = new DummyTask("task1", String.class);
+        AbstractTask task1 = new DummyTask("task1", String.class);
+        AbstractTask task2 = new DummyTask("task1", String.class);
         task2.setMergeable(false);
 
         IObserver observer1 = new DummyObserver();

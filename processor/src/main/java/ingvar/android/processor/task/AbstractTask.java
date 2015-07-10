@@ -17,25 +17,27 @@ public abstract class AbstractTask<K, R> implements ITask<K, R> {
 
     private K key;
     private Class cacheClass;
-    private boolean cancelled;
-    private TaskStatus status;
-    private boolean mergeable;
     private String uuid; //used if task is not mergeable
+    private Execution execution;
+    private boolean cancelFlag;
 
     public AbstractTask() {
-        this(null, Void.class);
+        this(null, Void.class, true);
+    }
+
+    public AbstractTask(K key, Class cacheClass) {
+        this(key, cacheClass, true);
     }
 
     /**
      * @param key task identifier
      * @param cacheClass class used for getting appropriate cache-repository. If null will be used {@link Void}.
      */
-    public AbstractTask(K key, Class cacheClass) {
+    public AbstractTask(K key, Class cacheClass, boolean mergeable) {
         this.key = key;
         this.cacheClass = cacheClass == null ? Void.class : cacheClass;
-        this.cancelled = false;
-        this.status = TaskStatus.PENDING;
-        setMergeable(key != null);
+        setMergeable(key != null && mergeable);
+        this.cancelFlag = false;
     }
 
     @Override
@@ -50,39 +52,48 @@ public abstract class AbstractTask<K, R> implements ITask<K, R> {
 
     @Override
     public void cancel() {
-        cancelled = true;
+        cancelFlag = true;
+        if(execution != null) {
+            execution.cancel();
+        }
     }
 
     @Override
     public boolean isCancelled() {
+        boolean cancelled = cancelFlag;
+        if(execution != null) {
+            cancelled = execution.isCancelled();
+        }
         return cancelled;
     }
 
     @Override
-    public void setStatus(TaskStatus status) {
-        this.status = status;
-    }
-
-    @Override
     public TaskStatus getStatus() {
+        TaskStatus status = TaskStatus.PENDING;
+        if(execution != null) {
+            status = execution.getStatus();
+        }
         return status;
     }
 
     @Override
+    public boolean isMergeable() {
+        return uuid.isEmpty();
+    }
+
+    @SuppressWarnings("unchecked")
+    public <E extends Execution> E getExecution() {
+        return (E) execution;
+    }
+
     public void setMergeable(boolean mergeable) {
         if(mergeable && key == null) {
             throw new ProcessorException("You can't set mergeable as true if you haven't key");
         }
-        if(!TaskStatus.PENDING.equals(status)) {
+        if(!TaskStatus.PENDING.equals(getStatus())) {
             throw new ProcessorException("Mergeable flag can be changed only in the pending task!");
         }
-        this.mergeable = mergeable;
         uuid = mergeable ? "" : UUID.randomUUID().toString();
-    }
-
-    @Override
-    public boolean isMergeable() {
-        return mergeable;
     }
 
     @Override
@@ -90,7 +101,7 @@ public abstract class AbstractTask<K, R> implements ITask<K, R> {
         int hashCode = 31;
         hashCode += 31 * CommonUtils.objectHashCode(getTaskKey());
         hashCode += 31 * CommonUtils.objectHashCode(getCacheClass());
-        hashCode += 31 * uuid.hashCode();
+        hashCode += 31 * CommonUtils.objectHashCode(uuid);
         return hashCode;
     }
 
@@ -113,6 +124,20 @@ public abstract class AbstractTask<K, R> implements ITask<K, R> {
     @Override
     public String toString() {
         return String.format("[class: %s, key: %s, uuid: %s]", getCacheClass().getSimpleName(), getTaskKey(), uuid);
+    }
+
+    void setStatus(TaskStatus status) {
+        if(execution == null) {
+            throw new IllegalStateException("Execution is null!");
+        }
+        execution.setStatus(status);
+    }
+
+    void setExecution(Execution execution) {
+        this.execution = execution;
+        if(cancelFlag) {
+            execution.cancel();
+        }
     }
 
 }

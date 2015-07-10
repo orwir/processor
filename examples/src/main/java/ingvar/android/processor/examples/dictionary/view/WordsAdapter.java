@@ -24,7 +24,7 @@ import ingvar.android.processor.examples.dictionary.task.DeleteWordTask;
 import ingvar.android.processor.examples.dictionary.task.RequestMeaningsTask;
 import ingvar.android.processor.observation.ContextObserver;
 import ingvar.android.processor.service.Processor;
-import ingvar.android.processor.task.ITask;
+import ingvar.android.processor.task.AbstractTask;
 
 /**
  * Created by Igor Zubenko on 2015.04.14.
@@ -109,7 +109,7 @@ public class WordsAdapter extends RecyclerView.Adapter<WordsAdapter.Holder> {
         private TextView meanings;
         private EditText createMeaning;
         private ImageButton remove;
-        private ITask meaningsTask;
+        private AbstractTask meaningsTask;
 
         public Holder(View itemView) {
             super(itemView);

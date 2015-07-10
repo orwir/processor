@@ -7,7 +7,6 @@ import android.test.ServiceTestCase;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import ingvar.android.processor.exception.ProcessorException;
@@ -17,6 +16,7 @@ import ingvar.android.processor.memory.test.task.MemoryTask;
 import ingvar.android.processor.observation.IObserverManager;
 import ingvar.android.processor.persistence.Time;
 import ingvar.android.processor.source.ContextSource;
+import ingvar.android.processor.task.Execution;
 import ingvar.android.processor.task.SingleTask;
 
 /**
@@ -30,24 +30,24 @@ public class ServiceTest extends ServiceTestCase<MockMemoryService> {
 
     public void testRequest() throws Exception {
         MemoryTask request = new MemoryTask("test", TimeUnit.HOURS.toMillis(1));
-        Future<Object> future = getService().execute(request);
+        Execution actual = getService().execute(request);
 
-        assertEquals("Returned result not match", "test_value", future.get());
+        assertEquals("Returned result not match", "test_value", actual.getFuture().get());
     }
 
     public void testRequestList() throws Exception {
         MemoryListTask request = new MemoryListTask(10, Time.ALWAYS_RETURNED);
 
-        Future<List<String>> future = getService().execute(request);
-        assertEquals(10, future.get().size());
+        Execution actual = getService().execute(request);
+        assertEquals(10, actual.<List<String>>getFuture().get().size());
         assertEquals(10, this.<List<String>>obtainFromCache(10, String.class).size());
     }
 
     public void testCache() throws Exception {
         MemoryTask request = new MemoryTask("test2", TimeUnit.HOURS.toMillis(1));
-        Future<Object> future = getService().execute(request);
+        Execution actual = getService().execute(request);
         //wait until it saved
-        future.get();
+        actual.getFuture().get();
 
         Object cached = obtainFromCache("test2", Object.class, Time.ALWAYS_RETURNED);
         assertEquals("Returned result not match", "test2_value", cached);
@@ -55,18 +55,18 @@ public class ServiceTest extends ServiceTestCase<MockMemoryService> {
 
     public void testAlwaysExpired() throws Exception {
         MemoryTask task = new MemoryTask("test_ae", Time.ALWAYS_EXPIRED);
-        Future result = getService().execute(task);
+        Execution actual = getService().execute(task);
 
-        assertEquals("test_ae_value", result.get());
+        assertEquals("test_ae_value", actual.getFuture().get());
         assertNull(obtainFromCache("test_ae", Object.class));
     }
 
     public void testAlwaysReturned() throws Exception {
         final String key = "test_ar";
         MemoryTask task = new MemoryTask(key, Time.ALWAYS_RETURNED);
-        Future result = getService().execute(task);
+        Execution actual = getService().execute(task);
 
-        assertEquals("test_ar_value", result.get());
+        assertEquals("test_ar_value", actual.getFuture().get());
         assertEquals("test_ar_value", obtainFromCache(key, Object.class));
         assertNull(obtainFromCache(key, Object.class, Time.ALWAYS_EXPIRED));
     }
@@ -74,9 +74,9 @@ public class ServiceTest extends ServiceTestCase<MockMemoryService> {
     public void testExpired() throws Exception {
         final String key = "test_e";
         MemoryTask task = new MemoryTask(key, Time.ALWAYS_RETURNED);
-        Future result = getService().execute(task);
+        Execution actual = getService().execute(task);
 
-        assertEquals("test_e_value", result.get());
+        assertEquals("test_e_value", actual.getFuture().get());
         assertEquals("test_e_value", obtainFromCache(key, Object.class));
         Thread.sleep(150);
         assertNull(obtainFromCache(key, Object.class, 100));
@@ -85,9 +85,9 @@ public class ServiceTest extends ServiceTestCase<MockMemoryService> {
     public void testBitmap() throws Exception {
         final String key = "hexapod.png";
         Bitmap expected = BitmapFactory.decodeStream(getContext().getAssets().open(key));
-        Future<Bitmap> future = getService().execute(new BitmapTask(key));
+        Execution actual = getService().execute(new BitmapTask(key));
 
-        assertTrue(expected.sameAs(future.get()));
+        assertTrue(expected.sameAs(actual.<Bitmap>getFuture().get()));
         assertTrue(expected.sameAs(this.<Bitmap>obtainFromCache(key, Bitmap.class)));
     }
 

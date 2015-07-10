@@ -8,10 +8,8 @@ import android.os.IBinder;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -22,10 +20,12 @@ import ingvar.android.processor.persistence.CacheManager;
 import ingvar.android.processor.persistence.ICacheManager;
 import ingvar.android.processor.source.ISourceManager;
 import ingvar.android.processor.source.SourceManager;
-import ingvar.android.processor.task.ITask;
+import ingvar.android.processor.task.AbstractTask;
+import ingvar.android.processor.task.DefaultWorker;
+import ingvar.android.processor.task.Execution;
+import ingvar.android.processor.task.IWorker;
+import ingvar.android.processor.task.ScheduledExecution;
 import ingvar.android.processor.util.LW;
-import ingvar.android.processor.worker.DefaultWorker;
-import ingvar.android.processor.worker.IWorker;
 
 /**
  * Service for async task execution.
@@ -97,75 +97,75 @@ public abstract class ProcessorService extends Service {
      *
      * @param task task
      * @param observers task observers
-     * @param <K> task identifier class
-     * @param <R> task result class
-     * @return {@link Future} of task execution
+     * @return {@link Execution}
      */
-    public <K, R> Future<R> execute(ITask<K, R> task, IObserver<R>... observers) {
+    public Execution execute(AbstractTask task, IObserver... observers) {
         for(IObserver observer : observers) {
             observerManager.add(task, observer);
         }
 
-        Future<R> future = worker.getExecuted(task);
-        if(future == null || !task.isMergeable()) {
-            future = worker.execute(task);
+        Execution execution = worker.getExecuted(task);
+        if(execution == null) {
+            execution = worker.execute(task);
             LW.v(TAG, "Execute task %s", task);
         } else {
             LW.d(TAG, "Merged task %s", task);
         }
 
-        return future;
+        return execution;
     }
 
     /**
      * Schedule task for single execution.
+     * If task with same key & cache class already exists it will be cancelled and their observers will be removed.
      *
      * @param task task
      * @param delay the time from now to delay execution (millis)
      * @param observers task observers
-     * @param <K> task identifier class
-     * @param <R> task result class
-     * @return {@link ScheduledFuture} of task execution
+     * @return {@link ScheduledExecution}
      */
-    public <K, R> ScheduledFuture<R> schedule(ITask<K, R> task, long delay, IObserver<R>... observers) {
+    public ScheduledExecution schedule(AbstractTask task, long delay, IObserver... observers) {
+        ScheduledExecution execution = worker.getScheduled(task);
+        if(execution != null) {
+            execution.cancel();
+            observerManager.remove(task);
+        }
+
         for(IObserver observer : observers) {
             observerManager.add(task, observer);
         }
 
-        ScheduledFuture future = worker.getScheduled(task);
-        if(future == null || !task.isMergeable()) {
-            future = worker.schedule(task, delay);
-            LW.v(TAG, "Schedule task %s", task);
-        } else {
-            LW.d(TAG, "Merged task %s", task);
-        }
-        return future;
+        execution = worker.schedule(task, delay);
+        LW.v(TAG, "Schedule task %s", task);
+
+        return execution;
     }
 
     /**
      * Schedule task for multiple executions.
+     * If task with same key & cache class already exists it will be cancelled and their observers will be removed.
      *
      * @param task task
      * @param initialDelay the time to delay first execution
      * @param delay the delay between the termination of one execution and the commencement of the next.
      * @param observers task observers
-     * @param <K> task identifier class
-     * @param <R> task result class
-     * @return {@link ScheduledFuture} of task execution
+     * @return {@link ScheduledExecution}
      */
-    public <K, R> ScheduledFuture<R> schedule(ITask<K, R> task, long initialDelay, long delay, IObserver<R>... observers) {
+    public ScheduledExecution schedule(AbstractTask task, long initialDelay, long delay, IObserver... observers) {
+        ScheduledExecution execution = worker.getScheduled(task);
+        if(execution != null) {
+            execution.cancel();
+            observerManager.remove(task);
+        }
+
         for(IObserver observer : observers) {
             observerManager.add(task, observer);
         }
 
-        ScheduledFuture future = worker.getScheduled(task);
-        if(future == null || !task.isMergeable()) {
-            future = worker.schedule(task, initialDelay, delay);
-            LW.v(TAG, "Schedule task %s", task);
-        } else {
-            LW.d(TAG, "Merged task %s", task);
-        }
-        return future;
+        execution = worker.schedule(task, initialDelay, delay);
+        LW.v(TAG, "Schedule task %s", task);
+
+        return execution;
     }
 
     /**

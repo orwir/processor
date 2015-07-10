@@ -1,11 +1,11 @@
 package ingvar.android.processor.test.task;
 
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import ingvar.android.processor.exception.TaskCancelledException;
 import ingvar.android.processor.observation.IObserverManager;
 import ingvar.android.processor.task.AggregatedTask;
+import ingvar.android.processor.task.Execution;
 import ingvar.android.processor.task.ITask;
 import ingvar.android.processor.task.SingleTask;
 import ingvar.android.processor.test.WorkerTest;
@@ -23,9 +23,9 @@ public class AggregatedTaskTest extends WorkerTest {
             sum.addTask(new CalculationTask(value));
         }
 
-        Future<Integer> result = getWorker().execute(sum);
+        Execution result = getWorker().execute(sum);
 
-        assertEquals("Result not match", Integer.valueOf(10), result.get());
+        assertEquals("Result not match", Integer.valueOf(10), result.getFuture().get());
     }
 
     public void testCancel() throws Exception {
@@ -35,10 +35,10 @@ public class AggregatedTaskTest extends WorkerTest {
             sum.addTask(new CalculationTask(value));
         }
 
-        Future<TestType> result = getWorker().execute(sum);
+        Execution result = getWorker().execute(sum);
         sum.cancel();
         try {
-            result.get();
+            result.getFuture().get();
             assertFalse("Task was not cancelled!", true);
         } catch (ExecutionException e) {
             if(!(e.getCause() instanceof TaskCancelledException)) {
@@ -54,9 +54,9 @@ public class AggregatedTaskTest extends WorkerTest {
             sum.addTask(new CalculationTask(value));
         }
 
-        Future<TestType> result = getWorker().execute(sum);
+        Execution result = getWorker().execute(sum);
 
-        result.get();
+        result.getFuture().get();
         assertTrue(sum.hasTasksExceptions());
         assertEquals("Exceptions count not match", sum.getTasks().size(), sum.getTasksExceptions().size());
     }

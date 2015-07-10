@@ -1,4 +1,4 @@
-package ingvar.android.processor.worker;
+package ingvar.android.processor.task;
 
 import java.util.Map;
 import java.util.Set;
@@ -21,10 +21,6 @@ import ingvar.android.processor.persistence.ICacheManager;
 import ingvar.android.processor.persistence.Time;
 import ingvar.android.processor.source.ISource;
 import ingvar.android.processor.source.ISourceManager;
-import ingvar.android.processor.task.AggregatedTask;
-import ingvar.android.processor.task.ITask;
-import ingvar.android.processor.task.SingleTask;
-import ingvar.android.processor.task.TaskStatus;
 import ingvar.android.processor.util.LW;
 
 /**
@@ -90,8 +86,8 @@ public class DefaultWorker implements IWorker {
     private ICacheManager cacheManager;
     private ISourceManager sourceManager;
     private IObserverManager observerManager;
-    protected final Map<ITask, Future> executingTasks;
-    protected final Map<ITask, ScheduledFuture> scheduledTasks;
+    protected final Map<ITask, Execution> executingTasks;
+    protected final Map<ITask, ScheduledExecution> scheduledTasks;
 
     public DefaultWorker() {
         this.executingTasks = new ConcurrentHashMap<>();
@@ -100,66 +96,54 @@ public class DefaultWorker implements IWorker {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <R> Future<R> execute(ITask task) {
-        Future<R> future = executorService.submit(createCallableForExecution(task));
-        executingTasks.put(task, future);
-        return future;
+    public Execution execute(AbstractTask task) {
+        Execution execution = new Execution();
+        task.setExecution(execution);
+        Future future = executorService.submit(createCallableForExecution(task));
+        execution.setFuture(future);
+        executingTasks.put(task, execution);
+        return execution;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <R> Future<R> getExecuted(ITask task) {
-        return executingTasks.get(task);
-    }
-
-    @Override
-    public ScheduledFuture schedule(ITask task, long delay) {
+    public ScheduledExecution schedule(AbstractTask task, long delay) {
+        ScheduledExecution execution = new ScheduledExecution();
+        execution.setDelay(delay);
+        execution.setRepeatable(false);
         ScheduledFuture future = scheduledService.schedule(createCallableForExecution(task), delay, TimeUnit.MILLISECONDS);
-        scheduledTasks.put(task, future);
-        return future;
+        execution.setFuture(future);
+        scheduledTasks.put(task, execution);
+        return execution;
     }
 
     @Override
-    public ScheduledFuture schedule(final ITask task, long initialDelay, long delay) {
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-                LW.d(TAG, "Process task %s", task);
-                process(task);
-            }
-        };
+    public ScheduledExecution schedule(final AbstractTask task, long initialDelay, long delay) {
+        ScheduledExecution execution = new ScheduledExecution();
+        execution.setInitialDelay(initialDelay);
+        execution.setDelay(delay);
+        execution.setRepeatable(true);
+        Runnable runnable = createRunnableForExecution(task);
         ScheduledFuture future = scheduledService.scheduleWithFixedDelay(runnable, initialDelay, delay, TimeUnit.MILLISECONDS);
-        scheduledTasks.put(task, future);
-        return future;
+        execution.setFuture(future);
+        scheduledTasks.put(task, execution);
+        return execution;
     }
 
     @Override
-    public ScheduledFuture getScheduled(ITask task) {
-        return scheduledTasks.get(task);
+    public Execution getExecuted(AbstractTask task) {
+        Execution execution = executingTasks.get(task);
+        task.setExecution(execution);
+        return execution;
     }
 
-    public ExecutorService getExecutorService() {
-        return executorService;
+    @Override
+    public ScheduledExecution getScheduled(AbstractTask task) {
+        ScheduledExecution execution = scheduledTasks.get(task);
+        task.setExecution(execution);
+        return execution;
     }
 
-    public ScheduledExecutorService getScheduledService() {
-        return scheduledService;
-    }
-
-    public ICacheManager getCacheManager() {
-        return cacheManager;
-    }
-
-    public ISourceManager getSourceManager() {
-        return sourceManager;
-    }
-
-    public IObserverManager getObserverManager() {
-        return observerManager;
-    }
-
-    protected <R> R process(ITask task) {
+    protected <R> R process(AbstractTask task) {
         task.setStatus(TaskStatus.STARTED);
         notifyProgress(task, IObserver.MIN_PROGRESS);
 
@@ -205,8 +189,8 @@ public class DefaultWorker implements IWorker {
         final ExecutorService innerExecutor = Executors.newFixedThreadPool(aggregatedTask.getThreadsCount());
 
         final AtomicInteger completed = new AtomicInteger(0);
-        final Set<ITask> tasks = aggregatedTask.getTasks();
-        for(final ITask innerTask : tasks) {
+        final Set<AbstractTask> tasks = aggregatedTask.getTasks();
+        for(final AbstractTask innerTask : tasks) {
             checkCancellation(aggregatedTask);
 
             innerExecutor.submit(new Callable() {
@@ -315,7 +299,7 @@ public class DefaultWorker implements IWorker {
         return result;
     }
 
-    protected <R> R processTask(ITask task) {
+    protected <R> R processTask(AbstractTask task) {
         R result;
         task.setStatus(TaskStatus.LOADING_FROM_CACHE);
 
@@ -332,19 +316,19 @@ public class DefaultWorker implements IWorker {
         LW.v(TAG, "Notify progress %.2f of task %s", progress, task);
     }
 
-    protected <R> void notifyCompleted(ITask task, R result) {
+    protected <R> void notifyCompleted(AbstractTask task, R result) {
         task.setStatus(TaskStatus.COMPLETED);
         observerManager.notifyCompleted(task, result);
         LW.v(TAG, "Notify completed task %s", task);
     }
 
-    protected void notifyCancelled(ITask task) {
+    protected void notifyCancelled(AbstractTask task) {
         task.setStatus(TaskStatus.CANCELLED);
         observerManager.notifyCancelled(task);
         LW.v(TAG, "Notify cancelled task %s", task);
     }
 
-    protected void notifyFailed(ITask task, Exception e) {
+    protected void notifyFailed(AbstractTask task, Exception e) {
         task.setStatus(TaskStatus.FAILED);
         observerManager.notifyFailed(task, e);
         LW.v(TAG, "Notify failed '%s' task %s", e.getMessage(), task);
@@ -352,10 +336,6 @@ public class DefaultWorker implements IWorker {
 
     protected void checkCancellation(ITask task) {
         if(task.isCancelled()) {
-            ScheduledFuture scheduledFuture = scheduledTasks.remove(task);
-            if(scheduledFuture != null) {
-                scheduledFuture.cancel(true);
-            }
             throw new TaskCancelledException(String.format("Task '%s' was cancelled!", task.getTaskKey().toString()));
         }
     }
@@ -366,7 +346,7 @@ public class DefaultWorker implements IWorker {
             && task.getTaskKey() != null;
     }
 
-    protected <R> Callable createCallableForExecution(final ITask task) {
+    protected <R> Callable createCallableForExecution(final AbstractTask task) {
         return new Callable() {
             @Override
             public R call() throws Exception {
@@ -375,6 +355,37 @@ public class DefaultWorker implements IWorker {
                 return process(task);
             }
         };
+    }
+
+    protected <R> Runnable createRunnableForExecution(final AbstractTask task) {
+        return new Runnable() {
+            @Override
+            public void run() {
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                LW.d(TAG, "Process task %s", task);
+                process(task);
+            }
+        };
+    }
+
+    protected ExecutorService getExecutorService() {
+        return executorService;
+    }
+
+    protected ScheduledExecutorService getScheduledService() {
+        return scheduledService;
+    }
+
+    protected ICacheManager getCacheManager() {
+        return cacheManager;
+    }
+
+    protected ISourceManager getSourceManager() {
+        return sourceManager;
+    }
+
+    protected IObserverManager getObserverManager() {
+        return observerManager;
     }
 
 }

@@ -12,7 +12,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Future;
 
 import ingvar.android.processor.exception.ProcessorException;
 import ingvar.android.processor.filesystem.source.FilesystemSource;
@@ -20,6 +19,7 @@ import ingvar.android.processor.filesystem.test.pojo.TestObject;
 import ingvar.android.processor.filesystem.test.service.MockFilesystemService;
 import ingvar.android.processor.filesystem.util.FileUtils;
 import ingvar.android.processor.observation.IObserverManager;
+import ingvar.android.processor.task.Execution;
 import ingvar.android.processor.task.SingleTask;
 
 /**
@@ -36,16 +36,16 @@ public class ServiceTest extends ServiceTestCase<MockFilesystemService> {
         TestObject object = new TestObject(2, "LoadTest", 10.42);
         getService().getFilesystemSource().save(file, object);
 
-        Future<TestObject> actual = getService().execute(new RequestFileTask(file));
-        assertEquals(object, actual.get());
+        Execution actual = getService().execute(new RequestFileTask(file));
+        assertEquals(object, actual.getFuture().get());
     }
 
     public void testLoadBitmap() throws Exception {
         String image = "hexapod.png";
         Bitmap expected = BitmapFactory.decodeStream(getContext().getAssets().open(image));
-        Future<Bitmap> actual = getService().execute(new RequestAssetBitmapTask(image));
+        Execution actual = getService().execute(new RequestAssetBitmapTask(image));
 
-        assertTrue(expected.sameAs(actual.get()));
+        assertTrue(expected.sameAs(actual.<Bitmap>getFuture().get()));
     }
 
     @Override
