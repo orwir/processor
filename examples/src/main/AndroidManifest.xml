@@ -23,6 +23,9 @@
         <activity android:name=".dictionary.view.DictionaryActivity"
             android:label="@string/label_dictionary"/>
 
+        <activity android:name=".notifier.view.NotifierActivity"
+                  android:label="@string/label_notifier"/>
+
         <service android:name=".service.ExampleService"/>
 
         <provider

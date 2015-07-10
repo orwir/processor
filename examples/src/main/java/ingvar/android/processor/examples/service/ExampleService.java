@@ -17,6 +17,7 @@ import ingvar.android.processor.memory.persistence.MemoryRepository;
 import ingvar.android.processor.memory.source.MemorySource;
 import ingvar.android.processor.persistence.ICacheManager;
 import ingvar.android.processor.service.ProcessorService;
+import ingvar.android.processor.source.ContextSource;
 import ingvar.android.processor.source.ISourceManager;
 import ingvar.android.processor.sqlite.persistence.SqliteRepository;
 import ingvar.android.processor.sqlite.source.SqliteSource;
@@ -36,6 +37,7 @@ public class ExampleService extends ProcessorService {
         sqliteSource.addConverter(Word.class, new WordConverter());
         sqliteSource.addConverter(Meaning.class, new MeaningConverter());
         sourceManager.addSource(SqliteSource.class, sqliteSource);
+        sourceManager.addSource(ContextSource.class, new ContextSource(this));
     }
 
     @Override
