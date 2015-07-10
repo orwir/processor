@@ -3,6 +3,7 @@ package ingvar.android.processor.task;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -14,7 +15,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import ingvar.android.processor.exception.ProcessorException;
 import ingvar.android.processor.exception.SourceNotAvailable;
-import ingvar.android.processor.exception.TaskCancelledException;
 import ingvar.android.processor.observation.IObserver;
 import ingvar.android.processor.observation.IObserverManager;
 import ingvar.android.processor.persistence.ICacheManager;
@@ -167,7 +167,7 @@ public class DefaultWorker implements IWorker {
             LW.v(TAG, "Completed task %s", task);
             return result;
 
-        } catch (TaskCancelledException e) {
+        } catch (CancellationException e) {
             LW.d(TAG, "Cancelled task %s", task);
             notifyCancelled(task);
             throw e;
@@ -193,7 +193,9 @@ public class DefaultWorker implements IWorker {
         for(final AbstractTask innerTask : tasks) {
             checkCancellation(aggregatedTask);
 
-            innerExecutor.submit(new Callable() {
+            Execution execution = new Execution();
+            innerTask.setExecution(execution);
+            Future future = innerExecutor.submit(new Callable() {
                 @Override
                 public Object call() throws Exception {
                     checkCancellation(aggregatedTask);
@@ -211,7 +213,7 @@ public class DefaultWorker implements IWorker {
                             notifyProgress(aggregatedTask, progress);
                             aggregatedTask.onTaskComplete(innerTask, innerResult);
                         }
-                    } catch (TaskCancelledException e) {
+                    } catch (CancellationException e) {
                         //nothing to do
                     } catch (Exception e) {
                         synchronized (aggregatedTask) {
@@ -223,6 +225,8 @@ public class DefaultWorker implements IWorker {
                     return innerResult;
                 }
             });
+            execution.setFuture(future);
+            executingTasks.put(innerTask, execution);
         }
 
         checkCancellation(aggregatedTask);
@@ -336,7 +340,7 @@ public class DefaultWorker implements IWorker {
 
     protected void checkCancellation(ITask task) {
         if(task.isCancelled()) {
-            throw new TaskCancelledException(String.format("Task '%s' was cancelled!", task.getTaskKey().toString()));
+            throw new CancellationException(String.format("Task '%s' was cancelled!", task.getTaskKey().toString()));
         }
     }
 

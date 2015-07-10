@@ -1,9 +1,9 @@
 package ingvar.android.processor.test.task;
 
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
 import ingvar.android.processor.exception.ProcessorException;
-import ingvar.android.processor.exception.TaskCancelledException;
 import ingvar.android.processor.observation.IObserverManager;
 import ingvar.android.processor.task.AbstractTask;
 import ingvar.android.processor.task.Execution;
@@ -30,11 +30,7 @@ public class SingleTaskTest extends WorkerTest {
         try {
             result.getFuture().get();
             assertFalse("Task was not cancelled!", true);
-        } catch (ExecutionException e) {
-            if(!(e.getCause() instanceof TaskCancelledException)) {
-                throw e;
-            }
-        }
+        } catch (CancellationException ignored) {}
     }
 
     public void testException() throws Exception {

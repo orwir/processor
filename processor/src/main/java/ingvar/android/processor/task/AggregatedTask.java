@@ -27,10 +27,10 @@ public abstract class AggregatedTask<K, G, I> extends AbstractTask<K, G> {
      */
     protected static final int DEFAULT_AGGREGATE_KEEP_ALIVE_TIME_SECONDS = 5 * 60;
 
-    private Set<ITask> tasks;
+    private Set<AbstractTask> tasks;
     private int threadsCount;
     private int keepAliveTimeout;
-    private Map<ITask, Exception> innerExceptions;
+    private Map<AbstractTask, Exception> innerExceptions;
 
     public AggregatedTask() {
         this(null);
@@ -68,7 +68,7 @@ public abstract class AggregatedTask<K, G, I> extends AbstractTask<K, G> {
      *
      * @param task task
      */
-    public void addTask(ITask task) {
+    public void addTask(AbstractTask task) {
         tasks.add(task);
     }
 
@@ -87,7 +87,7 @@ public abstract class AggregatedTask<K, G, I> extends AbstractTask<K, G> {
      *
      * @return tasks
      */
-    public Set<ITask> getTasks() {
+    public Set<AbstractTask> getTasks() {
         return Collections.unmodifiableSet(tasks);
     }
 
@@ -128,30 +128,24 @@ public abstract class AggregatedTask<K, G, I> extends AbstractTask<K, G> {
     }
 
     /**
-     * Add exception of task task execution
-     *
-     * @param task failed task
-     * @param exception exception
-     */
-    public void addTaskException(ITask task, Exception exception) {
-        innerExceptions.put(task, exception);
-    }
-
-    /**
-     * Get exceptions of inner tasks
-     * @return
-     */
-    public Map<ITask, Exception> getTasksExceptions() {
-        return Collections.unmodifiableMap(innerExceptions);
-    }
-
-    /**
      * Check if inner tasks failed.
      *
      * @return true if at least one task failed, false otherwise
      */
     public boolean hasTasksExceptions() {
         return innerExceptions.size() > 0;
+    }
+
+    /**
+     * Get exceptions of inner tasks
+     * @return
+     */
+    public Map<AbstractTask, Exception> getTasksExceptions() {
+        return Collections.unmodifiableMap(innerExceptions);
+    }
+
+    void addTaskException(AbstractTask task, Exception exception) {
+        innerExceptions.put(task, exception);
     }
 
 }
