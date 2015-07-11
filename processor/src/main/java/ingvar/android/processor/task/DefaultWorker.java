@@ -99,44 +99,34 @@ public class DefaultWorker implements IWorker {
     public Execution execute(AbstractTask task) {
         Execution execution = new Execution();
         task.setExecution(execution);
-        if(!task.isCancelled()) {
-            Future future = executorService.submit(createCallableForExecution(task));
-            execution.setFuture(future);
-            executingTasks.put(task, execution);
-        } else {
-            notifyCancelled(task);
-        }
+        Future future = executorService.submit(createCallableForExecution(task));
+        execution.setFuture(future);
+        executingTasks.put(task, execution);
         return execution;
     }
 
     @Override
     public ScheduledExecution schedule(AbstractTask task, long delay) {
         ScheduledExecution execution = new ScheduledExecution();
+        task.setExecution(execution);
         execution.setDelay(delay);
         execution.setRepeatable(false);
-        if(!task.isCancelled()) {
-            ScheduledFuture future = scheduledService.schedule(createCallableForExecution(task), delay, TimeUnit.MILLISECONDS);
-            execution.setFuture(future);
-            scheduledTasks.put(task, execution);
-        } else {
-            notifyCancelled(task);
-        }
+        ScheduledFuture future = scheduledService.schedule(createCallableForExecution(task), delay, TimeUnit.MILLISECONDS);
+        execution.setFuture(future);
+        scheduledTasks.put(task, execution);
         return execution;
     }
 
     @Override
     public ScheduledExecution schedule(final AbstractTask task, long initialDelay, long delay) {
         ScheduledExecution execution = new ScheduledExecution();
+        task.setExecution(execution);
         execution.setInitialDelay(initialDelay);
         execution.setDelay(delay);
         execution.setRepeatable(true);
-        if(!task.isCancelled()) {
-            ScheduledFuture future = scheduledService.scheduleWithFixedDelay(createRunnableForExecution(task), initialDelay, delay, TimeUnit.MILLISECONDS);
-            execution.setFuture(future);
-            scheduledTasks.put(task, execution);
-        } else {
-            notifyCancelled(task);
-        }
+        ScheduledFuture future = scheduledService.scheduleWithFixedDelay(createRunnableForExecution(task), initialDelay, delay, TimeUnit.MILLISECONDS);
+        execution.setFuture(future);
+        scheduledTasks.put(task, execution);
         return execution;
     }
 
@@ -159,10 +149,10 @@ public class DefaultWorker implements IWorker {
     }
 
     protected <R> R process(AbstractTask task) {
-        task.setStatus(TaskStatus.STARTED);
-        notifyProgress(task, IObserver.MIN_PROGRESS);
-
         try {
+            task.setStatus(TaskStatus.STARTED);
+            notifyProgress(task, IObserver.MIN_PROGRESS);
+
             checkCancellation(task);
 
             R result;
@@ -185,6 +175,7 @@ public class DefaultWorker implements IWorker {
         } catch (CancellationException e) {
             LW.d(TAG, "Cancelled task %s", task);
             notifyCancelled(task);
+            task.getExecution().getFuture().cancel(false);
             throw e;
 
         } catch (RuntimeException e) {
@@ -194,6 +185,9 @@ public class DefaultWorker implements IWorker {
 
         } finally {
             executingTasks.remove(task);
+            if(task.isCancelled()) {
+                scheduledTasks.remove(task);
+            }
         }
     }
 

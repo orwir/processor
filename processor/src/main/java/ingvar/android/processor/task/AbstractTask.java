@@ -81,6 +81,11 @@ public abstract class AbstractTask<K, R> implements ITask<K, R> {
         return uuid.isEmpty();
     }
 
+    @Override
+    public boolean isScheduled() {
+        return getExecution() instanceof ScheduledExecution;
+    }
+
     @SuppressWarnings("unchecked")
     public <E extends Execution> E getExecution() {
         return (E) execution;
@@ -123,7 +128,7 @@ public abstract class AbstractTask<K, R> implements ITask<K, R> {
 
     @Override
     public String toString() {
-        return String.format("[class: %s, key: %s, uuid: %s]", getCacheClass().getSimpleName(), getTaskKey(), uuid);
+        return String.format("{class: %s, key: %s, uuid: %s}", getCacheClass().getSimpleName(), getTaskKey(), uuid);
     }
 
     void setStatus(TaskStatus status) {

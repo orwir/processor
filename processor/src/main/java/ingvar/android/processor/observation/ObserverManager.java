@@ -169,8 +169,9 @@ public class ObserverManager implements IObserverManager {
                                 break;
                         }
                     }
-                    if (!Status.IN_PROGRESS.equals(status)) {
+                    if (!Status.IN_PROGRESS.equals(status) && !wrapper.task.isScheduled()) {
                         remove(wrapper.task);
+                        LW.v(TAG, "Task %s was executed. Observers removed.", wrapper.task);
                     }
                     LW.v(TAG, "Received message {'task': %s, 'task status': '%s', 'status': '%s'}", wrapper.task, taskStatus, status);
                 }

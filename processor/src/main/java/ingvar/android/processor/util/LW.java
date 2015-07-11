@@ -72,6 +72,10 @@ public class LW {
         LEVEL.put(tag, level);
     }
 
+    public static void resetLevel(String tag) {
+        LEVEL.remove(tag);
+    }
+
     public static void resetLevels() {
         LEVEL.clear();
     }

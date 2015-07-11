@@ -38,20 +38,25 @@ public class NotifierActivity extends AbstractActivity {
         }
         delay *= 1000;
 
-        if(mTask == null) {
-            Processor p = getProcessor();
-            if (p.isBound()) {
-                mTask = new DummyTask();
-                p.schedule(mTask, delay, delay, new ScheduledObserver(p.getService()));
-                Toast.makeText(this, getString(R.string.message_task_scheduled, delay / 1000), Toast.LENGTH_LONG).show();
-            }
-        } else {
-            Toast.makeText(this, R.string.message_cancel_previous_task, Toast.LENGTH_LONG).show();
+        if(mTask != null) {
+            Toast.makeText(this, R.string.message_previous_task_will_be_cancelled, Toast.LENGTH_LONG).show();
+        }
+
+        Processor p = getProcessor();
+        if (p.isBound()) {
+            mTask = new DummyTask();
+            p.schedule(mTask, delay, delay, new NotifierObserver());
+            Toast.makeText(this, getString(R.string.message_task_scheduled, delay / 1000), Toast.LENGTH_LONG).show();
         }
     }
 
     public void cancel(View view) {
-        if(mTask != null) {
+        if(mTask == null) { //if activity was re-created
+            DummyTask tmp = new DummyTask();
+            if(getProcessor().getScheduled(tmp) != null) {
+                tmp.cancel();
+            }
+        } else {
             mTask.cancel();
             mTask = null;
         }

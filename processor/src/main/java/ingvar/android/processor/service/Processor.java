@@ -13,6 +13,7 @@ import java.util.concurrent.ScheduledFuture;
 
 import ingvar.android.processor.exception.ProcessorException;
 import ingvar.android.processor.observation.IObserver;
+import ingvar.android.processor.observation.ScheduledObserver;
 import ingvar.android.processor.persistence.Time;
 import ingvar.android.processor.task.AbstractTask;
 import ingvar.android.processor.task.Execution;
@@ -81,7 +82,7 @@ public class Processor<S extends ProcessorService> {
      * @param observers task observers
      * @return {@link ScheduledFuture} of task execution
      */
-    public ScheduledExecution schedule(AbstractTask task, long delay, IObserver... observers) {
+    public ScheduledExecution schedule(AbstractTask task, long delay, ScheduledObserver... observers) {
         if(!isBound()) {
             throw new ProcessorException("Service is not bound yet!");
         }
@@ -98,11 +99,18 @@ public class Processor<S extends ProcessorService> {
      * @param observers task observers
      * @return {@link ScheduledFuture} of task execution
      */
-    public ScheduledExecution schedule(AbstractTask task, long initialDelay, long delay, IObserver... observers) {
+    public ScheduledExecution schedule(AbstractTask task, long initialDelay, long delay, ScheduledObserver... observers) {
         if(!isBound()) {
             throw new ProcessorException("Service is not bound yet!");
         }
         return service.schedule(task, initialDelay, delay, observers);
+    }
+
+    public ScheduledExecution getScheduled(AbstractTask task) {
+        if(!isBound()) {
+            throw new ProcessorException("Service is not bound yet!");
+        }
+        return service.getScheduled(task);
     }
 
     /**

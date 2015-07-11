@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import ingvar.android.processor.observation.IObserver;
 import ingvar.android.processor.observation.IObserverManager;
 import ingvar.android.processor.observation.ObserverManager;
+import ingvar.android.processor.observation.ScheduledObserver;
 import ingvar.android.processor.persistence.CacheManager;
 import ingvar.android.processor.persistence.ICacheManager;
 import ingvar.android.processor.source.ISourceManager;
@@ -124,14 +125,15 @@ public abstract class ProcessorService extends Service {
      * @param observers task observers
      * @return {@link ScheduledExecution}
      */
-    public ScheduledExecution schedule(AbstractTask task, long delay, IObserver... observers) {
+    public ScheduledExecution schedule(AbstractTask task, long delay, ScheduledObserver... observers) {
         ScheduledExecution execution = worker.getScheduled(task);
         if(execution != null) {
             execution.cancel();
             observerManager.remove(task);
         }
 
-        for(IObserver observer : observers) {
+        for(ScheduledObserver observer : observers) {
+            observer.setContext(this);
             observerManager.add(task, observer);
         }
 
@@ -151,14 +153,15 @@ public abstract class ProcessorService extends Service {
      * @param observers task observers
      * @return {@link ScheduledExecution}
      */
-    public ScheduledExecution schedule(AbstractTask task, long initialDelay, long delay, IObserver... observers) {
+    public ScheduledExecution schedule(AbstractTask task, long initialDelay, long delay, ScheduledObserver... observers) {
         ScheduledExecution execution = worker.getScheduled(task);
         if(execution != null) {
             execution.cancel();
             observerManager.remove(task);
         }
 
-        for(IObserver observer : observers) {
+        for(ScheduledObserver observer : observers) {
+            observer.setContext(this);
             observerManager.add(task, observer);
         }
 
@@ -166,6 +169,10 @@ public abstract class ProcessorService extends Service {
         LW.v(TAG, "Schedule task %s", task);
 
         return execution;
+    }
+
+    public ScheduledExecution getScheduled(AbstractTask task) {
+        return worker.getScheduled(task);
     }
 
     /**

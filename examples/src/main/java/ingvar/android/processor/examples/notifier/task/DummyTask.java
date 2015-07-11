@@ -7,15 +7,17 @@ import ingvar.android.processor.task.SingleTask;
 /**
  * Created by Igor Zubenko on 2015.07.09.
  */
-public class DummyTask extends SingleTask<String, Void, ContextSource> {
+public class DummyTask extends SingleTask<String, Integer, ContextSource> {
+
+    static int count = 0;
 
     public DummyTask() {
         super("dummy", ContextSource.class);
     }
 
     @Override
-    public Void process(IObserverManager observerManager, ContextSource source) {
-        return null;
+    public Integer process(IObserverManager observerManager, ContextSource source) {
+        return count++;
     }
 
 }

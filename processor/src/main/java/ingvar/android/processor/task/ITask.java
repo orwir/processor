@@ -49,4 +49,11 @@ public interface ITask<K, R> extends Comparable<ITask<K, R>> {
      */
     boolean isMergeable();
 
+    /**
+     * True if task run as scheduled.
+     *
+     * @return true if scheduled, false otherwise
+     */
+    boolean isScheduled();
+
 }

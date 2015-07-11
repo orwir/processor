@@ -39,8 +39,8 @@
     <string name="message_word_deleted">Word \'%s\' was deleted.</string>
     <string name="message_meaning_empty">You can\'t create empty meaning.</string>
     <string name="message_task_scheduled">Task scheduled. Will be executed after %d sec</string>
-    <string name="message_cancel_previous_task">Cancel prev task before start new</string>
-    <string name="message_hello_i_am_notification">Hello! I am dummy notification.</string>
+    <string name="message_previous_task_will_be_cancelled">Previous task will be cancelled.</string>
+    <string name="message_hello_i_am_notification">Hello! I am dummy notification #%d.</string>
     <string name="message_task_completed">Task was completed</string>
     <string name="message_task_cancelled">Task was cancelled</string>
     <string name="message_task_failed">Task was failed</string>
