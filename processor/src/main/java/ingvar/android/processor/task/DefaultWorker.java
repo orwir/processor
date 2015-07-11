@@ -99,9 +99,13 @@ public class DefaultWorker implements IWorker {
     public Execution execute(AbstractTask task) {
         Execution execution = new Execution();
         task.setExecution(execution);
-        Future future = executorService.submit(createCallableForExecution(task));
-        execution.setFuture(future);
-        executingTasks.put(task, execution);
+        if(!task.isCancelled()) {
+            Future future = executorService.submit(createCallableForExecution(task));
+            execution.setFuture(future);
+            executingTasks.put(task, execution);
+        } else {
+            notifyCancelled(task);
+        }
         return execution;
     }
 
@@ -110,9 +114,13 @@ public class DefaultWorker implements IWorker {
         ScheduledExecution execution = new ScheduledExecution();
         execution.setDelay(delay);
         execution.setRepeatable(false);
-        ScheduledFuture future = scheduledService.schedule(createCallableForExecution(task), delay, TimeUnit.MILLISECONDS);
-        execution.setFuture(future);
-        scheduledTasks.put(task, execution);
+        if(!task.isCancelled()) {
+            ScheduledFuture future = scheduledService.schedule(createCallableForExecution(task), delay, TimeUnit.MILLISECONDS);
+            execution.setFuture(future);
+            scheduledTasks.put(task, execution);
+        } else {
+            notifyCancelled(task);
+        }
         return execution;
     }
 
@@ -122,10 +130,13 @@ public class DefaultWorker implements IWorker {
         execution.setInitialDelay(initialDelay);
         execution.setDelay(delay);
         execution.setRepeatable(true);
-        Runnable runnable = createRunnableForExecution(task);
-        ScheduledFuture future = scheduledService.scheduleWithFixedDelay(runnable, initialDelay, delay, TimeUnit.MILLISECONDS);
-        execution.setFuture(future);
-        scheduledTasks.put(task, execution);
+        if(!task.isCancelled()) {
+            ScheduledFuture future = scheduledService.scheduleWithFixedDelay(createRunnableForExecution(task), initialDelay, delay, TimeUnit.MILLISECONDS);
+            execution.setFuture(future);
+            scheduledTasks.put(task, execution);
+        } else {
+            notifyCancelled(task);
+        }
         return execution;
     }
 

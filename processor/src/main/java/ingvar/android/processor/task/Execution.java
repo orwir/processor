@@ -27,6 +27,7 @@ public class Execution {
     }
 
     public void cancel() {
+        cancelled = true;
         if(future != null) {
             future.cancel(false);
         }
@@ -38,8 +39,8 @@ public class Execution {
 
     void setFuture(Future future) {
         this.future = future;
-        if(cancelled) {
-            cancel();
+        if(cancelled && future != null) {
+            future.cancel(false);
         }
     }
 

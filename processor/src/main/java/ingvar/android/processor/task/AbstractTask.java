@@ -135,7 +135,7 @@ public abstract class AbstractTask<K, R> implements ITask<K, R> {
 
     void setExecution(Execution execution) {
         this.execution = execution;
-        if(cancelFlag) {
+        if(cancelFlag && execution != null) {
             execution.cancel();
         }
     }

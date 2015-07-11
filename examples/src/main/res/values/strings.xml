@@ -29,7 +29,8 @@
     <string name="label_schedule">Schedule</string>
     <string name="label_dummy_notification">Dummy Notification</string>
     <string name="label_completed">Completed</string>
-    <string name="label_cancelled">Cancelled</string>
+    <string name="label_immediate_cancel">Immediate cancel</string>
+    <string name="label_postpone_cancel">Postpone cancel</string>
     <string name="label_failed">Failed</string>
 
     <string name="message_unknown_example">You are trying to open unknown example!</string>

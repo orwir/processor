@@ -30,7 +30,7 @@ public class ObservationActivity extends AbstractActivity {
 
     public void startTask(View view) {
         AbstractTask task = new ObservationTask(view.getId());
-        if(view.getId() == R.id.button_cancelled) {
+        if(view.getId() == R.id.button_immediate_cancel) {
             task.cancel();
         }
 
@@ -73,6 +73,9 @@ public class ObservationActivity extends AbstractActivity {
         public String process(IObserverManager observerManager, ContextSource source) {
             if(getTaskKey().equals(R.id.button_failed)) {
                 throw new ProcessorException();
+            }
+            else if(getTaskKey().equals(R.id.button_postpone_cancel)) {
+                cancel();
             }
             return null;
         }

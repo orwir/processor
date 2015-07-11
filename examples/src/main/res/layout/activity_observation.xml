@@ -12,13 +12,21 @@
         android:text="@string/label_completed"
         android:onClick="startTask"/>
 
-    <Button android:id="@+id/button_cancelled"
+    <Button android:id="@+id/button_immediate_cancel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/vertical_spacing"
         android:minEms="@integer/button_width"
-        android:text="@string/label_cancelled"
+        android:text="@string/label_immediate_cancel"
         android:onClick="startTask"/>
+
+    <Button android:id="@+id/button_postpone_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/vertical_spacing"
+            android:minEms="@integer/button_width"
+            android:text="@string/label_postpone_cancel"
+            android:onClick="startTask"/>
 
     <Button android:id="@+id/button_failed"
         android:layout_width="wrap_content"
