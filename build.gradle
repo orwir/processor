@@ -6,8 +6,8 @@ ext {
     vMinSdkVersion = 14
     vTargetSdkVersion = 21
 
-    vGlobalVersionCode = 22
-    vGlobalVersionName = '1.6.1'
+    vGlobalVersionCode = 23
+    vGlobalVersionName = '1.7.0'
 
     vVersionCode = vGlobalVersionCode
     vVersionName = vGlobalVersionName
