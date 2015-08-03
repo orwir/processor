@@ -7,7 +7,7 @@ ext {
     vTargetSdkVersion = 21
 
     vGlobalVersionCode = 23
-    vGlobalVersionName = '1.7.0'
+    vGlobalVersionName = '1.8.0'
 
     vVersionCode = vGlobalVersionCode
     vVersionName = vGlobalVersionName
@@ -43,7 +43,7 @@ allprojects {
     }
 }
 
-final publishedProjects = ['root', 'processor', 'processor-filesystem', 'processor-memory', 'processor-network', 'processor-sqlite']
+final publishedProjects = ['root', 'processor', 'processor-filesystem', 'processor-memory', 'processor-network', 'processor-sqlite', 'processor-std']
 configure(allprojects.findAll {publishedProjects.contains(it.name)}) {
 
     evaluationDependsOn(':' + project.name)

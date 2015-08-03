@@ -12,7 +12,7 @@ import ingvar.android.processor.persistence.IRepository;
  * <br/><br/>Created by Igor Zubenko on 2015.03.20.
  */
 public class BitmapMemoryRepository<K> extends MemoryRepository<K, Bitmap> {
-
+    // TODO: 2015-08-03 use bitmap pool
     private static class BitmapLruCache<K> extends LruCache<K, Entry<Bitmap>> {
 
         public BitmapLruCache(int maxSize) {

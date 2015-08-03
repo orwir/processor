@@ -1,4 +1,4 @@
-package ingvar.android.processor.ultimate.service;
+package ingvar.android.processor.std.service;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -18,9 +18,9 @@ import ingvar.android.processor.source.ISourceManager;
 import ingvar.android.processor.util.LW;
 
 /**
- * Created by Igor Zubenko on 2015.04.28.
+ * Created by Igor Zubenko on 2015.05.02.
  */
-public class BaseProcessorService extends ProcessorService {
+public class AbstractProcessorService extends ProcessorService {
 
     protected static final int DEFAULT_BITMAP_MEMORY_CACHE_SIZE     = 40 * 1024 * 1024;
     protected static final int DEFAULT_BITMAP_FILESYSTEM_CACHE_SIZE = 20 * 1024 * 1024;
@@ -33,10 +33,23 @@ public class BaseProcessorService extends ProcessorService {
 
     private boolean isExternal;
     private List<File> cacheDirs;
+    private boolean enableBitmapCache;
+    private boolean enableCommonCache;
 
-    public BaseProcessorService() {
+    /**
+     *
+     * @param enableBitmapCache create(or not) memory-wrapped file cache for bitmaps
+     * @param enableCommonCache create(or not) memory-wrapped file cache for serializable objects
+     */
+    public AbstractProcessorService(boolean enableBitmapCache, boolean enableCommonCache) {
         cacheDirs = new ArrayList<>(5);
         isExternal = true;
+        this.enableBitmapCache = enableBitmapCache;
+        this.enableCommonCache = enableCommonCache;
+    }
+
+    public AbstractProcessorService() {
+        this(true, true);
     }
 
     @Override
@@ -49,22 +62,26 @@ public class BaseProcessorService extends ProcessorService {
     @Override
     protected void provideRepositories(ICacheManager cacheManager) {
         //BITMAP CACHE
-        File dirBitmap = createCacheDir("lru-bitmap");
-        int dirBitmapSize = getBitmapFilesystemCacheSize();
-        int memoryBitmapSize = getMaxMemoryCacheSize(getBitmapMemoryCacheSize());
+        if(enableBitmapCache) {
+            File dirBitmap = createCacheDir("lru-bitmap");
+            int dirBitmapSize = getBitmapFilesystemCacheSize();
+            int memoryBitmapSize = getMaxMemoryCacheSize(getBitmapMemoryCacheSize());
 
-        BitmapFilesystemRepository bitmapFsRepo = new BitmapFilesystemRepository(dirBitmap, dirBitmapSize);
-        BitmapMemoryRepository bitmapMemoryRepo = new BitmapMemoryRepository(memoryBitmapSize, bitmapFsRepo);
-        cacheManager.addRepository(bitmapMemoryRepo);
+            BitmapFilesystemRepository bitmapFsRepo = new BitmapFilesystemRepository(dirBitmap, dirBitmapSize);
+            BitmapMemoryRepository bitmapMemoryRepo = new BitmapMemoryRepository(memoryBitmapSize, bitmapFsRepo);
+            cacheManager.addRepository(bitmapMemoryRepo);
+        }
 
         //COMMON CACHE
-        File dirCommon = createCacheDir("lru-common");
-        int dirCommonSize = getFilesystemCacheSize();
-        int memoryCommonSize = getMaxMemoryCacheSize(getMemoryCacheSize());
+        if(enableCommonCache) {
+            File dirCommon = createCacheDir("lru-common");
+            int dirCommonSize = getFilesystemCacheSize();
+            int memoryCommonSize = getMaxMemoryCacheSize(getMemoryCacheSize());
 
-        FilesystemRepository fsRepo = new FilesystemRepository(dirCommon, dirCommonSize);
-        MemoryRepository memoryRepo = new MemoryRepository(memoryCommonSize, fsRepo);
-        cacheManager.addRepository(memoryRepo);
+            FilesystemRepository fsRepo = new FilesystemRepository(dirCommon, dirCommonSize);
+            MemoryRepository memoryRepo = new MemoryRepository(memoryCommonSize, fsRepo);
+            cacheManager.addRepository(memoryRepo);
+        }
     }
 
     /**

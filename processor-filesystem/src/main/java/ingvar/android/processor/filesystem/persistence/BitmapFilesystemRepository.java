@@ -93,7 +93,7 @@ public class BitmapFilesystemRepository<K> extends FilesystemRepository<K, Bitma
     @Override
     protected Bitmap readFile(String filename) {
         Bitmap result = null;
-
+        // TODO: 2015-08-03 use bitmap pool
         File file = storage.getFile(filename);
         InputStream is = null;
         try {

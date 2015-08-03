@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import ingvar.android.literepo.conversion.Converter;
 import ingvar.android.literepo.conversion.ConverterFactory;
 import ingvar.android.processor.source.ContextSource;
+import ingvar.android.processor.sqlite.persistence.SqliteRepository;
 
 /**
  * Base implementation of sqlite source.
@@ -17,11 +18,26 @@ import ingvar.android.processor.source.ContextSource;
  */
 public class SqliteSource extends ContextSource {
 
+    private Map<Class, SqliteRepository> repositories;
     private Map<Class, Converter> converters;
 
     public SqliteSource(Context context) {
         super(context);
         this.converters = new ConcurrentHashMap<>();
+        this.repositories = new ConcurrentHashMap<>();
+    }
+
+    public void addRepository(Class dataClass, SqliteRepository repository) {
+        repositories.put(dataClass, repository);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends SqliteRepository> T getRepository(Class dataClass) {
+        return (T) repositories.get(dataClass);
+    }
+
+    public void removeRepository(Class dataClass) {
+        repositories.remove(dataClass);
     }
 
     /**
