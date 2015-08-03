@@ -42,6 +42,7 @@ dependencies {
     compile project(':processor-filesystem')
     compile project(':processor-network')
     compile project(':processor-sqlite')
+    compile project(':processor-std')
 
     compile 'com.android.support:appcompat-v7:22.0.0'
     compile 'com.android.support:recyclerview-v7:22.0.0'

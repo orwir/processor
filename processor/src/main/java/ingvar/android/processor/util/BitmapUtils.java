@@ -14,8 +14,8 @@ public class BitmapUtils {
             // From Android 4.4 (KitKat) onward we can re-use if the byte size of
             // the new bitmap is smaller than the reusable bitmap candidate
             // allocation byte count.
-            int width = targetOptions.outWidth / targetOptions.inSampleSize;
-            int height = targetOptions.outHeight / targetOptions.inSampleSize;
+            int width = targetOptions.outWidth / Math.max(1, targetOptions.inSampleSize);
+            int height = targetOptions.outHeight / Math.max(1, targetOptions.inSampleSize);
             int byteCount = width * height * getBytesPerPixel(candidate.getConfig());
             return byteCount <= candidate.getAllocationByteCount();
         }
@@ -24,6 +24,27 @@ public class BitmapUtils {
         return candidate.getWidth() == targetOptions.outWidth
                 && candidate.getHeight() == targetOptions.outHeight
                 && targetOptions.inSampleSize == 1;
+    }
+
+    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+            //https://github.com/square/picasso/blob/master/picasso/src/main/java/com/squareup/picasso/RequestHandler.java#L161
+            if (reqHeight == 0) {
+                inSampleSize = (int) Math.floor((float) width / (float) reqWidth);
+            } else if (reqWidth == 0) {
+                inSampleSize = (int) Math.floor((float) height / (float) reqHeight);
+            } else {
+                int heightRatio = (int) Math.floor((float) height / (float) reqHeight);
+                int widthRatio = (int) Math.floor((float) width / (float) reqWidth);
+                inSampleSize = Math.max(heightRatio, widthRatio);
+            }
+        }
+        return inSampleSize;
     }
 
     /**
