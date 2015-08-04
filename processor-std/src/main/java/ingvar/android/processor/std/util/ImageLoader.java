@@ -25,7 +25,20 @@ import ingvar.android.processor.util.PooledBitmapDecoder;
  */
 public class ImageLoader {
 
-    public static class Request {
+    public static Request request(Processor processor) {
+        return new Request(processor);
+    }
+
+    public static void cancel(Processor processor, ImageView view) {
+        if(processor.isBound()) {
+            ImageRequest request = (ImageRequest) view.getTag();
+            if (request != null) {
+                processor.removeObservers(request);
+            }
+        }
+    }
+
+    public static final class Request {
 
         private Processor processor;
         private Drawable placeholder;
@@ -33,7 +46,7 @@ public class ImageLoader {
         private int width = -1;
         private int height = -1;
 
-        public Request(Processor processor) {
+        private Request(Processor processor) {
             this.processor = processor;
         }
 
@@ -70,22 +83,13 @@ public class ImageLoader {
 
     }
 
-    public static void cancel(Processor processor, ImageView view) {
-        if(processor.isBound()) {
-            ImageRequest request = (ImageRequest) view.getTag();
-            if (request != null) {
-                processor.removeObservers(request);
-            }
-        }
-    }
-
-    private static class ImageRequest extends SingleTask<Uri, Bitmap, NetworkSource> {
+    public static final class ImageRequest extends SingleTask<Uri, Bitmap, NetworkSource> {
 
         private BitmapFactory.Options options;
         private int width;
         private int height;
 
-        public ImageRequest(Uri uri, BitmapFactory.Options options, int width, int height) {
+        private ImageRequest(Uri uri, BitmapFactory.Options options, int width, int height) {
             super(uri, Bitmap.class, NetworkSource.class, Time.ALWAYS_RETURNED);
             this.options = (options == null) ? new BitmapFactory.Options() : options;
             this.width = width;
@@ -105,12 +109,12 @@ public class ImageLoader {
 
     }
 
-    private static class ImageObserver extends AbstractObserver<Bitmap> {
+    public static final class ImageObserver extends AbstractObserver<Bitmap> {
 
         private WeakReference<ImageView> mImageView;
         private Drawable mPlaceholder;
 
-        public ImageObserver(ImageView view, Drawable placeholder) {
+        private ImageObserver(ImageView view, Drawable placeholder) {
             mImageView = new WeakReference<>(view);
             mPlaceholder = placeholder;
         }
