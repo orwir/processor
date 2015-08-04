@@ -74,6 +74,8 @@ public class ImageLoader {
             if(view.getDrawable() != null && !view.getDrawable().equals(placeholder)) {
                 PooledBitmapDecoder.free(BitmapUtils.tryGetBitmapFromDrawable(view.getDrawable()));
             }
+            cancel(processor, view);
+
             view.setImageDrawable(placeholder);
             ImageRequest task = new ImageRequest(uri, options, width, height);
             ImageObserver observer = new ImageObserver(view, placeholder);
