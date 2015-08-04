@@ -5,6 +5,7 @@ import android.os.Build;
 import android.util.LruCache;
 
 import ingvar.android.processor.persistence.IRepository;
+import ingvar.android.processor.util.PooledBitmapDecoder;
 
 /**
  * Simple implementation memory LRU-cache for saving bitmaps.
@@ -12,7 +13,7 @@ import ingvar.android.processor.persistence.IRepository;
  * <br/><br/>Created by Igor Zubenko on 2015.03.20.
  */
 public class BitmapMemoryRepository<K> extends MemoryRepository<K, Bitmap> {
-    // TODO: 2015-08-03 use bitmap pool
+
     private static class BitmapLruCache<K> extends LruCache<K, Entry<Bitmap>> {
 
         public BitmapLruCache(int maxSize) {
@@ -29,6 +30,12 @@ public class BitmapMemoryRepository<K> extends MemoryRepository<K, Bitmap> {
             }
             return size;
         }
+
+        @Override
+        protected void entryRemoved(boolean evicted, K key, Entry<Bitmap> oldValue, Entry<Bitmap> newValue) {
+            PooledBitmapDecoder.free(oldValue.getValue());
+        }
+
     }
 
     @SuppressWarnings("unchecked")

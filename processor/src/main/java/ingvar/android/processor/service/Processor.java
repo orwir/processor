@@ -106,6 +106,13 @@ public class Processor<S extends ProcessorService> {
         return service.schedule(task, initialDelay, delay, observers);
     }
 
+    public void cancel(AbstractTask task) {
+        if(!isBound()) {
+            throw new ProcessorException("Service is not bound yet!");
+        }
+        service.cancel(task);
+    }
+
     public ScheduledExecution getScheduled(AbstractTask task) {
         if(!isBound()) {
             throw new ProcessorException("Service is not bound yet!");

@@ -2,12 +2,21 @@ package ingvar.android.processor.util;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 
 /**
  * Created by Igor Zubenko on 2015.08.03.
  */
 public class BitmapUtils {
+
+    public static Bitmap tryGetBitmapFromDrawable(Drawable drawable) {
+        if(drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable) drawable).getBitmap();
+        }
+        return null;
+    }
 
     public static boolean canUseForInBitmap(Bitmap candidate, BitmapFactory.Options targetOptions) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {

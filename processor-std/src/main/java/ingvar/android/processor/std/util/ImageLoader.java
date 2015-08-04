@@ -16,6 +16,7 @@ import ingvar.android.processor.observation.IObserverManager;
 import ingvar.android.processor.persistence.Time;
 import ingvar.android.processor.service.Processor;
 import ingvar.android.processor.task.SingleTask;
+import ingvar.android.processor.util.BitmapUtils;
 import ingvar.android.processor.util.CommonUtils;
 import ingvar.android.processor.util.PooledBitmapDecoder;
 
@@ -57,6 +58,9 @@ public class ImageLoader {
         }
 
         public SingleTask load(Uri uri, ImageView view) {
+            if(view.getDrawable() != null && !view.getDrawable().equals(placeholder)) {
+                PooledBitmapDecoder.free(BitmapUtils.tryGetBitmapFromDrawable(view.getDrawable()));
+            }
             view.setImageDrawable(placeholder);
             ImageRequest task = new ImageRequest(uri, options, width, height);
             ImageObserver observer = new ImageObserver(view, placeholder);

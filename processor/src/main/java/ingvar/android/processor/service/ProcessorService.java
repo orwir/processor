@@ -175,6 +175,18 @@ public abstract class ProcessorService extends Service {
         return worker.getScheduled(task);
     }
 
+    public void cancel(AbstractTask task) {
+        observerManager.remove(task);
+        Execution execution = worker.getExecuted(task);
+        if(execution != null) {
+            execution.cancel();
+        }
+        execution = worker.getScheduled(task);
+        if(execution != null) {
+            execution.cancel();
+        }
+    }
+
     /**
      * Remove registered observers from context.
      * Used with {@link ingvar.android.processor.observation.ContextObserver}

@@ -13,6 +13,7 @@ import java.io.InputStream;
 
 import ingvar.android.processor.exception.PersistenceException;
 import ingvar.android.processor.filesystem.util.FileUtils;
+import ingvar.android.processor.util.PooledBitmapDecoder;
 
 /**
  * Filesystem repository for caching bitmaps.
@@ -24,7 +25,7 @@ public class BitmapFilesystemRepository<K> extends FilesystemRepository<K, Bitma
     protected static final int DEFAULT_QUALITY = 100;
 
     private Bitmap.CompressFormat compressFormat = Bitmap.CompressFormat.PNG;
-    private BitmapFactory.Options decodingOptions = null;
+    private BitmapFactory.Options decodingOptions = new BitmapFactory.Options();
     private int quality = DEFAULT_QUALITY;
 
     public BitmapFilesystemRepository(File directory, int maxBytes) {
@@ -93,12 +94,15 @@ public class BitmapFilesystemRepository<K> extends FilesystemRepository<K, Bitma
     @Override
     protected Bitmap readFile(String filename) {
         Bitmap result = null;
-        // TODO: 2015-08-03 use bitmap pool
+
         File file = storage.getFile(filename);
         InputStream is = null;
         try {
             is = new BufferedInputStream(new FileInputStream(file));
-            result = BitmapFactory.decodeStream(is, null, decodingOptions);
+            if(decodingOptions == null) {
+                decodingOptions = new BitmapFactory.Options();
+            }
+            result = PooledBitmapDecoder.decode(is, decodingOptions, 0, 0);
         } catch (IOException e) {
             throw new PersistenceException(e);
         } finally {
