@@ -23,7 +23,7 @@ public class SourceManager implements ISourceManager {
     }
 
     @Override
-    public void addSource(Class<? extends ISource> key, ISource source) {
+    public void setSource(Class<? extends ISource> key, ISource source) {
         sources.put(key, source);
     }
 

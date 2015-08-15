@@ -19,7 +19,7 @@ public class MockFilesystemService extends ProcessorService {
 
     @Override
     protected void provideSources(ISourceManager sourceManager) {
-        sourceManager.addSource(FilesystemSource.class, new FilesystemSource(this));
+        sourceManager.setSource(FilesystemSource.class, new FilesystemSource(this));
     }
 
     @Override

@@ -30,7 +30,7 @@ public abstract class WorkerTest extends TestCase {
         ISourceManager sourceManager = new SourceManager();
         IObserverManager observerManager = new ObserverManager();
 
-        sourceManager.addSource(MockSource.class, new MockSource());
+        sourceManager.setSource(MockSource.class, new MockSource());
 
         worker = new DefaultWorker.Builder()
         .setExecutorService(executor)

@@ -16,7 +16,7 @@ public class MockService extends ProcessorService {
 
     @Override
     protected void provideSources(ISourceManager sourceManager) {
-        sourceManager.addSource(MockSource.class, new MockSource());
+        sourceManager.setSource(MockSource.class, new MockSource());
     }
 
     @Override

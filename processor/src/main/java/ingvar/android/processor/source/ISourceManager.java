@@ -19,7 +19,7 @@ public interface ISourceManager {
      * @param key source class
      * @param source source
      */
-    void addSource(Class<? extends ISource> key, ISource source);
+    void setSource(Class<? extends ISource> key, ISource source);
 
     /**
      * Check if source exists in the manager.
