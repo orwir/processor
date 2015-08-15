@@ -34,8 +34,8 @@ public class ExampleService extends ProcessorService {
         sourceManager.setSource(MemorySource.class, new MemorySource());
 
         SqliteSource sqliteSource = new SqliteSource(this);
-        sqliteSource.addConverter(Word.class, new WordConverter());
-        sqliteSource.addConverter(Meaning.class, new MeaningConverter());
+        sqliteSource.setConverter(Word.class, new WordConverter());
+        sqliteSource.setConverter(Meaning.class, new MeaningConverter());
         sourceManager.setSource(SqliteSource.class, sqliteSource);
         sourceManager.setSource(ContextSource.class, new ContextSource(this));
     }

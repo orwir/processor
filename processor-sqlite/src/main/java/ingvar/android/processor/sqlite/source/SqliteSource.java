@@ -27,7 +27,7 @@ public class SqliteSource extends ContextSource {
         this.repositories = new ConcurrentHashMap<>();
     }
 
-    public void addRepository(Class dataClass, SqliteRepository repository) {
+    public void setRepository(Class dataClass, SqliteRepository repository) {
         repositories.put(dataClass, repository);
     }
 
@@ -46,7 +46,7 @@ public class SqliteSource extends ContextSource {
      * @param dataClass data class.
      * @param converter
      */
-    public void addConverter(Class dataClass, Converter converter) {
+    public void setConverter(Class dataClass, Converter converter) {
         converters.put(dataClass, converter);
     }
 
