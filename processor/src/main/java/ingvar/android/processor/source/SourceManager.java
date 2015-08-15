@@ -17,8 +17,9 @@ public class SourceManager implements ISourceManager {
     }
 
     @Override
-    public ISource getSource(Class<? extends ISource> key) {
-        return sources.get(key);
+    @SuppressWarnings("unchecked")
+    public <S extends ISource> S getSource(Class<? extends ISource> key) {
+        return (S) sources.get(key);
     }
 
     @Override

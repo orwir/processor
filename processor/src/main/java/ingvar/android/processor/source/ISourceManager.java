@@ -11,7 +11,7 @@ public interface ISourceManager {
      * @param key source class
      * @return source
      */
-    ISource getSource(Class<? extends ISource> key);
+    <S extends ISource> S getSource(Class<? extends ISource> key);
 
     /**
      * Add source to source manager.
