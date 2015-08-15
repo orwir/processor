@@ -89,8 +89,8 @@ public abstract class ProcessorService extends Service {
         observerManager = createObserverManager();
         worker = createWorker();
 
-        provideRepositories(cacheManager);
         provideSources(sourceManager);
+        provideRepositories(cacheManager);
     }
 
     /**
