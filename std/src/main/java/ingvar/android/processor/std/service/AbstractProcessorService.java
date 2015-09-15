@@ -54,9 +54,9 @@ public class AbstractProcessorService extends ProcessorService {
 
     @Override
     protected void provideSources(ISourceManager sourceManager) {
-        sourceManager.addSource(ContextSource.class, new ContextSource(this));
-        sourceManager.addSource(MemorySource.class, new MemorySource());
-        sourceManager.addSource(FilesystemSource.class, new FilesystemSource(this));
+        sourceManager.setSource(ContextSource.class, new ContextSource(this));
+        sourceManager.setSource(MemorySource.class, new MemorySource());
+        sourceManager.setSource(FilesystemSource.class, new FilesystemSource(this));
     }
 
     @Override

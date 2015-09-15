@@ -15,8 +15,8 @@ public class MockMemoryService extends ProcessorService {
 
     @Override
     protected void provideSources(ISourceManager sourceManager) {
-        sourceManager.addSource(MemorySource.class, new MemorySource());
-        sourceManager.addSource(ContextSource.class, new ContextSource(this));
+        sourceManager.setSource(MemorySource.class, new MemorySource());
+        sourceManager.setSource(ContextSource.class, new ContextSource(this));
     }
 
     @Override

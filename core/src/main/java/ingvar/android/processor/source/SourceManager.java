@@ -17,12 +17,13 @@ public class SourceManager implements ISourceManager {
     }
 
     @Override
-    public ISource getSource(Class<? extends ISource> key) {
-        return sources.get(key);
+    @SuppressWarnings("unchecked")
+    public <S extends ISource> S getSource(Class<? extends ISource> key) {
+        return (S) sources.get(key);
     }
 
     @Override
-    public void addSource(Class<? extends ISource> key, ISource source) {
+    public void setSource(Class<? extends ISource> key, ISource source) {
         sources.put(key, source);
     }
 

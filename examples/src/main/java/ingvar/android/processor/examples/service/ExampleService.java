@@ -29,15 +29,15 @@ public class ExampleService extends ProcessorService {
 
     @Override
     protected void provideSources(ISourceManager sourceManager) {
-        sourceManager.addSource(RetrofitSource.class, new RetrofitSource(this));
-        sourceManager.addSource(FilesystemSource.class, new FilesystemSource(this));
-        sourceManager.addSource(MemorySource.class, new MemorySource());
+        sourceManager.setSource(RetrofitSource.class, new RetrofitSource(this));
+        sourceManager.setSource(FilesystemSource.class, new FilesystemSource(this));
+        sourceManager.setSource(MemorySource.class, new MemorySource());
 
         SqliteSource sqliteSource = new SqliteSource(this);
-        sqliteSource.addConverter(Word.class, new WordConverter());
-        sqliteSource.addConverter(Meaning.class, new MeaningConverter());
-        sourceManager.addSource(SqliteSource.class, sqliteSource);
-        sourceManager.addSource(ContextSource.class, new ContextSource(this));
+        sqliteSource.setConverter(Word.class, new WordConverter());
+        sqliteSource.setConverter(Meaning.class, new MeaningConverter());
+        sourceManager.setSource(SqliteSource.class, sqliteSource);
+        sourceManager.setSource(ContextSource.class, new ContextSource(this));
     }
 
     @Override
