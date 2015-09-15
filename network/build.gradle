@@ -3,18 +3,18 @@ apply plugin: 'com.github.dcendents.android-maven'
 
 description '''\
 Modular android framework for asynchronous task processing.
-Module for working with filesystem.
+Module for working with network.
 '''
 
 ext {
     vVersionCode = vGlobalVersionCode
     vVersionName = vGlobalVersionName
-    vTestApplicationId = 'ingvar.android.processor.filesystem.test'
+    vTestApplicationId = 'ingvar.android.processor.network.test'
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(':processor')
+    compile project(':core')
 }
 
 android {
@@ -59,7 +59,7 @@ install {
                 packaging 'aar'
                 name project.name
                 description project.description
-                url 'https://github.com/deadly-cat/processor'
+                url 'https://github.com/orwir/processor'
                 licenses {
                     license {
                         name 'The Apache Software License, Version 2.0'
@@ -68,15 +68,15 @@ install {
                 }
                 developers {
                     developer {
-                        id 'deadly-cat'
+                        id 'orwir'
                         name 'Igor Zubenko'
                         email 'igor.a.zubenko@gmail.com'
                     }
                 }
                 scm {
-                    connection 'https://github.com/deadly-cat/processor.git'
-                    developerConnection 'https://github.com/deadly-cat/processor.git'
-                    url 'https://github.com/deadly-cat/processor'
+                    connection 'https://github.com/orwir/processor.git'
+                    developerConnection 'https://github.com/orwir/processor.git'
+                    url 'https://github.com/orwir/processor'
 
                 }
             }

@@ -1,1 +1,2 @@
-include ':processor', ':processor-filesystem', ':examples', ':processor-network', ':processor-sqlite', ':processor-std', 'processor-memory'
+rootProject.name = 'processor'
+include ':core', ':memory', ':sqlite', ':filesystem', ':network', ':std', ':examples'

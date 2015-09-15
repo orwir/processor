@@ -1,7 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 ext {
-    vBuildToolsVersion = '22.0.1'
+    vBuildToolsVersion = '23.0.1'
     vCompileSdkVersion = 21
     vMinSdkVersion = 14
     vTargetSdkVersion = 21
@@ -27,7 +27,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.2.3'
+        classpath 'com.android.tools.build:gradle:1.3.0'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.6'
         classpath 'com.github.dcendents:android-maven-plugin:1.2'
 
@@ -39,11 +39,11 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
-        maven { url  'http://dl.bintray.com/deadly-cat/maven' }
+        maven { url  'http://dl.bintray.com/orwir/maven' }
     }
 }
 
-final publishedProjects = ['root', 'processor', 'processor-filesystem', 'processor-memory', 'processor-network', 'processor-sqlite', 'processor-std']
+final publishedProjects = ['core', 'memory', 'sqlite', 'filesystem', 'network', 'std']
 configure(allprojects.findAll {publishedProjects.contains(it.name)}) {
 
     evaluationDependsOn(':' + project.name)
@@ -63,9 +63,9 @@ configure(allprojects.findAll {publishedProjects.contains(it.name)}) {
             repo = 'maven'
             name = 'processor'
             desc = 'Modular android framework for asynchronous task processing.'
-            websiteUrl = 'https://github.com/deadly-cat/processor'
-            issueTrackerUrl = 'https://github.com/deadly-cat/processor/issues'
-            vcsUrl = 'https://github.com/deadly-cat/processor.git'
+            websiteUrl = 'https://github.com/orwir/processor'
+            issueTrackerUrl = 'https://github.com/orwir/processor/issues'
+            vcsUrl = 'https://github.com/orwir/processor.git'
             licenses = ['Apache-2.0']
             labels = ['service', 'async', 'android']
             publicDownloadNumbers = true

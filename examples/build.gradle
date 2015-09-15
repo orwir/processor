@@ -37,12 +37,12 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile project(':processor')
-    compile project(':processor-memory')
-    compile project(':processor-filesystem')
-    compile project(':processor-network')
-    compile project(':processor-sqlite')
-    compile project(':processor-std')
+    compile project(':core')
+    compile project(':memory')
+    compile project(':filesystem')
+    compile project(':network')
+    compile project(':sqlite')
+    compile project(':std')
 
     compile 'com.android.support:appcompat-v7:22.0.0'
     compile 'com.android.support:recyclerview-v7:22.0.0'
