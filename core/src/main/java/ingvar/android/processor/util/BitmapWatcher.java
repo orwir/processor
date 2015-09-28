@@ -28,6 +28,7 @@ public class BitmapWatcher {
         BitmapWatcher watcher = getInstance();
         if(!enable && watcher.watchThread != null) {
             watcher.watchThread.interrupt();
+            watcher.references.clear();
         }
         if(!watcher.enabled && enable) {
             watcher.watchThread = watcher.new WatchThread();
@@ -50,6 +51,14 @@ public class BitmapWatcher {
         }
     }
 
+    public static void vanish(int bitmapHashCode) {
+        BitmapWatcher watcher = getInstance();
+        if(watcher.enabled) {
+            getInstance().references.remove(new BitmapReference(bitmapHashCode));
+            LW.v(TAG, "removed phantom reference.");
+        }
+    }
+
     private boolean enabled;
     private Set<BitmapReference> references;
     private ReferenceQueue<Bitmap> referenceQueue;
@@ -64,16 +73,16 @@ public class BitmapWatcher {
 
     private static class BitmapReference extends PhantomReference<Bitmap> {
 
-        private int hashCode;
+        private int bitmapHashCode;
 
         public BitmapReference(Bitmap r, ReferenceQueue<? super Bitmap> q) {
             super(r, q);
-            hashCode = r.hashCode();
+            bitmapHashCode = r.hashCode();
         }
 
         public BitmapReference(int hashCode) {
             super(null, null);
-            this.hashCode = hashCode;
+            this.bitmapHashCode = hashCode;
         }
 
         @Override
@@ -81,12 +90,12 @@ public class BitmapWatcher {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             BitmapReference that = (BitmapReference) o;
-            return hashCode == that.hashCode;
+            return bitmapHashCode == that.bitmapHashCode;
         }
 
         @Override
         public int hashCode() {
-            return hashCode;
+            return bitmapHashCode;
         }
 
     }
@@ -100,6 +109,7 @@ public class BitmapWatcher {
                     if(bitmap != null) {
                         PooledBitmapDecoder.free(bitmap);
                         references.remove(new BitmapReference(bitmap.hashCode()));
+                        LW.d(TAG, "added new bitmap to pool.");
                     }
                 } catch (InterruptedException interrupted) {
                     break;

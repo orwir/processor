@@ -25,7 +25,7 @@ public class PooledBitmapDecoder {
         private static final PooledBitmapDecoder INSTANCE = new PooledBitmapDecoder();
     }
 
-    private final Set<SoftReference<Bitmap>> reusableBitmaps;
+    private final Set<BitmapReference> reusableBitmaps;
     private int capacity;
 
     //***********************PUBLIC STATIC METHODS (start)
@@ -120,7 +120,7 @@ public class PooledBitmapDecoder {
         if(bitmap != null && bitmap.isMutable()) {
             PooledBitmapDecoder decoder = Holder.INSTANCE;
             if(decoder.reusableBitmaps.size() < decoder.capacity) {
-                decoder.reusableBitmaps.add(new SoftReference<>(bitmap));
+                decoder.reusableBitmaps.add(new BitmapReference(bitmap));
             }
         }
     }
@@ -153,9 +153,10 @@ public class PooledBitmapDecoder {
 
         if (!reusableBitmaps.isEmpty()) {
             synchronized (reusableBitmaps) {
-                final Iterator<SoftReference<Bitmap>> iterator = reusableBitmaps.iterator();
+                final Iterator<BitmapReference> iterator = reusableBitmaps.iterator();
                 while (iterator.hasNext()) {
-                    Bitmap item = iterator.next().get();
+                    BitmapReference reference = iterator.next();
+                    Bitmap item = reference.get();
                     if (null != item && item.isMutable()) {
                         // Check to see it the item can be used for inBitmap.
                         if (BitmapUtils.canUseForInBitmap(item, options)) {
@@ -170,6 +171,7 @@ public class PooledBitmapDecoder {
                         // Remove from the set if the reference has been cleared.
                         iterator.remove();
                     }
+                    BitmapWatcher.vanish(reference.bitmapHashCode);
                 }
             }
         }
@@ -177,8 +179,37 @@ public class PooledBitmapDecoder {
     }
 
     private PooledBitmapDecoder() {
-        reusableBitmaps = Collections.synchronizedSet(new HashSet<SoftReference<Bitmap>>());
+        reusableBitmaps = Collections.synchronizedSet(new HashSet<BitmapReference>());
         capacity = DEFAULT_CAPACITY;
+    }
+
+    private static class BitmapReference extends SoftReference<Bitmap> {
+
+        private int bitmapHashCode;
+
+        public BitmapReference(Bitmap r) {
+            super(r);
+            bitmapHashCode = r.hashCode();
+        }
+
+        public BitmapReference(int hashCode) {
+            super(null, null);
+            this.bitmapHashCode = hashCode;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            BitmapReference that = (BitmapReference) o;
+            return bitmapHashCode == that.bitmapHashCode;
+        }
+
+        @Override
+        public int hashCode() {
+            return bitmapHashCode;
+        }
+
     }
 
 }
