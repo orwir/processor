@@ -19,12 +19,14 @@ import java.util.Set;
 public class PooledBitmapDecoder {
 
     public static final String TAG = PooledBitmapDecoder.class.getSimpleName();
+    public static final int DEFAULT_CAPACITY = 15;
 
     private static class Holder {
         private static final PooledBitmapDecoder INSTANCE = new PooledBitmapDecoder();
     }
 
     private final Set<SoftReference<Bitmap>> reusableBitmaps;
+    private int capacity;
 
     //***********************PUBLIC STATIC METHODS (start)
 
@@ -40,7 +42,11 @@ public class PooledBitmapDecoder {
             BitmapFactory.decodeFile(file.getAbsolutePath(), options);
         }
         prepareOptionsForDecode(options, reqWidth, reqHeight);
-        return BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+        Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+        if(BitmapWatcher.isEnabled()) {
+            BitmapWatcher.watch(bitmap);
+        }
+        return bitmap;
     }
 
     public static Bitmap decode(Resources resources, int id, BitmapFactory.Options options, int reqWidth, int reqHeight) {
@@ -55,7 +61,11 @@ public class PooledBitmapDecoder {
             BitmapFactory.decodeResource(resources, id, options);
         }
         prepareOptionsForDecode(options, reqWidth, reqHeight);
-        return BitmapFactory.decodeResource(resources, id, options);
+        Bitmap bitmap = BitmapFactory.decodeResource(resources, id, options);
+        if(BitmapWatcher.isEnabled()) {
+            BitmapWatcher.watch(bitmap);
+        }
+        return bitmap;
     }
 
     public static Bitmap decode(InputStream stream, BitmapFactory.Options options, int reqWidth, int reqHeight) {
@@ -65,7 +75,7 @@ public class PooledBitmapDecoder {
         reqWidth = Math.max(0, reqWidth);
         reqHeight = Math.max(0, reqHeight);
 
-        Bitmap result = null;
+        Bitmap bitmap = null;
         if(stream.markSupported()) {
             try {
                 stream.mark(Integer.MAX_VALUE);
@@ -75,13 +85,16 @@ public class PooledBitmapDecoder {
                     stream.reset();
                 }
                 prepareOptionsForDecode(options, reqWidth, reqHeight);
-                result = BitmapFactory.decodeStream(stream, null, options);
+                bitmap = BitmapFactory.decodeStream(stream, null, options);
             } catch (Throwable ignored) {}
         }
-        if(result == null) {
-            result = decode(BytesUtils.streamToBytes(stream), options, reqWidth, reqHeight);
+        if(bitmap == null) {
+            bitmap = decode(BytesUtils.streamToBytes(stream), options, reqWidth, reqHeight);
         }
-        return result;
+        if(BitmapWatcher.isEnabled()) {
+            BitmapWatcher.watch(bitmap);
+        }
+        return bitmap;
     }
 
     public static Bitmap decode(byte[] data, BitmapFactory.Options options, int reqWidth, int reqHeight) {
@@ -96,12 +109,29 @@ public class PooledBitmapDecoder {
             BitmapFactory.decodeByteArray(data, 0, data.length, options);
         }
         prepareOptionsForDecode(options, reqWidth, reqHeight);
-        return BitmapFactory.decodeByteArray(data, 0, data.length, options);
+        Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+        if(BitmapWatcher.isEnabled()) {
+            BitmapWatcher.watch(bitmap);
+        }
+        return bitmap;
     }
 
     public static void free(Bitmap bitmap) {
         if(bitmap != null && bitmap.isMutable()) {
-            Holder.INSTANCE.reusableBitmaps.add(new SoftReference<>(bitmap));
+            PooledBitmapDecoder decoder = Holder.INSTANCE;
+            if(decoder.reusableBitmaps.size() < decoder.capacity) {
+                decoder.reusableBitmaps.add(new SoftReference<>(bitmap));
+            }
+        }
+    }
+
+    public static void setCapacity(int capacity) {
+        PooledBitmapDecoder decoder = Holder.INSTANCE;
+        decoder.capacity = capacity;
+        synchronized (decoder.reusableBitmaps) {
+            while (decoder.reusableBitmaps.size() > decoder.capacity) {
+                decoder.reusableBitmaps.iterator().remove();
+            }
         }
     }
 
@@ -148,5 +178,7 @@ public class PooledBitmapDecoder {
 
     private PooledBitmapDecoder() {
         reusableBitmaps = Collections.synchronizedSet(new HashSet<SoftReference<Bitmap>>());
+        capacity = DEFAULT_CAPACITY;
     }
+
 }
