@@ -45,7 +45,7 @@ public class BitmapWatcher {
     public static void watch(Bitmap bitmap) {
         BitmapWatcher watcher = getInstance();
         if(watcher.enabled) {
-            if(watcher.watchThread == null) { //made more resistant
+            if(watcher.watchThread == null || watcher.watchThread.isInterrupted()) { //made more resistant
                 watcher.watchThread = watcher.new WatchThread();
                 watcher.watchThread.start();
             }
