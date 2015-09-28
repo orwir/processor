@@ -29,6 +29,7 @@ public class BitmapWatcher {
         if(!enable && watcher.watchThread != null) {
             watcher.watchThread.interrupt();
             watcher.references.clear();
+            watcher.watchThread = null;
         }
         if(!watcher.enabled && enable) {
             watcher.watchThread = watcher.new WatchThread();
@@ -44,6 +45,10 @@ public class BitmapWatcher {
     public static void watch(Bitmap bitmap) {
         BitmapWatcher watcher = getInstance();
         if(watcher.enabled) {
+            if(watcher.watchThread == null) { //made more resistant
+                watcher.watchThread = watcher.new WatchThread();
+                watcher.watchThread.start();
+            }
             watcher.references.add(new BitmapReference(bitmap, watcher.referenceQueue));
             LW.v(TAG, "added new reference to watch.");
         } else {
@@ -112,6 +117,7 @@ public class BitmapWatcher {
                         LW.d(TAG, "added new bitmap to pool.");
                     }
                 } catch (InterruptedException interrupted) {
+                    watchThread = null;
                     break;
                 }
             }
